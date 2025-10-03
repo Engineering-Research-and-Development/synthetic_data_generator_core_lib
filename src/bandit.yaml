@@ -1,0 +1,2 @@
+exclude_dirs: ['./sdg_core_lib/test/']
+skips: ['B113', 'B104']
