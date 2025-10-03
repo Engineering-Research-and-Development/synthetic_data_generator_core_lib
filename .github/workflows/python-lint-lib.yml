@@ -2,7 +2,7 @@ name: Python Lint and Security lib
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
 
 jobs:
   check_with_black:

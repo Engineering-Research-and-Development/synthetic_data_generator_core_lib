@@ -2,17 +2,11 @@ name: Test and Build Lib
 
 on:
   push:
-    branches: [ main ]
+    branches: [ * ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
-    branches: [ main ]
-
-env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
+    branches: [ master ]
 
 
 jobs:
@@ -47,6 +41,7 @@ jobs:
   build:
     needs: test_sdg_core_lib
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
 
     environment:
       name: pypi
