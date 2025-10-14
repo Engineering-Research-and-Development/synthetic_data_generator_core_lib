@@ -1,0 +1,153 @@
+from typing import Dict, Optional, Tuple
+
+import numpy as np
+from loguru import logger
+
+from sdg_core_lib.dataset.processing.processors.PipelineConfig import (
+    PipelineConfig,
+)
+from sdg_core_lib.dataset.processing.processors.PipelineStepFactory import (
+    PipelineStepFactory,
+)
+from sdg_core_lib.dataset.processing.processors.pipeline_steps.PipelineStep import (
+    PipelineStep,
+)
+
+
+class ProcessingPipeline:
+    """
+    A pipeline for applying a sequence of processing steps to data.
+
+    This class manages the execution of processing steps in sequence, handling both
+    training and test data while maintaining the state of each step.
+    """
+
+    def __init__(
+        self, step_factory: PipelineStepFactory, config: PipelineConfig
+    ) -> None:
+        """
+        Initialize the processing pipeline.
+
+        Args:
+            step_factory: Factory for creating processing steps.
+            config: Configuration object containing pipeline parameters.
+        """
+        self.step_factory = step_factory
+        self.config = config
+        self.steps: Dict[str, PipelineStep] = {}
+        self._prepare()
+        self.is_all_fit = False
+
+    def _prepare(self) -> None:
+        """
+        Initialize all processing steps based on the configuration.
+
+        This method creates and configures each processing step using the step factory
+        and the provided configuration.
+
+        Raises:
+            AttributeError: If a step in the configuration is not supported by the factory.
+        """
+        for step_name, step_config in self.config.get_full_config().items():
+            self.steps[step_name] = getattr(self.step_factory, f"create_{step_name}")(
+                step_config
+            )
+            logger.info(f"Added {step_config} {step_name} to processing pipeline")
+
+    def load(self, folder_path: str) -> None:
+        """
+        Load the state of all pipeline steps from disk.
+
+        Args:
+            folder_path: Directory path containing the saved pipeline states.
+
+        Raises:
+            FileNotFoundError: If the specified directory or state files are not found.
+            OSError: If there is an error reading from the specified directory.
+        """
+        for step_name in self.steps:
+            self.steps[step_name].load(folder_path)
+        self.is_all_fit = True
+
+    def save(self, folder_path: str) -> None:
+        """
+        Save the state of all pipeline steps to disk.
+
+        Args:
+            folder_path: Directory path where the pipeline states should be saved.
+
+        Raises:
+            OSError: If there is an error writing to the specified directory.
+        """
+        for step_name in self.steps:
+            self.steps[step_name].save(folder_path)
+
+    def fit_transform(
+        self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Apply all processing steps to the input data.
+
+        This method applies each processing step in sequence to the training data,
+        fitting the step if necessary, and then applies the same transformations
+        to the test data without refitting.
+
+        Args:
+            train_data: The training data to preprocess.
+            test_data: Optional test data to apply the same transformations to.
+
+        Returns:
+            A tuple containing the preprocessed training and test data.
+        """
+        for step_name in self.steps:
+            train_data, test_data = self.steps[step_name].fit_transform(
+                train_data, test_data
+            )
+        self.is_all_fit = True
+        return train_data, test_data
+
+    def transform(
+        self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Apply all processing steps to the input data.
+
+        This method applies each processing step in sequence to the training data,
+        fitting the step if necessary, and then applies the same transformations
+        to the test data without refitting.
+
+        Args:
+            train_data: The training data to preprocess.
+            test_data: Optional test data to apply the same transformations to.
+
+        Returns:
+            A tuple containing the preprocessed training and test data.
+        """
+        for step_name in self.steps:
+            train_data, test_data = self.steps[step_name].transform(
+                train_data, test_data
+            )
+        return train_data, test_data
+
+    def inverse_transform(
+        self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Apply the inverse of all processing steps to the input data.
+
+        This method applies the inverse of each processing step in reverse order
+        to the training data, and then applies the inverse of the same transformations
+        to the test data.
+
+        Args:
+            train_data: The training data to preprocess.
+            test_data: Optional test data to apply the same transformations to.
+
+        Returns:
+            A tuple containing the preprocessed training and test data.
+        """
+        for step_name in reversed(self.steps):
+            train_data, test_data = self.steps[step_name].inverse_transform(
+                train_data, test_data
+            )
+        return train_data, test_data
