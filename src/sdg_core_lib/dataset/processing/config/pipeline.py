@@ -2,7 +2,7 @@ class PipelineConfig:
     """
     Configuration class for processing pipelines.
 
-    This class holds configuration parameters for different processing steps
+    This class holds configuration parameters for different processing pipeline_steps
     in the pipeline, such as scaling, imputation, and encoding strategies.
     """
 

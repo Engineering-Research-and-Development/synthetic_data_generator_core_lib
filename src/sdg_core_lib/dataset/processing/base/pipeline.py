@@ -3,22 +3,22 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 from loguru import logger
 
-from sdg_core_lib.dataset.processing.processors.PipelineConfig import (
+from sdg_core_lib.dataset.processing.config.pipeline import (
     PipelineConfig,
 )
-from sdg_core_lib.dataset.processing.processors.PipelineStepFactory import (
+from sdg_core_lib.dataset.processing.base.pipeline_step_factory import (
     PipelineStepFactory,
 )
-from sdg_core_lib.dataset.processing.processors.pipeline_steps.PipelineStep import (
+from sdg_core_lib.dataset.processing.base.pipeline_steps.pipeline_step import (
     PipelineStep,
 )
 
 
 class ProcessingPipeline:
     """
-    A pipeline for applying a sequence of processing steps to data.
+    A pipeline for applying a sequence of processing pipeline_steps to data.
 
-    This class manages the execution of processing steps in sequence, handling both
+    This class manages the execution of processing pipeline_steps in sequence, handling both
     training and test data while maintaining the state of each step.
     """
 
@@ -29,7 +29,7 @@ class ProcessingPipeline:
         Initialize the processing pipeline.
 
         Args:
-            step_factory: Factory for creating processing steps.
+            step_factory: Factory for creating processing pipeline_steps.
             config: Configuration object containing pipeline parameters.
         """
         self.step_factory = step_factory
@@ -40,7 +40,7 @@ class ProcessingPipeline:
 
     def _prepare(self) -> None:
         """
-        Initialize all processing steps based on the configuration.
+        Initialize all processing pipeline_steps based on the configuration.
 
         This method creates and configures each processing step using the step factory
         and the provided configuration.
@@ -56,7 +56,7 @@ class ProcessingPipeline:
 
     def load(self, folder_path: str) -> None:
         """
-        Load the state of all pipeline steps from disk.
+        Load the state of all pipeline pipeline_steps from disk.
 
         Args:
             folder_path: Directory path containing the saved pipeline states.
@@ -71,7 +71,7 @@ class ProcessingPipeline:
 
     def save(self, folder_path: str) -> None:
         """
-        Save the state of all pipeline steps to disk.
+        Save the state of all pipeline pipeline_steps to disk.
 
         Args:
             folder_path: Directory path where the pipeline states should be saved.
@@ -86,7 +86,7 @@ class ProcessingPipeline:
         self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Apply all processing steps to the input data.
+        Apply all processing pipeline_steps to the input data.
 
         This method applies each processing step in sequence to the training data,
         fitting the step if necessary, and then applies the same transformations
@@ -110,7 +110,7 @@ class ProcessingPipeline:
         self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Apply all processing steps to the input data.
+        Apply all processing pipeline_steps to the input data.
 
         This method applies each processing step in sequence to the training data,
         fitting the step if necessary, and then applies the same transformations
@@ -133,7 +133,7 @@ class ProcessingPipeline:
         self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Apply the inverse of all processing steps to the input data.
+        Apply the inverse of all processing pipeline_steps to the input data.
 
         This method applies the inverse of each processing step in reverse order
         to the training data, and then applies the inverse of the same transformations

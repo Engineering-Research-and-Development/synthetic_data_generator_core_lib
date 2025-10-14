@@ -6,9 +6,9 @@ import numpy as np
 
 class PipelineStep(ABC):
     """
-    Abstract base class for all processing pipeline steps.
+    Abstract base class for all processing pipeline pipeline_steps.
 
-    This class defines the interface that all processing steps must implement.
+    This class defines the interface that all processing pipeline_steps must implement.
     Each step in the processing pipeline should inherit from this class and
     implement all abstract methods.
     """
@@ -95,7 +95,7 @@ class PipelineStep(ABC):
         Pre-process the data before applying the main transformation.
 
         This method can be used for tasks like input validation, reshaping, or
-        other data preparation steps that should happen before the main transform.
+        other data preparation pipeline_steps that should happen before the main transform.
 
         Args:
             data: The input data to pre-process.
@@ -113,7 +113,7 @@ class PipelineStep(ABC):
         Post-process the data after applying the main transformation.
 
         This method can be used for tasks like reshaping, type conversion, or
-        other data cleanup steps that should happen after the main transform.
+        other data cleanup pipeline_steps that should happen after the main transform.
 
         Args:
             data: The transformed data to post-process.

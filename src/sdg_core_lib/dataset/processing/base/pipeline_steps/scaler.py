@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import skops.io as sio
 import os
 
-from sdg_core_lib.dataset.processing.processors.pipeline_steps.PipelineStep import (
+from sdg_core_lib.dataset.processing.base.pipeline_steps.pipeline_step import (
     PipelineStep,
 )
 
@@ -211,7 +211,7 @@ class Scaler(PipelineStep):
         Pre-process the data before applying the scaling transformation.
 
         This method is called before the scaler's transform method. It can be used
-        for input validation, type conversion, or other processing steps.
+        for input validation, type conversion, or other processing pipeline_steps.
 
         Args:
             data: Input data to be pre-processed. Should be a numpy array.
@@ -232,7 +232,7 @@ class Scaler(PipelineStep):
         Post-process the data after applying the scaling transformation.
 
         This method is called after the scaler's transform method. It can be used
-        for reshaping, type conversion, or other post-processing steps.
+        for reshaping, type conversion, or other post-processing pipeline_steps.
 
         Args:
             data: Scaled data to be post-processed.

@@ -167,7 +167,7 @@ class TabularComparisonEvaluator:
 
     def _evaluate_novelty(self):
         """
-        This function evaluates in two steps the following metrics
+        This function evaluates in two pipeline_steps the following metrics
         1) The number of unique samples generated in the synthetic dataset with respect to the real data
         2) The number of duplicated samples in the synthetic dataset
         """

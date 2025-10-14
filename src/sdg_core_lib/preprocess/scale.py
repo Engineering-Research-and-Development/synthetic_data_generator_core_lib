@@ -29,8 +29,8 @@ def standardize_simple_tabular_time_series(
     """
     Standardizes the time series data by scaling features to have zero mean and unit variance.
 
-    :param train_data: A numpy array of shape (batch, features, steps) representing the training data.
-    :param test_data: An optional numpy array of shape (batch, features, steps) representing the test data.
+    :param train_data: A numpy array of shape (batch, features, pipeline_steps) representing the training data.
+    :param test_data: An optional numpy array of shape (batch, features, pipeline_steps) representing the test data.
     :return: A tuple containing the fitted StandardScaler, the standardized training data, and the standardized test data
              if provided.
     :raises DataException: If the input data does not have the expected shape.

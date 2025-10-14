@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from numpy import ndarray
 from typing import Optional, Tuple
 
-from sdg_core_lib.dataset.processing.processors.PipelineConfig import (
+from sdg_core_lib.dataset.processing.config.pipeline import (
     PipelineConfig,
 )
-from sdg_core_lib.dataset.processing.processors.ProcessingPipeline import (
+from sdg_core_lib.dataset.processing.base.pipeline import (
     ProcessingPipeline,
 )
 
@@ -52,8 +52,8 @@ class Processor(ABC):
             )
 
         if not self.pipeline.is_all_fit:
-            train_data_preprocessed, test_data_preprocessed = self.pipeline.fit_transform(
-                train_data=data, test_data=test_data
+            train_data_preprocessed, test_data_preprocessed = (
+                self.pipeline.fit_transform(train_data=data, test_data=test_data)
             )
         else:
             train_data_preprocessed, test_data_preprocessed = self.pipeline.transform(
@@ -62,7 +62,7 @@ class Processor(ABC):
         return train_data_preprocessed, test_data_preprocessed
 
     def execute_postprocessing(
-            self, train_data_preprocessed: ndarray, test_data_preprocessed: ndarray
+        self, train_data_preprocessed: ndarray, test_data_preprocessed: ndarray
     ):
         train_data, test_data = self.pipeline.inverse_transform(
             train_data_preprocessed, test_data_preprocessed
