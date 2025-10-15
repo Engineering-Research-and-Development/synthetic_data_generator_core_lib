@@ -7,6 +7,7 @@ from sdg_core_lib.dataset.processing.processors.numeric.steps.scaler import (
 
 
 class NumericStepFactory(PipelineStepFactory):
+    data_type = "numeric"
     @staticmethod
     def create_scaler(mode: str) -> NumericScaler:
-        return NumericScaler(mode)
+        return NumericScaler(data_type=NumericStepFactory.data_type, mode=mode)

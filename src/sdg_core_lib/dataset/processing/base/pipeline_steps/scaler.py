@@ -24,7 +24,7 @@ class Scaler(PipelineStep):
         scaler: The underlying scikit-learn scaler instance (MinMaxScaler or StandardScaler)
     """
 
-    def __init__(self, mode: str) -> None:
+    def __init__(self, data_type: str, mode: str) -> None:
         """
         Initialize the Scaler with the specified scaling mode.
 
@@ -36,10 +36,11 @@ class Scaler(PipelineStep):
         Raises:
             ValueError: If an invalid mode is provided.
         """
-        super().__init__()
+        super().__init__(data_type)
         self.scaler = None
         self._set_scaler(mode)
         self.is_fit = False
+        self._filename = f"scaler_{self.data_type}.skops"
 
     def _set_scaler(self, mode: str) -> None:
         """
@@ -77,7 +78,7 @@ class Scaler(PipelineStep):
             OSError: If there is an error creating the directory or writing the file.
         """
         os.makedirs(folder_path, exist_ok=True)
-        scaler_filename = os.path.join(folder_path, "scaler.skops")
+        scaler_filename = os.path.join(folder_path, self._filename)
         sio.dump(self.scaler, scaler_filename)
 
     def load(self, folder_path: str) -> None:
@@ -93,7 +94,7 @@ class Scaler(PipelineStep):
             FileNotFoundError: If the scaler file is not found.
             OSError: If there is an error reading the file.
         """
-        scaler_filename = os.path.join(folder_path, "scaler.skops")
+        scaler_filename = os.path.join(folder_path, self._filename)
         if not os.path.isfile(scaler_filename):
             raise FileNotFoundError(f"Scaler file not found: {scaler_filename}")
         self.scaler = sio.load(scaler_filename)
@@ -201,8 +202,8 @@ class Scaler(PipelineStep):
         if test_data is not None:
             test_data_shape = test_data.shape
             test_data = self._pre_process(test_data)
-            test_data = self.scaler.inverse_transform(test_data, test_data_shape)
-        self.scaler.fit(data)
+            test_data = self.scaler.inverse_transform(test_data)
+            test_data = self._post_process(test_data, test_data_shape)
         return data, test_data
 
     @abstractmethod

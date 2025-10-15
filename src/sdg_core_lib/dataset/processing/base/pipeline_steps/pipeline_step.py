@@ -12,6 +12,9 @@ class PipelineStep(ABC):
     Each step in the processing pipeline should inherit from this class and
     implement all abstract methods.
     """
+    def __init__(self, data_type=None):
+        self.data_type = data_type
+
 
     @abstractmethod
     def fit(self, data: np.ndarray) -> None:

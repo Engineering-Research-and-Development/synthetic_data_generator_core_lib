@@ -48,7 +48,7 @@ class Processor(ABC):
         """
         if self.pipeline is None:
             raise AttributeError(
-                "Pipeline has not been initialized. Call create_preprocessing_pipeline() first."
+                "Pipeline has not been initialized. Call create_processing_pipeline() first."
             )
 
         if not self.pipeline.is_all_fit:
@@ -115,5 +115,5 @@ class Processor(ABC):
             NotImplementedError: If the method is not implemented by a subclass.
         """
         raise NotImplementedError(
-            "Subclasses must implement create_preprocessing_pipeline"
+            "Subclasses must implement create_processing_pipeline"
         )

@@ -7,6 +7,7 @@ from sdg_core_lib.dataset.processing.processors.timeseries.steps.scaler import (
 
 
 class TimeSeriesStepFactory(PipelineStepFactory):
+    data_type = "timeseries"
     @staticmethod
     def create_scaler(mode: str) -> TimeSeriesScaler:
-        return TimeSeriesScaler(mode)
+        return TimeSeriesScaler(data_type=TimeSeriesStepFactory.data_type, mode=mode)
