@@ -1,11 +1,11 @@
-from sdg_core_lib.dataset.processing.config.pipeline import (
+from sdg_core_lib.processing.config.pipeline import (
     PipelineConfig,
 )
-from sdg_core_lib.dataset.processing.base.pipeline import (
+from sdg_core_lib.processing.base.pipeline import (
     ProcessingPipeline,
 )
-from sdg_core_lib.dataset.processing.base.processor import Processor
-from sdg_core_lib.dataset.processing.factories.pipeline_steps.numeric import (
+from sdg_core_lib.processing.base.processor import Processor
+from sdg_core_lib.processing.factories.pipeline_steps.numeric import (
     NumericStepFactory,
 )
 

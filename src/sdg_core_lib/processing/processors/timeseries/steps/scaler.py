@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Tuple
 
-from sdg_core_lib.dataset.processing.base.pipeline_steps.scaler import (
+from sdg_core_lib.processing.base.pipeline_steps.scaler import (
     Scaler,
 )
 

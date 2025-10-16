@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import skops.io as sio
 import os
 
-from sdg_core_lib.dataset.processing.base.pipeline_steps.pipeline_step import (
+from sdg_core_lib.processing.base.pipeline_steps.pipeline_step import (
     PipelineStep,
 )
 

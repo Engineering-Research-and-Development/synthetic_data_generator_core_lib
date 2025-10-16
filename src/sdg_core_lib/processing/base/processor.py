@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from numpy import ndarray
 from typing import Optional, Tuple
 
-from sdg_core_lib.dataset.processing.config.pipeline import (
+from sdg_core_lib.processing.config.pipeline import (
     PipelineConfig,
 )
-from sdg_core_lib.dataset.processing.base.pipeline import (
+from sdg_core_lib.processing.base.pipeline import (
     ProcessingPipeline,
 )
 

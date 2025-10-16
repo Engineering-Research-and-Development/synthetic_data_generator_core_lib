@@ -1,7 +1,7 @@
-from sdg_core_lib.dataset.processing.base.pipeline_step_factory import (
+from sdg_core_lib.processing.base.step_factory import (
     PipelineStepFactory,
 )
-from sdg_core_lib.dataset.processing.processors.numeric.steps.scaler import (
+from sdg_core_lib.processing.processors.numeric.steps.scaler import (
     NumericScaler,
 )
 

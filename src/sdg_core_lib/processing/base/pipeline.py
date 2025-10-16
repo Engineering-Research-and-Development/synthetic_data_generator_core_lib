@@ -3,13 +3,13 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 from loguru import logger
 
-from sdg_core_lib.dataset.processing.config.pipeline import (
+from sdg_core_lib.processing.config.pipeline import (
     PipelineConfig,
 )
-from sdg_core_lib.dataset.processing.base.pipeline_step_factory import (
+from sdg_core_lib.processing.base.step_factory import (
     PipelineStepFactory,
 )
-from sdg_core_lib.dataset.processing.base.pipeline_steps.pipeline_step import (
+from sdg_core_lib.processing.base.pipeline_steps.pipeline_step import (
     PipelineStep,
 )
 
