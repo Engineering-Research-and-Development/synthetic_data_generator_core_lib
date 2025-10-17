@@ -6,7 +6,9 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import skops.io as sio
 import os
 
-from sdg_core_lib.processing.base.pipeline_steps.pipeline_step import (
+from sdg_core_lib.data_type import DataType
+from sdg_core_lib.processing.PipelineConfig import ScalerConfig, PipelineStepConfig
+from sdg_core_lib.processing.pipeline.PipelineStep import (
     PipelineStep,
 )
 
@@ -24,7 +26,7 @@ class Scaler(PipelineStep):
         scaler: The underlying scikit-learn scaler instance (MinMaxScaler or StandardScaler)
     """
 
-    def __init__(self, data_type: str, mode: str) -> None:
+    def __init__(self, data_type: DataType, config: PipelineStepConfig) -> None:
         """
         Initialize the Scaler with the specified scaling mode.
 
@@ -38,11 +40,11 @@ class Scaler(PipelineStep):
         """
         super().__init__(data_type)
         self.scaler = None
-        self._set_scaler(mode)
+        self._set_scaler(config)
         self.is_fit = False
-        self._filename = f"scaler_{self.data_type}.skops"
+        self._filename = f"scaler_{self.data_type.value}.skops"
 
-    def _set_scaler(self, mode: str) -> None:
+    def _set_scaler(self, mode: PipelineStepConfig) -> None:
         """
         Initialize the appropriate scikit-learn scaler based on the specified mode.
 
@@ -55,13 +57,13 @@ class Scaler(PipelineStep):
         if self.scaler is not None:
             return
 
-        if mode == "minmax":
+        if mode == ScalerConfig.MINMAX:
             self.scaler = MinMaxScaler()
-        elif mode == "standard":
+        elif mode == ScalerConfig.STANDARD:
             self.scaler = StandardScaler()
         else:
             raise ValueError(
-                f"Invalid scaler mode: {mode}. Must be one of ['minmax', 'standard']"
+                f"Invalid scaler mode: {mode}. Must be one of {ScalerConfig.get_possible_values()}"
             )
 
     def save(self, folder_path: str) -> None:

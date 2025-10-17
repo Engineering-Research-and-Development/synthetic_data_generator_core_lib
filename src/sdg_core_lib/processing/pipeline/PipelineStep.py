@@ -3,6 +3,9 @@ from typing import Optional
 
 import numpy as np
 
+from sdg_core_lib.data_type import DataType
+from sdg_core_lib.processing.PipelineConfig import PipelineStepConfig
+
 
 class PipelineStep(ABC):
     """
@@ -12,9 +15,14 @@ class PipelineStep(ABC):
     Each step in the processing pipeline should inherit from this class and
     implement all abstract methods.
     """
-    def __init__(self, data_type=None):
-        self.data_type = data_type
 
+    def __init__(
+        self,
+        data_type: DataType = DataType.NONE,
+        config: PipelineStepConfig = None,
+    ):
+        self.data_type = data_type
+        self.config = config
 
     @abstractmethod
     def fit(self, data: np.ndarray) -> None:

@@ -3,13 +3,13 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 from loguru import logger
 
-from sdg_core_lib.processing.config.pipeline import (
+from sdg_core_lib.processing.PipelineConfig import (
     PipelineConfig,
 )
-from sdg_core_lib.processing.base.step_factory import (
+from sdg_core_lib.processing.factories.StepFactory import (
     PipelineStepFactory,
 )
-from sdg_core_lib.processing.base.pipeline_steps.pipeline_step import (
+from sdg_core_lib.processing.pipeline.PipelineStep import (
     PipelineStep,
 )
 
@@ -52,7 +52,7 @@ class ProcessingPipeline:
             self.steps[step_name] = getattr(self.step_factory, f"create_{step_name}")(
                 step_config
             )
-            logger.info(f"Added {step_config} {step_name} to processing pipeline")
+            logger.info(f"Added {step_config.value} {step_name} to processing pipeline")
 
     def load(self, folder_path: str) -> None:
         """

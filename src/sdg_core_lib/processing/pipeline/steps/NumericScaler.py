@@ -1,7 +1,9 @@
 import numpy as np
 from typing import Tuple
 
-from sdg_core_lib.processing.base.pipeline_steps.scaler import (
+from sdg_core_lib.data_type import DataType
+from sdg_core_lib.processing.PipelineConfig import PipelineStepConfig
+from sdg_core_lib.processing.pipeline.steps.Scaler import (
     Scaler,
 )
 
@@ -24,7 +26,7 @@ class NumericScaler(Scaler):
         X_scaled, _ = scaler.fit_transform(X_train)
     """
 
-    def __init__(self, data_type: str, mode: str) -> None:
+    def __init__(self, data_type: DataType, config: PipelineStepConfig) -> None:
         """
         Initialize the NumericScaler with the specified scaling mode.
 
@@ -37,7 +39,7 @@ class NumericScaler(Scaler):
         Raises:
             ValueError: If an invalid mode is provided.
         """
-        super().__init__(data_type, mode)
+        super().__init__(data_type, config)
 
     def _pre_process(self, data: np.ndarray) -> np.ndarray:
         """

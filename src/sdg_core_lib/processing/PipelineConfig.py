@@ -1,3 +1,20 @@
+from enum import Enum
+
+
+class PipelineStepConfig(Enum):
+    pass
+
+    @classmethod
+    def get_possible_values(cls):
+        return [e.value for e in cls if e.value is not None]
+
+
+class ScalerConfig(PipelineStepConfig):
+    MINMAX = "minmax"
+    STANDARD = "standard"
+    NONE = None
+
+
 class PipelineConfig:
     """
     Configuration class for processing pipelines.
@@ -6,7 +23,7 @@ class PipelineConfig:
     in the pipeline, such as scaling, imputation, and encoding strategies.
     """
 
-    def __init__(self, scaler: str = None) -> None:
+    def __init__(self, scaler: str = None):
         """
         Initialize the PipelineConfig with optional scaler configuration.
 
@@ -14,35 +31,9 @@ class PipelineConfig:
             scaler: The type of scaler to use. Supported values are 'minmax' for MinMaxScaler
                    and 'standard' for StandardScaler. If None, no scaling will be applied.
         """
-        self.scaler = self._set_scaler_config(scaler)
+        self.scaler = ScalerConfig(scaler)
 
-    @staticmethod
-    def _set_scaler_config(scaler: str = None) -> str | None:
-        """
-        Validate and return the scaler configuration.
-
-        Args:
-            scaler: The scaler type to validate.
-
-        Returns:
-            The validated scaler type string if passed, None otherwise
-
-        Raises:
-            ValueError: If an invalid scaler type is provided.
-        """
-        if scaler is None:
-            return None
-
-        if scaler == "minmax":
-            return "minmax"
-        elif scaler == "standard":
-            return "standard"
-        else:
-            raise ValueError(
-                "Invalid scaler configuration. Must be either 'minmax' or 'standard'."
-            )
-
-    def get_full_config(self) -> dict:
+    def get_full_config(self) -> dict[str, PipelineStepConfig]:
         """
         Get a dictionary of all non-None configuration parameters.
 
@@ -59,5 +50,5 @@ class PipelineConfig:
         return {
             name: getattr(self, name)
             for name in vars(self)
-            if not name.startswith("_") and getattr(self, name) is not None
+            if not name.startswith("_") and getattr(self, name).value is not None
         }
