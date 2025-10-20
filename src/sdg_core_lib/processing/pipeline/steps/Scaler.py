@@ -44,7 +44,7 @@ class Scaler(PipelineStep):
         self.is_fit = False
         self._filename = f"scaler_{self.data_type.value}.skops"
 
-    def _set_scaler(self, mode: PipelineStepConfig) -> None:
+    def _set_scaler(self, mode: ScalerConfig) -> None:
         """
         Initialize the appropriate scikit-learn scaler based on the specified mode.
 

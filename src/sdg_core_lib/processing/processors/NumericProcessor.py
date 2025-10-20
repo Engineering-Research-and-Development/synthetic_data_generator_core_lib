@@ -1,6 +1,3 @@
-from sdg_core_lib.processing.PipelineConfig import (
-    PipelineConfig,
-)
 from sdg_core_lib.processing.pipeline.ProcessingPipeline import (
     ProcessingPipeline,
 )
@@ -11,9 +8,8 @@ from sdg_core_lib.processing.factories.NumericStepFactory import (
 
 
 class NumericProcessor(Processor):
-    def __init__(self, config: PipelineConfig):
-        super().__init__(config)
-        self.pipeline = self.create_processing_pipeline()
+    def __init__(self):
+        super().__init__()
 
     def create_processing_pipeline(self) -> ProcessingPipeline:
         step_factory = NumericStepFactory()

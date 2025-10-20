@@ -19,14 +19,14 @@ class Processor(ABC):
     be created for different data types (e.g., numeric, time series).
     """
 
-    def __init__(self, config: PipelineConfig) -> None:
+    def __init__(self) -> None:
         """
         Initialize the Preprocessor with a configuration object.
 
         Args:
             config: A PipelineConfig object containing the configuration for the processing pipeline.
         """
-        self.config = config
+        self.config = None
         self.pipeline: Optional[ProcessingPipeline] = None
 
     def execute_preprocessing(
@@ -95,9 +95,16 @@ class Processor(ABC):
             FileNotFoundError: If the specified directory or pipeline files are not found.
             OSError: If there is an error reading from the specified directory.
         """
+        if self.config is None:
+            raise AttributeError("Config is not instantiated. Call set_config() first.")
         if self.pipeline is None:
             self.pipeline = self.create_processing_pipeline()
         self.pipeline.load(folder_path)
+
+    def set_config(self, config: PipelineConfig):
+        self.config = config
+        self.pipeline = self.create_processing_pipeline()
+        return self
 
     @staticmethod
     @abstractmethod

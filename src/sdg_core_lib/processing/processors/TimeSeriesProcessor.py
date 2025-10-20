@@ -38,18 +38,11 @@ class TimeSeriesProcessor(Processor):
         X_scaled, _ = preprocessor.execute_preprocessing_pipeline(X_train, None)
     """
 
-    def __init__(self, config: Optional[PipelineConfig] = None):
+    def __init__(self):
         """
         Initialize the TimeSeriesPreprocessor with the given configuration.
-
-        Args:
-            config: Configuration object for the processing pipeline.
-                   If None, a default configuration will be used.
         """
-        if config is None:
-            config = PipelineConfig()
-        super().__init__(config)
-        self.pipeline = self.create_processing_pipeline()
+        super().__init__()
 
     def create_processing_pipeline(self) -> ProcessingPipeline:
         """
