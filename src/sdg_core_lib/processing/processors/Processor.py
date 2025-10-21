@@ -21,10 +21,7 @@ class Processor(ABC):
 
     def __init__(self) -> None:
         """
-        Initialize the Preprocessor with a configuration object.
-
-        Args:
-            config: A PipelineConfig object containing the configuration for the processing pipeline.
+        Initialize the processor with a configuration object.
         """
         self.config = None
         self.pipeline: Optional[ProcessingPipeline] = None
@@ -64,6 +61,20 @@ class Processor(ABC):
     def execute_postprocessing(
         self, train_data_preprocessed: ndarray, test_data_preprocessed: ndarray
     ):
+        """
+        Execute the inverse transformation on the preprocessed data.
+
+        Args:
+            train_data_preprocessed: The preprocessed training data.
+            test_data_preprocessed: The preprocessed test data.
+
+        Returns:
+            A tuple containing the original training data and test data.
+
+        Raises:
+            AttributeError: If the pipeline has not been initialized.
+            OSError: If there is an error reading from the specified directory.
+        """
         train_data, test_data = self.pipeline.inverse_transform(
             train_data_preprocessed, test_data_preprocessed
         )
@@ -80,13 +91,19 @@ class Processor(ABC):
             AttributeError: If the pipeline has not been initialized.
             OSError: If there is an error writing to the specified directory.
         """
+        # Check if the pipeline has been initialized
         if self.pipeline is None:
             raise AttributeError("Pipeline is not instantiated")
+
+        # Save the pipeline to disk
         self.pipeline.save(folder_path)
 
     def load_pipeline(self, folder_path: str) -> None:
         """
         Load a processing pipeline from disk.
+
+        This method loads a saved processing pipeline from disk and assigns it to the current
+        instance.
 
         Args:
             folder_path: Directory path containing the saved pipeline.
@@ -95,13 +112,35 @@ class Processor(ABC):
             FileNotFoundError: If the specified directory or pipeline files are not found.
             OSError: If there is an error reading from the specified directory.
         """
+        # Check if the config is instantiated
         if self.config is None:
             raise AttributeError("Config is not instantiated. Call set_config() first.")
+
+        # Check if the pipeline is instantiated
         if self.pipeline is None:
+            # If not, create a new pipeline
             self.pipeline = self.create_processing_pipeline()
+
+        # Load the pipeline from disk
         self.pipeline.load(folder_path)
 
-    def set_config(self, config: PipelineConfig):
+
+    def configure_and_setup(self, config: PipelineConfig):
+        """
+        Set the configuration for the processing pipeline.
+
+        This method sets the configuration for the processing pipeline and recreates the pipeline
+        using the new configuration.
+
+        Args:
+            config: A PipelineConfig object containing the configuration for the processing pipeline.
+
+        Returns:
+            self
+
+        Raises:
+            NotImplementedError: If the method is not implemented by a subclass.
+        """
         self.config = config
         self.pipeline = self.create_processing_pipeline()
         return self

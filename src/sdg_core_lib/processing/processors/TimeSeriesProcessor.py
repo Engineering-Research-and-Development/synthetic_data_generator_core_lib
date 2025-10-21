@@ -40,7 +40,7 @@ class TimeSeriesProcessor(Processor):
 
     def __init__(self):
         """
-        Initialize the TimeSeriesPreprocessor with the given configuration.
+        Initialize the TimeSeriesPreprocessor.
         """
         super().__init__()
 

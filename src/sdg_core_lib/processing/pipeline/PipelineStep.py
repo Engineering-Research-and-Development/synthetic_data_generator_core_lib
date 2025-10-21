@@ -21,6 +21,16 @@ class PipelineStep(ABC):
         data_type: DataType = DataType.NONE,
         config: PipelineStepConfig = None,
     ):
+        """
+        Initialize the PipelineStep with the specified data type and configuration.
+
+        Args:
+            data_type: The type of data to be processed by the step.
+            config: The configuration object containing step-specific parameters.
+
+        Note:
+            If config is None, the step should use default parameters.
+        """
         self.data_type = data_type
         self.config = config
 
