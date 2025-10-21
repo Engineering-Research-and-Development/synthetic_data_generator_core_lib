@@ -12,4 +12,3 @@ class ProcessorRegistry:
             return TimeSeriesProcessor()
         else:
             raise ValueError(f"Unsupported data type: {data_type}")
-

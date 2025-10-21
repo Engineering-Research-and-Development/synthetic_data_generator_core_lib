@@ -56,7 +56,7 @@ def test_instantiate(model_data_correct_train):
 def test_preprocess(model_data_correct_train, data):
     model = TimeSeriesVAE(**model_data_correct_train)
     assert model._scaler is None
-    scaled_data = model._pre_process(data)
+    scaled_data = model.get_preprocessing_config(data)
     assert model._scaler is not None and type(model._scaler) is MinMaxScaler
     assert type(scaled_data) is np.ndarray
     assert scaled_data.shape == data.get_numpy_data(data.dataframe).shape

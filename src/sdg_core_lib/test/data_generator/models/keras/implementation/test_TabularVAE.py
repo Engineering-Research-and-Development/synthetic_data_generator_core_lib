@@ -61,7 +61,7 @@ def test_instantiate(model_data_no_load):
 def test_preprocess(model_data_no_load, data):
     model = TabularVAE(**model_data_no_load)
     assert model._scaler is None
-    scaled_data = model._pre_process(data)
+    scaled_data = model.get_preprocessing_config(data)
     assert model._scaler is not None and type(model._scaler) is StandardScaler
     assert type(scaled_data) is np.ndarray
 

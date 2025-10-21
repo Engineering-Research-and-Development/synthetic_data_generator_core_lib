@@ -24,3 +24,5 @@ class TypedSubDataset(DatasetComponent):
             columns.append(Column(data[:, column_idx], column_metadata))
         return cls(columns, data_type)
 
+    def get_data_shape(self) -> str:
+        return str(self.to_numpy().shape)

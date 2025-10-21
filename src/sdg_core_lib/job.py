@@ -1,15 +1,17 @@
 import copy
 import pandas as pd
 
+from sdg_core_lib.dataset.Dataset import Dataset
+from sdg_core_lib.dataset.TypedSubDataset import TypedSubDataset
 from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
-from sdg_core_lib.NumericDataset import NumericDataset
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
+from sdg_core_lib.processing.processors import ProcessorRegistry
 
 
 def job(
     model_info: dict, dataset: list, n_rows: int, save_filepath: str, train: bool
-) -> tuple[list[dict], dict, UnspecializedModel, NumericDataset]:
+) -> tuple[list[dict], dict, UnspecializedModel, Dataset]:
     """
     Main function to run the job.
 
@@ -27,23 +29,39 @@ def job(
 
     if len(dataset) == 0:
         data_info = model_info.get("training_data_info", [])
-        data = NumericDataset(dataset=data_info)
+        data = Dataset.from_json(data_info)
     else:
-        data = NumericDataset(dataset=dataset)
+        data = Dataset.from_json(dataset)
 
-    model = model_factory(model_info, data.input_shape)
-    if train:
-        model.train(data=data)
-        model.save(save_filepath)
+    subdatasets = data.separate_into_subdatasets()
 
-    predicted_data = model.infer(n_rows)
-    df_predict = pd.DataFrame(data=predicted_data.tolist(), columns=data.columns)
+    synthetic_subdatasets = []
+    for subdataset in subdatasets:
+        input_shape = subdataset.get_data_shape()
+        model = model_factory(model_info, input_shape)
+        pipeline_config = model.get_preprocessing_config()
+        processor = ProcessorRegistry.get_processor(subdataset.data_type).configure_and_setup(pipeline_config)
+        preprocessed_data, _ = processor.execute_preprocessing(subdataset.to_numpy(), None)
+        if train:
+            model.train(data=preprocessed_data)
+            model.save(save_filepath)
+            processor.save(save_filepath)
 
+        predicted_data = model.infer(n_rows)
+        postprocessed_data, _ = processor.execute_postprocessing(predicted_data, None)
+        synthetic_subdataset = TypedSubDataset.from_data_and_metadata(postprocessed_data, subdataset.get_metadata())
+        synthetic_subdatasets.append(synthetic_subdataset)
+
+    synthetic_data = Dataset.from_subdatasets(synthetic_subdatasets)
+
+
+    return None, None, None, None
     report = {"available": False}
+
     if len(data.dataframe) > 0:
         evaluator = TabularComparisonEvaluator(
-            real_data=data.dataframe,
-            synthetic_data=df_predict,
+            real_data=data,
+            synthetic_data=synthetic_data,
             numerical_columns=data.continuous_columns,
             categorical_columns=data.categorical_columns,
         )

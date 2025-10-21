@@ -8,18 +8,31 @@ class DatasetComponent:
 
     @classmethod
     def from_json(cls, json_data: list[dict]):
-        raise NotImplementedError(f"This method is not implemented for class {cls.__name__}")
+        raise NotImplementedError(
+            f"This method is not implemented for class {cls.__name__}"
+        )
 
     @classmethod
     def from_data_and_metadata(cls, data: np.ndarray, metadata: list[ColumnMetadata]):
-        raise NotImplementedError(f"This method is not implemented for class {cls.__name__}")
+        raise NotImplementedError(
+            f"This method is not implemented for class {cls.__name__}"
+        )
 
     @classmethod
-    def from_subdatasets(cls, subdatasets: list['DatasetComponent']):
-        raise NotImplementedError(f"This method is not implemented for class {cls.__name__} ")
+    def from_subdatasets(cls, subdatasets: list["DatasetComponent"]):
+        raise NotImplementedError(
+            f"This method is not implemented for class {cls.__name__} "
+        )
 
-    def separate_into_subdatasets(self) -> list['DatasetComponent']:
-        raise NotImplementedError(f"This method is not implemented for class {self.__class__.__name__}")
+    def get_data_shape(self):
+        raise NotImplementedError(
+            f"This method is not implemented for class {self.__class__.__name__}"
+        )
+
+    def separate_into_subdatasets(self) -> list["DatasetComponent"]:
+        raise NotImplementedError(
+            f"This method is not implemented for class {self.__class__.__name__}"
+        )
 
     def to_numpy(self) -> np.ndarray:
         array_data = np.array([col.data for col in self.columns])
@@ -33,4 +46,3 @@ class DatasetComponent:
 
     def to_json(self) -> list[dict]:
         return [column.to_json() for column in self.columns]
-

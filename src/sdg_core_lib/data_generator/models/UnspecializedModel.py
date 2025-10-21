@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-from sdg_core_lib import NumericDataset
+from sdg_core_lib.processing.PipelineConfig import PipelineConfig
 
 
 class UnspecializedModel(ABC):
@@ -15,7 +15,6 @@ class UnspecializedModel(ABC):
         input_shape (tuple): A tuple containing the input shape of the model.
         _load_path (str): A string containing the path where to load the model from.
         _model (keras.Model): The model instance.
-        _scaler (Scaler): The scaler instance.
         training_info (TrainingInfo): The training info instance.
     """
 
@@ -31,7 +30,6 @@ class UnspecializedModel(ABC):
         self.input_shape = self._parse_stringed_input_shape(input_shape)
         self._load_path = load_path
         self._model = None  # Placeholder for the model instance
-        self._scaler = None  # Placeholder for model scaler
         self.training_info = None  # Placeholder for training info
         self._model_misc = None  # Placeholder for model miscellaneous info
 
@@ -49,27 +47,17 @@ class UnspecializedModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _scale(self, data: np.array):
-        """Scale inputs with its logic"""
-        raise NotImplementedError
-
-    @abstractmethod
-    def _inverse_scale(self, data: np.array):
-        """Inverse scale inputs with its logic"""
-        raise NotImplementedError
-
-    @abstractmethod
-    def _pre_process(self, data: NumericDataset, **kwargs):
+    def get_preprocessing_config(self) -> PipelineConfig:
         """Pre-process data"""
         raise NotImplementedError
 
     @abstractmethod
-    def train(self, data):
+    def train(self, data: np.ndarray):
         """Train the model."""
         raise NotImplementedError
 
     @abstractmethod
-    def fine_tune(self, data: np.array, **kwargs):
+    def fine_tune(self, data: np.ndarray, **kwargs):
         """Fine-tune the model."""
         raise NotImplementedError
 

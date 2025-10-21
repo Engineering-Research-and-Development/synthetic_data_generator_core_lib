@@ -22,13 +22,13 @@ class Dataset(DatasetComponent):
         return cls(columns)
 
     @classmethod
-    def from_subdatasets(cls, subdatasets: list[DatasetComponent]):
+    def from_subdatasets(cls, subdatasets: list[TypedSubDataset]):
         columns = []
         for subdataset in subdatasets:
             columns.extend(subdataset.columns)
         return cls(columns)
 
-    def separate_into_subdatasets(self) -> list[DatasetComponent]:
+    def separate_into_subdatasets(self) -> list[TypedSubDataset]:
         subdatasets = []
         all_data_types = set([column.metadata.column_type for column in self.columns])
         for data_type in all_data_types:
@@ -37,5 +37,3 @@ class Dataset(DatasetComponent):
             ]
             subdatasets.append(TypedSubDataset(grouped_columns, data_type))
         return subdatasets
-
-

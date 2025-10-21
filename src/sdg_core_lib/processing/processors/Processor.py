@@ -124,7 +124,6 @@ class Processor(ABC):
         # Load the pipeline from disk
         self.pipeline.load(folder_path)
 
-
     def configure_and_setup(self, config: PipelineConfig):
         """
         Set the configuration for the processing pipeline.
