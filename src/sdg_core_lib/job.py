@@ -2,8 +2,8 @@ import copy
 
 from sdg_core_lib.dataset.Dataset import Dataset
 from sdg_core_lib.dataset.TypedSubDataset import TypedSubDataset
-from sdg_core_lib.dataset.merge import merge_all_datasets
-from sdg_core_lib.dataset.split import split_into_subdataset
+from sdg_core_lib.dataset.ops.merge import merge_all_datasets
+from sdg_core_lib.dataset.ops.split import split_into_subdataset
 from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
