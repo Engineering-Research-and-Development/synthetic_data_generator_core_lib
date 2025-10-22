@@ -2,6 +2,8 @@ import copy
 
 from sdg_core_lib.dataset.Dataset import Dataset
 from sdg_core_lib.dataset.TypedSubDataset import TypedSubDataset
+from sdg_core_lib.dataset.merge import merge_all_datasets
+from sdg_core_lib.dataset.split import split_into_subdataset
 from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
@@ -32,11 +34,11 @@ def job(
     else:
         data = Dataset.from_json(dataset)
 
-    subdatasets = data.separate_into_subdatasets()
+    subdatasets = split_into_subdataset(data)
     model = None
 
     synthetic_subdatasets = []
-
+    # TODO: Think for a way to handle mixed-dataset models
     for subdataset in subdatasets:
         input_shape = subdataset.get_processing_shape()
         model = model_factory(model_info, input_shape)
@@ -57,7 +59,7 @@ def job(
         synthetic_subdataset = TypedSubDataset.from_data_and_metadata(postprocessed_data, subdataset.get_metadata())
         synthetic_subdatasets.append(synthetic_subdataset)
 
-    synthetic_data = Dataset.from_subdatasets(synthetic_subdatasets)
+    synthetic_data = merge_all_datasets(synthetic_subdatasets)
 
 
     return synthetic_data.to_json() , {"available": False}, model, synthetic_data

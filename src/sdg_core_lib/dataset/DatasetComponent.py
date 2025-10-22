@@ -23,18 +23,7 @@ class DatasetComponent:
             f"This method is not implemented for class {cls.__name__}"
         )
 
-    @classmethod
-    def from_subdatasets(cls, subdatasets: list["DatasetComponent"]):
-        raise NotImplementedError(
-            f"This method is not implemented for class {cls.__name__} "
-        )
-
     def get_processing_shape(self):
-        raise NotImplementedError(
-            f"This method is not implemented for class {self.__class__.__name__}"
-        )
-
-    def separate_into_subdatasets(self) -> list["DatasetComponent"]:
         raise NotImplementedError(
             f"This method is not implemented for class {self.__class__.__name__}"
         )
