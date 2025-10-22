@@ -4,5 +4,5 @@ from enum import Enum
 class DataType(Enum):
     NUMERIC = "numeric"
     CATEGORICAL = "categorical"
-    TIMESERIES = "timeseries"
+    TIMESERIES = "time_series"
     NONE = ""

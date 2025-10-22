@@ -8,7 +8,6 @@ from sdg_core_lib.dataset.DatasetComponent import DatasetComponent
 class TypedSubDataset(DatasetComponent):
     def __init__(self, columns: list[Column], data_type: DataType):
         super().__init__(columns)
-        self.columns = columns
         self.data_type = data_type
 
     @classmethod
@@ -24,5 +23,5 @@ class TypedSubDataset(DatasetComponent):
             columns.append(Column(data[:, column_idx], column_metadata))
         return cls(columns, data_type)
 
-    def get_data_shape(self) -> str:
-        return str(self.to_numpy().shape)
+    def get_processing_shape(self) -> str:
+        return str(self.to_numpy().shape[1:])

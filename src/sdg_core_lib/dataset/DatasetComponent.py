@@ -5,6 +5,11 @@ import numpy as np
 class DatasetComponent:
     def __init__(self, columns: list[Column]):
         self.columns = columns
+        self._check_columns()
+
+    def _check_columns(self):
+        if len(self.columns) < 1:
+            raise ValueError("Dataset must have at least one column")
 
     @classmethod
     def from_json(cls, json_data: list[dict]):
@@ -24,7 +29,7 @@ class DatasetComponent:
             f"This method is not implemented for class {cls.__name__} "
         )
 
-    def get_data_shape(self):
+    def get_processing_shape(self):
         raise NotImplementedError(
             f"This method is not implemented for class {self.__class__.__name__}"
         )

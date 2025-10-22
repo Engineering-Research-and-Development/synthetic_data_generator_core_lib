@@ -37,16 +37,20 @@ def job(
 
     synthetic_subdatasets = []
     for subdataset in subdatasets:
-        input_shape = subdataset.get_data_shape()
+        input_shape = subdataset.get_processing_shape()
         model = model_factory(model_info, input_shape)
         pipeline_config = model.get_preprocessing_config()
         processor = ProcessorRegistry.get_processor(subdataset.data_type).configure_and_setup(pipeline_config)
-        preprocessed_data, _ = processor.execute_preprocessing(subdataset.to_numpy(), None)
+
         if train:
+            preprocessed_data, _ = processor.execute_preprocessing(
+                subdataset.to_numpy(), None
+            )
             model.train(data=preprocessed_data)
             model.save(save_filepath)
-            processor.save(save_filepath)
+            processor.save_pipeline(save_filepath)
 
+        processor.load_pipeline(save_filepath)
         predicted_data = model.infer(n_rows)
         postprocessed_data, _ = processor.execute_postprocessing(predicted_data, None)
         synthetic_subdataset = TypedSubDataset.from_data_and_metadata(postprocessed_data, subdataset.get_metadata())
