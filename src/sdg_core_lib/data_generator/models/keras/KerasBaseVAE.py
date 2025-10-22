@@ -8,6 +8,7 @@ from keras import saving
 
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
+from sdg_core_lib.processing.PipelineConfig import PipelineConfig
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -117,6 +118,8 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         :raises ValueError: if the model shape does not match data shape
         :return: None
         """
+        if self._model is None:
+            raise AttributeError("Model not instantiated")
         learning_rate = (
             learning_rate if learning_rate is not None else self._learning_rate
         )
@@ -143,9 +146,14 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         :raises AttributeError: If the model is not instantiated.
         :return: A numpy array containing the generated data after decoding and inverse scaling.
         """
+        if self._model is None:
+            raise AttributeError("Model not instantiated")
         z_random = np.random.normal(size=(n_rows, self._latent_dim))
         results = self._model.decoder.predict(z_random)
         return results
+
+    def get_preprocessing_config(self) -> PipelineConfig:
+        raise NotImplementedError
 
     @classmethod
     def self_describe(cls):

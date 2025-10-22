@@ -1,6 +1,7 @@
 import pytest
+import numpy as np
 
-from sdg_core_lib.NumericDataset import NumericDataset
+from sdg_core_lib.dataset.Dataset import Dataset
 from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
 
 
@@ -20,12 +21,12 @@ def correct_dataset():
     data = [
         {
             "column_name": "A",
-            "column_type": "continuous",
+            "column_type": "numeric",
             "column_datatype": "float64",
             "column_data": [1.0, 2.0, 3.0, 4.0, 5.0],
         }
     ]
-    return NumericDataset(data)
+    return Dataset.from_json(data).to_numpy()
 
 
 def test_instantiate(model):
@@ -57,15 +58,15 @@ def test_set_hyperparameters(model):
 
 
 def test_train_not_initialized(model, correct_dataset):
-    with pytest.raises(NotImplementedError) as exception_info:
+    with pytest.raises(AttributeError) as exception_info:
         model.train(correct_dataset)
-    assert exception_info.type is NotImplementedError
+    assert exception_info.type is AttributeError
 
 
 def test_train_wrong_data(model):
-    with pytest.raises(NotImplementedError) as exception_info:
-        model.train([1, 2, 3])
-    assert exception_info.type is NotImplementedError
+    with pytest.raises(AttributeError) as exception_info:
+        model.train(np.array([1, 2, 3]))
+    assert exception_info.type is AttributeError
 
 
 def test_infer(model):

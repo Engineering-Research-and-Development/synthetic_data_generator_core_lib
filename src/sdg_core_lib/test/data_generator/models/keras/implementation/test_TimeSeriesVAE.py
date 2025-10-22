@@ -4,7 +4,7 @@ import os
 import shutil
 from sklearn.preprocessing import MinMaxScaler
 
-from sdg_core_lib.NumericDataset import NumericDataset
+from sdg_core_lib.dataset.Dataset import Dataset
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
 from sdg_core_lib.data_generator.models.keras.VAE import VAE
 from sdg_core_lib.data_generator.models.keras.implementation.TimeSeriesVAE import (
@@ -25,7 +25,7 @@ def model_data_correct_train():
 
 @pytest.fixture()
 def data():
-    return NumericDataset(
+    return Dataset.from_json(
         [
             {
                 "column_name": "A",
@@ -40,7 +40,7 @@ def data():
                 "column_data": np.linspace(-10, 10, 1020).reshape(-1, 51).tolist(),
             },
         ]
-    )
+    ).to_numpy()
 
 
 def test_instantiate(model_data_correct_train):
@@ -50,25 +50,13 @@ def test_instantiate(model_data_correct_train):
     assert model.input_shape == (2, 51)
     assert model._epochs == 1
     assert type(model._model) is VAE
-    assert model._scaler is None
 
-
-def test_preprocess(model_data_correct_train, data):
-    model = TimeSeriesVAE(**model_data_correct_train)
-    assert model._scaler is None
-    scaled_data = model.get_preprocessing_config(data)
-    assert model._scaler is not None and type(model._scaler) is MinMaxScaler
-    assert type(scaled_data) is np.ndarray
-    assert scaled_data.shape == data.get_numpy_data(data.dataframe).shape
-    assert scaled_data.shape[1:] == model.input_shape
 
 
 def test_train_correct(model_data_correct_train, data):
     model = TimeSeriesVAE(**model_data_correct_train)
     assert model.training_info is None
-    assert model._scaler is None
     model.train(data)
-    assert type(model._scaler) is MinMaxScaler
     assert type(model.training_info) is TrainingInfo
 
 
@@ -79,7 +67,6 @@ def test_save(model_data_correct_train):
     model.save(model_path)
     assert os.path.isfile(os.path.join(model_path, "encoder.keras"))
     assert os.path.isfile(os.path.join(model_path, "decoder.keras"))
-    assert os.path.isfile(os.path.join(model_path, "scaler.skops"))
     shutil.rmtree(model_path)
 
 

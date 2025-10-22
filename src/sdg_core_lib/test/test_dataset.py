@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import numpy as np
 
-from sdg_core_lib.NumericDataset import NumericDataset
+from sdg_core_lib.dataset.Dataset import Dataset
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ def empty_dataset():
 
 
 def test_initialization(correct_dataset):
-    dataset = NumericDataset(correct_dataset)
+    dataset = Dataset.from_json(correct_dataset)
     assert len(dataset.columns) == 4
     assert len(dataset.categorical_columns) == 1
     assert len(dataset.continuous_columns) == 2
@@ -74,7 +74,7 @@ def test_initialization(correct_dataset):
 
 
 def test_dataset_complexity(complex_dataset):
-    dataset = NumericDataset(complex_dataset)
+    dataset = Dataset.from_json(complex_dataset)
     print(np.array(dataset.dataframe.to_numpy().tolist()).shape)
     assert len(dataset.columns) == 1
     assert len(dataset.categorical_columns) == 0
@@ -85,12 +85,12 @@ def test_dataset_complexity(complex_dataset):
 
 def test_error_initialization(error_dataset):
     with pytest.raises(TypeError) as exception_info:
-        _ = NumericDataset(error_dataset)
+        _ = Dataset.from_json(error_dataset)
     assert exception_info.type is TypeError
 
 
 def test_parse_tabular_data_json(correct_dataset):
-    dataset = NumericDataset(correct_dataset)
+    dataset = Dataset.from_json(correct_dataset)
     print(dataset.dataframe["A"].dtype)
     list_dict = dataset.parse_tabular_data_json()
     assert len(list_dict) == len(dataset.columns)
@@ -113,7 +113,7 @@ def test_parse_tabular_data_json(correct_dataset):
 
 
 def test_parse_data_to_registry(correct_dataset):
-    dataset = NumericDataset(correct_dataset)
+    dataset = Dataset.from_json(correct_dataset)
     feature_list = dataset.parse_data_to_registry()
     assert len(feature_list) == len(dataset.columns)
     assert feature_list[0]["feature_name"] == "A"
@@ -135,7 +135,7 @@ def test_parse_data_to_registry(correct_dataset):
 
 
 def test_get_data(correct_dataset):
-    dataset = NumericDataset(correct_dataset)
+    dataset = Dataset.from_json(correct_dataset)
     dataframe, columns, continuous_columns, categorical_columns = dataset.get_data()
     assert type(dataframe) is pd.DataFrame
     assert columns == ["A", "B", "C", "D"]
@@ -145,5 +145,5 @@ def test_get_data(correct_dataset):
 
 def test_empty_dataset(empty_dataset):
     with pytest.raises(ValueError) as exception_info:
-        _ = NumericDataset(empty_dataset)
+        _ = Dataset.from_json(empty_dataset)
     assert exception_info.type is ValueError
