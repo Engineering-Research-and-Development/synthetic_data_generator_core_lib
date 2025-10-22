@@ -1,5 +1,4 @@
 import copy
-import pandas as pd
 
 from sdg_core_lib.dataset.Dataset import Dataset
 from sdg_core_lib.dataset.TypedSubDataset import TypedSubDataset
@@ -34,8 +33,10 @@ def job(
         data = Dataset.from_json(dataset)
 
     subdatasets = data.separate_into_subdatasets()
+    model = None
 
     synthetic_subdatasets = []
+
     for subdataset in subdatasets:
         input_shape = subdataset.get_processing_shape()
         model = model_factory(model_info, input_shape)
@@ -59,7 +60,7 @@ def job(
     synthetic_data = Dataset.from_subdatasets(synthetic_subdatasets)
 
 
-    return None, None, None, None
+    return synthetic_data.to_json() , {"available": False}, model, synthetic_data
     report = {"available": False}
 
     if len(data.dataframe) > 0:

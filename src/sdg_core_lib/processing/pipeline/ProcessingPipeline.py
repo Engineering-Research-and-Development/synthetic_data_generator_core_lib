@@ -44,15 +44,16 @@ class ProcessingPipeline:
 
         This method creates and configures each processing step using the step factory
         and the provided configuration.
-
-        Raises:
-            AttributeError: If a step in the configuration is not supported by the factory.
         """
         for step_name, step_config in self.config.get_full_config().items():
-            self.steps[step_name] = getattr(self.step_factory, f"create_{step_name}")(
-                step_config
-            )
-            logger.info(f"Added {step_config.value} {step_name} to processing pipeline")
+            try:
+                self.steps[step_name] = getattr(self.step_factory, f"create_{step_name}")(
+                    step_config
+                )
+                logger.info(f"Added {step_config.value} {step_name} to processing pipeline")
+            except AttributeError:
+                logger.info(f"Skipping creation of {step_name} which is not supported by StepFactory")
+                pass
 
     def load(self, folder_path: str) -> None:
         """
