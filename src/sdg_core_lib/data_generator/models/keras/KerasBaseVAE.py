@@ -8,7 +8,7 @@ from keras import saving
 
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
-from sdg_core_lib.processing.PipelineConfig import PipelineConfig
+from sdg_core_lib.process.PipelineConfig import PipelineConfig
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 

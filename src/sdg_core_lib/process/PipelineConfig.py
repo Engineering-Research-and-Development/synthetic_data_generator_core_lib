@@ -17,9 +17,9 @@ class ScalerConfig(PipelineStepConfig):
 
 class PipelineConfig:
     """
-    Configuration class for processing pipelines.
+    Configuration class for process pipelines.
 
-    This class holds configuration parameters for different processing pipeline_steps
+    This class holds configuration parameters for different process pipeline_steps
     in the pipeline, such as scaling, imputation, and encoding strategies.
     """
 

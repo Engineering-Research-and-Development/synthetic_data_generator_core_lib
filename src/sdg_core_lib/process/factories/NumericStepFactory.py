@@ -1,9 +1,9 @@
 from sdg_core_lib.data_type import DataType
-from sdg_core_lib.processing.PipelineConfig import ScalerConfig
-from sdg_core_lib.processing.factories.StepFactory import (
+from sdg_core_lib.process.PipelineConfig import ScalerConfig
+from sdg_core_lib.process.factories.StepFactory import (
     PipelineStepFactory,
 )
-from sdg_core_lib.processing.pipeline.steps.NumericScaler import (
+from sdg_core_lib.process.pipeline.steps.NumericScaler import (
     NumericScaler,
 )
 

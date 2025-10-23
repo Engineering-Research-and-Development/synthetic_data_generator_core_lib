@@ -7,7 +7,7 @@ from sdg_core_lib.dataset.ops.split import split_into_subdataset
 from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
-from sdg_core_lib.processing.processors import ProcessorRegistry
+from sdg_core_lib.process.processors import ProcessorRegistry
 
 
 def job(

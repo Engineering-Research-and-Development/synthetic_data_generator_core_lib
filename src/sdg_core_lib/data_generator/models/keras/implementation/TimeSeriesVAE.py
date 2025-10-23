@@ -6,7 +6,7 @@ from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
 from keras import layers
 
 from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
-from sdg_core_lib.processing.PipelineConfig import PipelineConfig
+from sdg_core_lib.process.PipelineConfig import PipelineConfig
 
 
 class TimeSeriesVAE(KerasBaseVAE):

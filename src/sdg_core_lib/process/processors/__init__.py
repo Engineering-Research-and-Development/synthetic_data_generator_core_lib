@@ -1,6 +1,6 @@
 from sdg_core_lib.data_type import DataType
-from sdg_core_lib.processing.processors.NumericProcessor import NumericProcessor
-from sdg_core_lib.processing.processors.TimeSeriesProcessor import TimeSeriesProcessor
+from sdg_core_lib.process.processors.NumericProcessor import NumericProcessor
+from sdg_core_lib.process.processors.TimeSeriesProcessor import TimeSeriesProcessor
 
 
 class ProcessorRegistry:

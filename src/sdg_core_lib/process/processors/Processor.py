@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from numpy import ndarray
 from typing import Optional, Tuple
 
-from sdg_core_lib.processing.PipelineConfig import (
+from sdg_core_lib.process.PipelineConfig import (
     PipelineConfig,
 )
-from sdg_core_lib.processing.pipeline.ProcessingPipeline import (
+from sdg_core_lib.process.pipeline.ProcessingPipeline import (
     ProcessingPipeline,
 )
 
@@ -14,8 +14,8 @@ class Processor(ABC):
     """
     Abstract base class for all data processors in the SDG Core Library.
 
-    This class defines the interface for processing pipelines and provides common functionality
-    for executing, saving, and loading processing pipelines. Concrete implementations should
+    This class defines the interface for process pipelines and provides common functionality
+    for executing, saving, and loading process pipelines. Concrete implementations should
     be created for different data types (e.g., numeric, time series).
     """
 
@@ -30,7 +30,7 @@ class Processor(ABC):
         self, data: ndarray, test_data: ndarray
     ) -> Tuple[ndarray, ndarray]:
         """
-        Execute the processing pipeline on the provided data.
+        Execute the process pipeline on the provided data.
 
         Args:
             data: The training data to be preprocessed.
@@ -82,7 +82,7 @@ class Processor(ABC):
 
     def save_pipeline(self, folder_path: str) -> None:
         """
-        Save the current processing pipeline to disk.
+        Save the current process pipeline to disk.
 
         Args:
             folder_path: Directory path where the pipeline should be saved.
@@ -100,9 +100,9 @@ class Processor(ABC):
 
     def load_pipeline(self, folder_path: str) -> None:
         """
-        Load a processing pipeline from disk.
+        Load a process pipeline from disk.
 
-        This method loads a saved processing pipeline from disk and assigns it to the current
+        This method loads a saved process pipeline from disk and assigns it to the current
         instance.
 
         Args:
@@ -126,13 +126,13 @@ class Processor(ABC):
 
     def configure_and_setup(self, config: PipelineConfig):
         """
-        Set the configuration for the processing pipeline.
+        Set the configuration for the process pipeline.
 
-        This method sets the configuration for the processing pipeline and recreates the pipeline
+        This method sets the configuration for the process pipeline and recreates the pipeline
         using the new configuration.
 
         Args:
-            config: A PipelineConfig object containing the configuration for the processing pipeline.
+            config: A PipelineConfig object containing the configuration for the process pipeline.
 
         Returns:
             self
@@ -148,10 +148,10 @@ class Processor(ABC):
     @abstractmethod
     def create_processing_pipeline() -> ProcessingPipeline:
         """
-        Create and return a new processing pipeline.
+        Create and return a new process pipeline.
 
         This method must be implemented by subclasses to create a specific type of
-        processing pipeline based on the data type being processed.
+        process pipeline based on the data type being processed.
 
         Returns:
             A ProcessingPipeline instance configured for the specific data type.

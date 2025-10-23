@@ -1,7 +1,7 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-from sdg_core_lib.processing.PipelineConfig import PipelineConfig
+from sdg_core_lib.process.PipelineConfig import PipelineConfig
 
 
 class UnspecializedModel(ABC):

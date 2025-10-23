@@ -3,22 +3,22 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 from loguru import logger
 
-from sdg_core_lib.processing.PipelineConfig import (
+from sdg_core_lib.process.PipelineConfig import (
     PipelineConfig,
 )
-from sdg_core_lib.processing.factories.StepFactory import (
+from sdg_core_lib.process.factories.StepFactory import (
     PipelineStepFactory,
 )
-from sdg_core_lib.processing.pipeline.PipelineStep import (
+from sdg_core_lib.process.pipeline.PipelineStep import (
     PipelineStep,
 )
 
 
 class ProcessingPipeline:
     """
-    A pipeline for applying a sequence of processing pipeline_steps to data.
+    A pipeline for applying a sequence of process pipeline_steps to data.
 
-    This class manages the execution of processing pipeline_steps in sequence, handling both
+    This class manages the execution of process pipeline_steps in sequence, handling both
     training and test data while maintaining the state of each step.
     """
 
@@ -26,10 +26,10 @@ class ProcessingPipeline:
         self, step_factory: PipelineStepFactory, config: PipelineConfig
     ) -> None:
         """
-        Initialize the processing pipeline.
+        Initialize the process pipeline.
 
         Args:
-            step_factory: Factory for creating processing pipeline_steps.
+            step_factory: Factory for creating process pipeline_steps.
             config: Configuration object containing pipeline parameters.
         """
         self.step_factory = step_factory
@@ -40,9 +40,9 @@ class ProcessingPipeline:
 
     def _prepare(self) -> None:
         """
-        Initialize all processing pipeline_steps based on the configuration.
+        Initialize all process pipeline_steps based on the configuration.
 
-        This method creates and configures each processing step using the step factory
+        This method creates and configures each process step using the step factory
         and the provided configuration.
         """
         for step_name, step_config in self.config.get_full_config().items():
@@ -50,7 +50,7 @@ class ProcessingPipeline:
                 self.steps[step_name] = getattr(self.step_factory, f"create_{step_name}")(
                     step_config
                 )
-                logger.info(f"Added {step_config.value} {step_name} to processing pipeline")
+                logger.info(f"Added {step_config.value} {step_name} to process pipeline")
             except AttributeError:
                 logger.info(f"Skipping creation of {step_name} which is not supported by StepFactory")
                 pass
@@ -87,9 +87,9 @@ class ProcessingPipeline:
         self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Apply all processing pipeline_steps to the input data.
+        Apply all process pipeline_steps to the input data.
 
-        This method applies each processing step in sequence to the training data,
+        This method applies each process step in sequence to the training data,
         fitting the step if necessary, and then applies the same transformations
         to the test data without refitting.
 
@@ -111,9 +111,9 @@ class ProcessingPipeline:
         self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Apply all processing pipeline_steps to the input data.
+        Apply all process pipeline_steps to the input data.
 
-        This method applies each processing step in sequence to the training data,
+        This method applies each process step in sequence to the training data,
         fitting the step if necessary, and then applies the same transformations
         to the test data without refitting.
 
@@ -134,9 +134,9 @@ class ProcessingPipeline:
         self, train_data: np.ndarray, test_data: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
-        Apply the inverse of all processing pipeline_steps to the input data.
+        Apply the inverse of all process pipeline_steps to the input data.
 
-        This method applies the inverse of each processing step in reverse order
+        This method applies the inverse of each process step in reverse order
         to the training data, and then applies the inverse of the same transformations
         to the test data.
 

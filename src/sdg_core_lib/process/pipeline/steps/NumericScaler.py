@@ -2,8 +2,8 @@ import numpy as np
 from typing import Tuple
 
 from sdg_core_lib.data_type import DataType
-from sdg_core_lib.processing.PipelineConfig import ScalerConfig
-from sdg_core_lib.processing.pipeline.steps.Scaler import (
+from sdg_core_lib.process.PipelineConfig import ScalerConfig
+from sdg_core_lib.process.pipeline.steps.Scaler import (
     Scaler,
 )
 
@@ -16,7 +16,7 @@ class NumericScaler(Scaler):
     and each row represents a sample. It supports both Min-Max and Standard scaling
     strategies through its parent Scaler class.
 
-    The scaler can be used as part of a processing pipeline to normalize or standardize
+    The scaler can be used as part of a process pipeline to normalize or standardize
     numerical features, which is particularly useful for machine learning algorithms that
     are sensitive to the scale of input features.
 
@@ -46,7 +46,7 @@ class NumericScaler(Scaler):
         Pre-process the data before scaling.
 
         For NumericScaler, this is a pass-through method that returns the input data
-        as-is, since no special processing is needed for 2D numerical data.
+        as-is, since no special process is needed for 2D numerical data.
 
         Args:
             data: Input data to be pre-processed. Should be a 2D numpy array.
@@ -68,11 +68,11 @@ class NumericScaler(Scaler):
         Post-process the data after scaling.
 
         For NumericScaler, this is a pass-through method that returns the scaled data
-        as-is, since no special post-processing is needed for 2D numerical data.
+        as-is, since no special post-process is needed for 2D numerical data.
 
         Args:
             data: Scaled data to be post-processed.
-            original_shape: The shape of the original data before pre-processing.
+            original_shape: The shape of the original data before pre-process.
 
         Returns:
             The scaled data unchanged.

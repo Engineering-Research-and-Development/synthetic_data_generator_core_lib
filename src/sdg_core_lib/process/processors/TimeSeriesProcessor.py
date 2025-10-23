@@ -1,13 +1,13 @@
 from typing import Optional
 
-from sdg_core_lib.processing.PipelineConfig import (
+from sdg_core_lib.process.PipelineConfig import (
     PipelineConfig,
 )
-from sdg_core_lib.processing.pipeline.ProcessingPipeline import (
+from sdg_core_lib.process.pipeline.ProcessingPipeline import (
     ProcessingPipeline,
 )
-from sdg_core_lib.processing.processors.Processor import Processor
-from sdg_core_lib.processing.factories.TimeSeriesStepFactory import (
+from sdg_core_lib.process.processors.Processor import Processor
+from sdg_core_lib.process.factories.TimeSeriesStepFactory import (
     TimeSeriesStepFactory,
 )
 
@@ -17,7 +17,7 @@ class TimeSeriesProcessor(Processor):
     A preprocessor implementation for time series data.
 
     This class provides a concrete implementation of the Preprocessor abstract base class
-    specifically designed for time series data. It creates and manages a processing
+    specifically designed for time series data. It creates and manages a process
     pipeline configured with pipeline_steps appropriate for time series features.
 
     The preprocessor is designed to handle 3D time series data with shape
@@ -46,13 +46,13 @@ class TimeSeriesProcessor(Processor):
 
     def create_processing_pipeline(self) -> ProcessingPipeline:
         """
-        Create and return a processing pipeline configured for time series data.
+        Create and return a process pipeline configured for time series data.
 
         This method initializes a TimeSeriesStepFactory and creates a PreProcessingPipeline
         with the current configuration.
 
         Returns:
-            A PreProcessingPipeline instance configured for time series data processing.
+            A PreProcessingPipeline instance configured for time series data process.
         """
         step_factory = TimeSeriesStepFactory()
         pipeline = ProcessingPipeline(step_factory, self.config)

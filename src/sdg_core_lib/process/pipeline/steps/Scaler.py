@@ -7,8 +7,8 @@ import skops.io as sio
 import os
 
 from sdg_core_lib.data_type import DataType
-from sdg_core_lib.processing.PipelineConfig import ScalerConfig, PipelineStepConfig
-from sdg_core_lib.processing.pipeline.PipelineStep import (
+from sdg_core_lib.process.PipelineConfig import ScalerConfig, PipelineStepConfig
+from sdg_core_lib.process.pipeline.PipelineStep import (
     PipelineStep,
 )
 
@@ -214,7 +214,7 @@ class Scaler(PipelineStep):
         Pre-process the data before applying the scaling transformation.
 
         This method is called before the scaler's transform method. It can be used
-        for input validation, type conversion, or other processing pipeline_steps.
+        for input validation, type conversion, or other process pipeline_steps.
 
         Args:
             data: Input data to be pre-processed. Should be a numpy array.
@@ -235,11 +235,11 @@ class Scaler(PipelineStep):
         Post-process the data after applying the scaling transformation.
 
         This method is called after the scaler's transform method. It can be used
-        for reshaping, type conversion, or other post-processing pipeline_steps.
+        for reshaping, type conversion, or other post-process pipeline_steps.
 
         Args:
             data: Scaled data to be post-processed.
-            original_shape: The shape of the original data before pre-processing.
+            original_shape: The shape of the original data before pre-process.
 
         Returns:
             Post-processed scaled data.

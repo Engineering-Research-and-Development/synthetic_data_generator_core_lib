@@ -1,8 +1,8 @@
-from sdg_core_lib.processing.pipeline.ProcessingPipeline import (
+from sdg_core_lib.process.pipeline.ProcessingPipeline import (
     ProcessingPipeline,
 )
-from sdg_core_lib.processing.processors.Processor import Processor
-from sdg_core_lib.processing.factories.NumericStepFactory import (
+from sdg_core_lib.process.processors.Processor import Processor
+from sdg_core_lib.process.factories.NumericStepFactory import (
     NumericStepFactory,
 )
 
@@ -24,13 +24,13 @@ class NumericProcessor(Processor):
 
     def create_processing_pipeline(self) -> ProcessingPipeline:
         """
-        Create a processing pipeline for numeric data.
+        Create a process pipeline for numeric data.
 
         This method initializes a NumericStepFactory and creates a ProcessingPipeline
         with the current configuration.
 
         Returns:
-            A ProcessingPipeline instance configured for numeric data processing.
+            A ProcessingPipeline instance configured for numeric data process.
         """
         step_factory = NumericStepFactory()
         pipeline = ProcessingPipeline(step_factory, self.config)

@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 class Metric:
     def __init__(self, title: str, unit_measure: str, value: float | int | dict):
         self.title = title

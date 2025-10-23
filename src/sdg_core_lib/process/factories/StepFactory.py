@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from sdg_core_lib.processing.PipelineConfig import ScalerConfig
-from sdg_core_lib.processing.pipeline.steps.Scaler import (
+from sdg_core_lib.process.PipelineConfig import ScalerConfig
+from sdg_core_lib.process.pipeline.steps.Scaler import (
     Scaler,
 )
 

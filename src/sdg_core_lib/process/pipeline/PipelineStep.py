@@ -4,15 +4,15 @@ from typing import Optional
 import numpy as np
 
 from sdg_core_lib.data_type import DataType
-from sdg_core_lib.processing.PipelineConfig import PipelineStepConfig
+from sdg_core_lib.process.PipelineConfig import PipelineStepConfig
 
 
 class PipelineStep(ABC):
     """
-    Abstract base class for all processing pipeline pipeline_steps.
+    Abstract base class for all process pipeline pipeline_steps.
 
-    This class defines the interface that all processing pipeline_steps must implement.
-    Each step in the processing pipeline should inherit from this class and
+    This class defines the interface that all process pipeline_steps must implement.
+    Each step in the process pipeline should inherit from this class and
     implement all abstract methods.
     """
 
@@ -37,7 +37,7 @@ class PipelineStep(ABC):
     @abstractmethod
     def fit(self, data: np.ndarray) -> None:
         """
-        Fit the processing step to the training data.
+        Fit the process step to the training data.
 
         Args:
             data: The training data to fit the step on.
