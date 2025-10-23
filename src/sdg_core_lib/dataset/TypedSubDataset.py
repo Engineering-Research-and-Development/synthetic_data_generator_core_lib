@@ -1,12 +1,12 @@
 import numpy as np
 
-from sdg_core_lib.data_type import DataType
+from sdg_core_lib.types import ColumnType
 from sdg_core_lib.dataset.Column import Column, ColumnMetadata
 from sdg_core_lib.dataset.DatasetComponent import DatasetComponent
 
 
 class TypedSubDataset(DatasetComponent):
-    def __init__(self, columns: list[Column], data_type: DataType):
+    def __init__(self, columns: list[Column], data_type: ColumnType):
         super().__init__(columns)
         self.data_type = data_type
 

@@ -13,11 +13,15 @@ def split_into_subdataset(dataset: Dataset) -> list[TypedSubDataset]:
     return subdatasets
 
 
-def train_test_split(dataset: Dataset, train_size: float = 0.8) -> tuple[Dataset, Dataset]:
+def train_test_split(
+    dataset: Dataset, train_size: float = 0.8
+) -> tuple[Dataset, Dataset]:
     data = dataset.to_numpy()
     train_size = int(data.shape[0] * train_size)
     train_dataset = data[:train_size]
     test_dataset = data[train_size:]
-    train_dataset = Dataset.from_data_and_metadata(train_dataset, dataset.get_metadata())
+    train_dataset = Dataset.from_data_and_metadata(
+        train_dataset, dataset.get_metadata()
+    )
     test_dataset = Dataset.from_data_and_metadata(test_dataset, dataset.get_metadata())
     return train_dataset, test_dataset

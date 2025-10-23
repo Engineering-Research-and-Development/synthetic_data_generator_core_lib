@@ -47,12 +47,16 @@ class ProcessingPipeline:
         """
         for step_name, step_config in self.config.get_full_config().items():
             try:
-                self.steps[step_name] = getattr(self.step_factory, f"create_{step_name}")(
-                    step_config
+                self.steps[step_name] = getattr(
+                    self.step_factory, f"create_{step_name}"
+                )(step_config)
+                logger.info(
+                    f"Added {step_config.value} {step_name} to process pipeline"
                 )
-                logger.info(f"Added {step_config.value} {step_name} to process pipeline")
             except AttributeError:
-                logger.info(f"Skipping creation of {step_name} which is not supported by StepFactory")
+                logger.info(
+                    f"Skipping creation of {step_name} which is not supported by StepFactory"
+                )
                 pass
 
     def load(self, folder_path: str) -> None:

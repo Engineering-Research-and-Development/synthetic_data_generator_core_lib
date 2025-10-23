@@ -43,7 +43,9 @@ def job(
         input_shape = subdataset.get_processing_shape()
         model = model_factory(model_info, input_shape)
         pipeline_config = model.get_preprocessing_config()
-        processor = ProcessorRegistry.get_processor(subdataset.data_type).configure_and_setup(pipeline_config)
+        processor = ProcessorRegistry.get_processor(
+            subdataset.data_type
+        ).configure_and_setup(pipeline_config)
 
         if train:
             preprocessed_data, _ = processor.execute_preprocessing(
@@ -56,13 +58,14 @@ def job(
         processor.load_pipeline(save_filepath)
         predicted_data = model.infer(n_rows)
         postprocessed_data, _ = processor.execute_postprocessing(predicted_data, None)
-        synthetic_subdataset = TypedSubDataset.from_data_and_metadata(postprocessed_data, subdataset.get_metadata())
+        synthetic_subdataset = TypedSubDataset.from_data_and_metadata(
+            postprocessed_data, subdataset.get_metadata()
+        )
         synthetic_subdatasets.append(synthetic_subdataset)
 
     synthetic_data = merge_all_datasets(synthetic_subdatasets)
 
-
-    return synthetic_data.to_json() , {"available": False}, model, synthetic_data
+    return synthetic_data.to_json(), {"available": False}, model, synthetic_data
     report = {"available": False}
 
     if len(data.dataframe) > 0:

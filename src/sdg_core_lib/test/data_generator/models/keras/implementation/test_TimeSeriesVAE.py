@@ -52,7 +52,6 @@ def test_instantiate(model_data_correct_train):
     assert type(model._model) is VAE
 
 
-
 def test_train_correct(model_data_correct_train, data):
     model = TimeSeriesVAE(**model_data_correct_train)
     assert model.training_info is None

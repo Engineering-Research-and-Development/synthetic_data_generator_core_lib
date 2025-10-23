@@ -1,4 +1,4 @@
-from sdg_core_lib.data_type import DataType
+from sdg_core_lib.types import ColumnType
 from sdg_core_lib.process.PipelineConfig import ScalerConfig
 from sdg_core_lib.process.factories.StepFactory import (
     PipelineStepFactory,
@@ -9,7 +9,7 @@ from sdg_core_lib.process.pipeline.steps.NumericScaler import (
 
 
 class NumericStepFactory(PipelineStepFactory):
-    data_type = DataType.NUMERIC
+    data_type = ColumnType.NUMERIC
 
     @staticmethod
     def create_scaler(config: ScalerConfig) -> NumericScaler:

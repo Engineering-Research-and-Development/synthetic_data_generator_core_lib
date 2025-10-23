@@ -5,6 +5,7 @@ from sdg_core_lib.dataset.Dataset import Dataset
 
 # TODO: Refactor
 
+
 @pytest.fixture
 def correct_dataset():
     return [
@@ -139,8 +140,16 @@ def test_get_data(correct_dataset):
     data = dataset.to_numpy()
     columns = dataset.columns
     column_names = [col.metadata.name for col in columns]
-    numeric_column_names = [col.metadata.name for col in columns if col.metadata.column_type.value == "numeric"]
-    categorical_column_names = [col.metadata.name for col in columns if col.metadata.column_type.value == "categorical"]
+    numeric_column_names = [
+        col.metadata.name
+        for col in columns
+        if col.metadata.column_type.value == "numeric"
+    ]
+    categorical_column_names = [
+        col.metadata.name
+        for col in columns
+        if col.metadata.column_type.value == "categorical"
+    ]
     assert type(data) is np.ndarray
     assert column_names == ["A", "B", "C", "D"]
     assert numeric_column_names == ["A", "C", "D"]

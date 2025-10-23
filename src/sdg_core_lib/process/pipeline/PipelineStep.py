@@ -3,7 +3,7 @@ from typing import Optional
 
 import numpy as np
 
-from sdg_core_lib.data_type import DataType
+from sdg_core_lib.types import ColumnType
 from sdg_core_lib.process.PipelineConfig import PipelineStepConfig
 
 
@@ -18,7 +18,7 @@ class PipelineStep(ABC):
 
     def __init__(
         self,
-        data_type: DataType = DataType.NONE,
+        data_type: ColumnType = ColumnType.NONE,
         config: PipelineStepConfig = None,
     ):
         """

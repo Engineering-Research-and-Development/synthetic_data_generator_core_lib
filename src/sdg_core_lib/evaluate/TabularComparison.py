@@ -2,11 +2,8 @@ import numpy as np
 import pandas as pd
 import scipy.stats as ss
 
-from sdg_core_lib.evaluate.Metrics import (
+from sdg_core_lib.evaluate.metrics.base import (
     MetricReport,
-    StatisticalMetric,
-    AdherenceMetric,
-    NoveltyMetric,
 )
 
 
@@ -46,7 +43,7 @@ class TabularComparisonEvaluator:
         return self.report.to_json()
 
     @staticmethod
-    def _compute_cramer_v(data1: np.array, data2: np.array):
+    def _compute_cramer_v(data1: np.ndarray, data2: np.ndarray):
         """
         Computes Cramer's V on a pair of categorical columns
         :param data1: first column
@@ -99,29 +96,6 @@ class TabularComparisonEvaluator:
 
         final_score = 1 - np.mean(contingency_scores_distances)
         return np.clip(final_score, 0, 1)
-
-    def _evaluate_wasserstein_distance(self) -> float:
-        """
-        Computing the Wasserstein distance for each numerical column. The score is computed using a different approach,
-        trying to clip the values between 0 and 1. With 1 it means that the distribution of data is aligned, while with
-        0 means that the distribution of data are largely unaligned.
-        In particular, the Wasserstein distance score will be clipped between 0 and |max - min|, where max and min
-        are related to the real dataset distribution. In the end, the score is scaled between 0 and 1
-        :return: A single score, computed as 1 - mean(scores)
-        """
-        if len(self._numerical_columns) < 1:
-            return 0
-
-        wass_distance_scores = []
-        for col in self._numerical_columns:
-            real_data = self._real_data[col].to_numpy()
-            synth_data = self._synthetic_data[col].to_numpy()
-            distance = np.abs(np.max(real_data) - np.min(real_data))
-            wass_dist = ss.wasserstein_distance(real_data, synth_data)
-            wass_dist = np.clip(wass_dist, 0, distance) / distance
-            wass_distance_scores.append(wass_dist)
-
-        return 1 - np.mean(wass_distance_scores)
 
     def _evaluate_statistical_properties(self):
         """

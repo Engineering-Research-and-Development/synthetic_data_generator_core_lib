@@ -1,20 +1,20 @@
 import numpy as np
 
-from sdg_core_lib.data_type import DataType
+from sdg_core_lib.types import ColumnType, DataType
 
 
 class ColumnMetadata:
     def __init__(self, name: str, column_type: str, data_type: str, position: int):
         self.name = name
         self.position = position
-        self.column_type = DataType(column_type)
-        self.data_type = data_type
+        self.column_type = ColumnType(column_type)
+        self.data_type = DataType(data_type)
 
     def to_json(self):
         return {
             "column_name": self.name,
             "column_type": self.column_type.value,
-            "column_datatype": self.data_type,
+            "column_datatype": self.data_type.value,
         }
 
 
@@ -46,7 +46,7 @@ class Column:
             "feature_name": self.metadata.name,
             "feature_position": self.metadata.position,
             "is_categorical": True
-            if self.metadata.column_type == DataType.CATEGORICAL
+            if self.metadata.column_type == ColumnType.CATEGORICAL
             else False,
-            "feature_datatype": self.metadata.data_type,
+            "feature_datatype": self.metadata.data_type.value,
         }

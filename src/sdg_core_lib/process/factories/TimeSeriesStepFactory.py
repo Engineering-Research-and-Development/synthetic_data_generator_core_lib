@@ -1,4 +1,4 @@
-from sdg_core_lib.data_type import DataType
+from sdg_core_lib.types import ColumnType
 from sdg_core_lib.process.PipelineConfig import ScalerConfig
 from sdg_core_lib.process.factories.StepFactory import (
     PipelineStepFactory,
@@ -9,7 +9,7 @@ from sdg_core_lib.process.pipeline.steps.TimeSeriesScaler import (
 
 
 class TimeSeriesStepFactory(PipelineStepFactory):
-    data_type = DataType.TIMESERIES
+    data_type = ColumnType.TIMESERIES
 
     @staticmethod
     def create_scaler(config: ScalerConfig) -> TimeSeriesScaler:

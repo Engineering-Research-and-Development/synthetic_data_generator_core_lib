@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import skops.io as sio
 import os
 
-from sdg_core_lib.data_type import DataType
+from sdg_core_lib.types import ColumnType
 from sdg_core_lib.process.PipelineConfig import ScalerConfig, PipelineStepConfig
 from sdg_core_lib.process.pipeline.PipelineStep import (
     PipelineStep,
@@ -26,7 +26,7 @@ class Scaler(PipelineStep):
         scaler: The underlying scikit-learn scaler instance (MinMaxScaler or StandardScaler)
     """
 
-    def __init__(self, data_type: DataType, config: PipelineStepConfig) -> None:
+    def __init__(self, data_type: ColumnType, config: PipelineStepConfig) -> None:
         """
         Initialize the Scaler with the specified scaling mode.
 

@@ -1,7 +1,7 @@
 import numpy as np
 from typing import Tuple
 
-from sdg_core_lib.data_type import DataType
+from sdg_core_lib.types import ColumnType
 from sdg_core_lib.process.PipelineConfig import ScalerConfig
 from sdg_core_lib.process.pipeline.steps.Scaler import (
     Scaler,
@@ -27,7 +27,7 @@ class TimeSeriesScaler(Scaler):
         X_scaled, _ = scaler.fit_transform(X_train)
     """
 
-    def __init__(self, data_type: DataType, config: ScalerConfig) -> None:
+    def __init__(self, data_type: ColumnType, config: ScalerConfig) -> None:
         """
         Initialize the TimeSeriesScaler with the specified scaling mode.
 
