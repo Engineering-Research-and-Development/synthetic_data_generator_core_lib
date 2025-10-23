@@ -4,39 +4,23 @@ from sdg_core_lib.dataset.TypedSubDataset import TypedSubDataset
 from sdg_core_lib.evaluate.metrics.base import Metric, MetricType, ComputeStrategy
 
 import numpy as np
-import pandas as pd
 
 
 class CategoricalCramerVStrategy(ComputeStrategy):
     @staticmethod
     def _compute_cramer_v(data1: np.ndarray, data2: np.ndarray):
         """
-        Computes Cramer's V on a pair of categorical columns
+        Computes Cramer's V on a pair of categorical columns.
+        Careful: Cramer's V is biased if there are missing categories!
         :param data1: first column
         :param data2: second column
         :return: Cramer's V
         """
         import scipy.stats as ss
-        #import pandas as pd
+        import pandas as pd
 
-        confusion_matrix = pd.crosstab(data1, data2)
-        chi2 = ss.chi2_contingency(confusion_matrix)[0]
-        # Total number of observations.
-        n = confusion_matrix.to_numpy().sum()
-        if n == 0:
-            return 0.0
-        phi2 = chi2 / n
-        r, k = confusion_matrix.shape
-        # Check for potential division by zero in the correction terms.
-        if n - 1 == 0:
-            return 0.0
-        phi2_corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
-        r_corr = r - ((r - 1) ** 2) / (n - 1)
-        k_corr = k - ((k - 1) ** 2) / (n - 1)
-        denominator = min(k_corr - 1, r_corr - 1)
-        if denominator <= 0:
-            return 0.0
-        v = np.sqrt(phi2_corr / denominator)
+        observed = pd.crosstab(data1, data2)
+        v = ss.contingency.association(observed)
         return v
 
     @staticmethod
@@ -74,16 +58,3 @@ class CramerV(Metric):
         )
         self._strategies.register(ColumnType.CATEGORICAL, CategoricalCramerVStrategy())
 
-
-if __name__ == "__main__":
-    real_data = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
-    synthetic_data = pd.DataFrame({"A": [1, 2, -3], "B": [-3, -4, 5]})
-
-    real_data_metadata = [ColumnMetadata("A", position=0, column_type="categorical", data_type="int32"), ColumnMetadata("B", position=1, column_type="categorical", data_type="int32")]
-    synthetic_data_metadata = [ColumnMetadata("A", position=0, column_type="categorical", data_type="int32"), ColumnMetadata("B", position=1, column_type="categorical", data_type="int32")]
-    real_data = TypedSubDataset.from_data_and_metadata(real_data.to_numpy(), real_data_metadata)
-    synthetic_data = TypedSubDataset.from_data_and_metadata(synthetic_data.to_numpy(), synthetic_data_metadata)
-
-    cramer_v = CramerV()
-    cramer_v.evaluate(real_data, synthetic_data)
-    print(cramer_v.to_json())
