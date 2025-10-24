@@ -8,7 +8,14 @@ from sdg_core_lib.dataset.DatasetComponent import DatasetComponent
 class TypedSubDataset(DatasetComponent):
     def __init__(self, columns: list[Column], column_type: ColumnType):
         super().__init__(columns)
-        self.column_type = column_type
+        self.column_type = self._set_type()
+
+    def _set_type(self):
+        data_type = set([col.metadata.column_type for col in self.columns])
+        if len(data_type) > 1:
+            raise TypeError("Typed Datasets cannot contain more than one column type")
+        return data_type.pop()
+
 
     @classmethod
     def from_data_and_metadata(cls, data: np.ndarray, metadata: list[ColumnMetadata]):
