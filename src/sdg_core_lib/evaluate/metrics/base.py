@@ -20,7 +20,7 @@ class ComputeStrategy(ABC):
 
 class StrategyRegistry:
     def __init__(self):
-        self.registry = {}
+        self.registry: dict[ColumnType, ComputeStrategy] = {}
 
     def register(self, dtype: ColumnType, strategy: ComputeStrategy):
         self.registry[dtype] = strategy
