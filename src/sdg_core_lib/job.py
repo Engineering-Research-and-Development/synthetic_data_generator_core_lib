@@ -44,7 +44,7 @@ def job(
         model = model_factory(model_info, input_shape)
         pipeline_config = model.get_preprocessing_config()
         processor = ProcessorRegistry.get_processor(
-            subdataset.data_type
+            subdataset.column_type
         ).configure_and_setup(pipeline_config)
 
         if train:

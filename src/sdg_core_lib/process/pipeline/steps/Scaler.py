@@ -26,7 +26,7 @@ class Scaler(PipelineStep):
         scaler: The underlying scikit-learn scaler instance (MinMaxScaler or StandardScaler)
     """
 
-    def __init__(self, data_type: ColumnType, config: PipelineStepConfig) -> None:
+    def __init__(self, column_type: ColumnType, config: PipelineStepConfig) -> None:
         """
         Initialize the Scaler with the specified scaling mode.
 
@@ -38,7 +38,7 @@ class Scaler(PipelineStep):
         Raises:
             ValueError: If an invalid mode is provided.
         """
-        super().__init__(data_type)
+        super().__init__(column_type)
         self.scaler = None
         self._set_scaler(config)
         self.is_fit = False

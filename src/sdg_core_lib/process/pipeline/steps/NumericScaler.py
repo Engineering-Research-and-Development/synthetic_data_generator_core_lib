@@ -26,12 +26,12 @@ class NumericScaler(Scaler):
         X_scaled, _ = scaler.fit_transform(X_train)
     """
 
-    def __init__(self, data_type: ColumnType, config: ScalerConfig) -> None:
+    def __init__(self, column_type: ColumnType, config: ScalerConfig) -> None:
         """
         Initialize the NumericScaler with the specified scaling mode.
 
         Args:
-            data_type: The type of data to be scaled.
+            column_type: The type of data to be scaled.
             mode: The scaling strategy to use. Must be one of:
                 - 'minmax': Uses scikit-learn's MinMaxScaler
                 - 'standard': Uses scikit-learn's StandardScaler
@@ -39,7 +39,7 @@ class NumericScaler(Scaler):
         Raises:
             ValueError: If an invalid mode is provided.
         """
-        super().__init__(data_type, config)
+        super().__init__(column_type, config)
 
     def _pre_process(self, data: np.ndarray) -> np.ndarray:
         """

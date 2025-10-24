@@ -63,16 +63,16 @@ class Metric(ABC):
             raise ValueError(
                 f"Real and Synthetic Data should have the same shape. Found Real data of shape {real_data.get_processing_shape()} and Synthetic data of shape {synthetic_data.get_processing_shape()}"
             )
-        if real_data.data_type != synthetic_data.data_type:
+        if real_data.column_type != synthetic_data.column_type:
             raise ValueError(
-                f"Real and Synthetic Data should be of the same data type. Found Real Data of type {real_data.data_type} and Synthetic Data of type {synthetic_data.data_type}"
+                f"Real and Synthetic Data should be of the same data type. Found Real Data of type {real_data.column_type} and Synthetic Data of type {synthetic_data.column_type}"
             )
 
     def evaluate(
         self, real_data: TypedSubDataset, synthetic_data: TypedSubDataset
     ) -> None:
         self._validate(real_data, synthetic_data)
-        data_type = real_data.data_type
+        data_type = real_data.column_type
         strategy = self._strategies.get(data_type)
         if strategy is not None:
             self.value = strategy.compute(real_data, synthetic_data)

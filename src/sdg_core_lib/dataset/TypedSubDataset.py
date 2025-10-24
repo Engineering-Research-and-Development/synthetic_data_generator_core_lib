@@ -6,9 +6,9 @@ from sdg_core_lib.dataset.DatasetComponent import DatasetComponent
 
 
 class TypedSubDataset(DatasetComponent):
-    def __init__(self, columns: list[Column], data_type: ColumnType):
+    def __init__(self, columns: list[Column], column_type: ColumnType):
         super().__init__(columns)
-        self.data_type = data_type
+        self.column_type = column_type
 
     @classmethod
     def from_data_and_metadata(cls, data: np.ndarray, metadata: list[ColumnMetadata]):

@@ -14,5 +14,5 @@ class TimeSeriesStepFactory(PipelineStepFactory):
     @staticmethod
     def create_scaler(config: ScalerConfig) -> TimeSeriesScaler:
         return TimeSeriesScaler(
-            data_type=TimeSeriesStepFactory.data_type, config=config
+            column_type=TimeSeriesStepFactory.data_type, config=config
         )

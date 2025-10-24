@@ -13,4 +13,4 @@ class NumericStepFactory(PipelineStepFactory):
 
     @staticmethod
     def create_scaler(config: ScalerConfig) -> NumericScaler:
-        return NumericScaler(data_type=NumericStepFactory.data_type, config=config)
+        return NumericScaler(column_type=NumericStepFactory.data_type, config=config)
