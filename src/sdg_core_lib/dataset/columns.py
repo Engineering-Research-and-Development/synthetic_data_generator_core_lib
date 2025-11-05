@@ -1,68 +1,73 @@
-from typing import Literal
-
 import numpy as np
 from abc import ABC
 
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
-
-class Column:
-    def __init__(self, name: str, column_type: str, data_type: str):
+class Column(ABC):
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         self.name = name
-        self.column_type = column_type
-        self.data_type = data_type
-        self._scaler = None
-        self._encoder = None
+        self.value_type = value_type
+        self.position = position
+        self.values = values
+        self.internal_shape = self.get_internal_shape()
 
-    def scale(self, mode: Literal["standard", "minmax"]):
-        raise NotImplementedError
+    def get_internal_shape(self) -> tuple[int, ...]:
+        return self.values.shape
 
-    def inverse_scale(self):
-        raise NotImplementedError
+    def get_metadata(self) -> dict:
+        return {
+            "name": self.name,
+            "value_type": self.value_type,
+            "position": self.position,
+            "internal_shape": self.internal_shape,
+        }
 
-    def save_scaler(self):
-        raise NotImplementedError
-
-    def load_scaler(self):
-        raise NotImplementedError
-
-
-    def encode(self, mode: Literal["onehot"]):
-        raise NotImplementedError
-
-    def decode(self):
-        raise NotImplementedError
-
-    def save_encoder(self):
-        raise NotImplementedError
-
-    def load_encoder(self):
-        raise NotImplementedError
+    def get_data(self) -> np.ndarray:
+        return self.values
 
 
 
 class NumericColumn(Column):
-    def __init__(self, name: str, column_type: str, data_type: str, values: np.ndarray):
-        super().__init__(name, column_type, data_type)
-        self.values = values
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
+        super().__init__(name, value_type, position, values)
 
-    def scale(self, mode: Literal["standard", "minmax"]):
-        if mode == "standard":
-            scaler = StandardScaler()
-        elif mode == "minmax":
-            scaler = MinMaxScaler()
-        else:
-            raise ValueError("Invalid scaling mode")
+    def get_metadata(self) -> dict:
+        metadata = super().get_metadata()
+        metadata.update({"column_type": "continuous"})
+        return metadata
 
-        self._scaler = scaler
-        scaled_values = scaler.fit_transform(self.values)
-        return scaled_values
+    def get_boundaries(self) -> tuple[float, float]:
+        return self.values.min(), self.values.max()
 
-    def inverse_scale(self):
-        raise NotImplementedError
+    def to_categorical(self, n_bins: int) -> 'CategoricalColumn':
+        bins = np.linspace(self.values.min(), self.values.max(), n_bins)
+        binned_values = np.digitize(self.values.T, bins).T
+        return CategoricalColumn(self.name, self.value_type, self.position, binned_values)
 
-    def save_scaler(self):
-        raise NotImplementedError
 
-    def load_scaler(self):
-        raise NotImplementedError
+
+class CategoricalColumn(Column):
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
+        super().__init__(name, value_type, position, values)
+
+    def get_metadata(self) -> dict:
+        metadata = super().get_metadata()
+        metadata.update({"column_type": "categorical"})
+        return metadata
+
+    def get_categories(self) -> list[str]:
+        return list(set(self.values))
+
+
+class PrimaryKeyColumn(Column):
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
+        super().__init__(name, value_type, position, values)
+
+    def get_metadata(self) -> dict:
+        metadata = super().get_metadata()
+        metadata.update({"column_type": "primary_key"})
+        return metadata
+
+    def contains_unique(self) -> bool:
+        if self.values.shape[0] == np.unique(self.values).shape[0]:
+            return True
+        return False
