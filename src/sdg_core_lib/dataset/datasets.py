@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 from copy import deepcopy
 
-from dataset import ColumnRegistry
+from dataset import ColumnRegistry, NumericColumn
 from dataset.Processor import Processor
 from dataset.columns import Column
 
@@ -79,20 +79,26 @@ class Table(Dataset):
         return Table(deepcopy(self.columns), self.processor, self.pk_col_index)
 
     def to_json(self) -> list[dict]:
-        pass
+        return [
+            {
+                "column_data": col.values.tolist(),
+                "column_name": col.name,
+                "column_type": col.column_type,
+                "column_datatype": col.value_type,
+            }
+            for col in self.columns]
 
     def to_registry(self) -> list[dict]:
-        feature_list = []
-        for idx, col in enumerate(self.columns):
-            column_metadata = col.get_metadata()
-            feat = {
-                "feature_name": column_metadata.get("name", ""),
-                "feature_position": idx,
-                "column_type": column_metadata.get("column_type", ""),
-                "type": column_metadata.get("value_type", ""),
+        return [
+            {
+                "feature_name": col.name,
+                "feature_position": col.position,
+                "column_type": col.column_type,
+                "type": col.value_type
             }
-            feature_list.append(feat)
-        return feature_list
+            for col in self.columns
+        ]
+
 
     def preprocess(self) -> "Table":
         pass
@@ -100,10 +106,21 @@ class Table(Dataset):
     def inverse_preprocess(self) -> 'Table':
         pass
 
+    def get_primary_key(self) -> Column:
+        return self.columns[self.pk_col_index]
+
+    def get_data(self) -> np.ndarray:
+        return np.array([col.get_data() for col in self.columns]).T
+
     def get_shape(self) -> tuple[int, ...]:
         col_shape_total = np.sum([col.get_internal_shape()[1] for col in self.columns])
         # We assume get_shape picks the first column shape as the row shape
         row_shape_total = self.columns[0].get_internal_shape()[0]
         return row_shape_total, col_shape_total
+
+    def get_numeric_column(self) -> list[NumericColumn]:
+        return [col for col in self.columns if isinstance(col, NumericColumn)]
+
+
 
 
