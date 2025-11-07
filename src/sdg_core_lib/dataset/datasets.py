@@ -3,7 +3,7 @@ import numpy as np
 from copy import deepcopy
 
 from dataset import ColumnRegistry, NumericColumn, CategoricalColumn, PrimaryKeyColumn, Column
-from dataset.processor import Processor
+from dataset.processor import Processor, TableProcessor
 
 
 class Dataset(ABC):
@@ -33,7 +33,7 @@ class Dataset(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def inverse_preprocess(self) -> 'Dataset':
+    def postprocess(self) -> 'Dataset':
         raise NotImplementedError
 
 
@@ -41,7 +41,7 @@ class Dataset(ABC):
 
 class Table(Dataset):
 
-    def __init__(self, columns: list[Column], processor: Processor, pk_index: int= None):
+    def __init__(self, columns: list[Column], processor: TableProcessor, pk_index: int= None):
         super().__init__(processor)
         self.columns = columns
         self.pk_col_index = pk_index
@@ -49,13 +49,13 @@ class Table(Dataset):
 
 
     @classmethod
-    def from_json(cls, json_data: list[dict], processor: Processor) -> 'Table':
+    def from_json(cls, json_data: list[dict], processor: TableProcessor) -> 'Table':
         pk_index = None
         columns = []
         for idx, col_data in enumerate(json_data):
             col_type = col_data.get("column_type", "")
             col_name = col_data.get("column_name", "")
-            col_values = np.array(col_data.get("column_data", [])).T
+            col_values = np.array(col_data.get("column_data", [])).reshape(-1, 1)
             col_value_type = col_data.get("column_datatype", "")
             col_position = idx
 
@@ -64,7 +64,7 @@ class Table(Dataset):
                     raise ValueError(f"A primary key for dataset already exists: {columns[pk_index].name} but another primary key was found: {col_name}")
                 pk_index = col_position
 
-            col = ColumnRegistry.get_column(col_value_type)(
+            col = ColumnRegistry.get_column(col_type)(
                 col_name,
                 col_value_type,
                 col_position,
@@ -122,9 +122,10 @@ class Table(Dataset):
     def _self_pk_integrity(self):
         return self.get_primary_key().contains_unique()
 
-
     def preprocess(self) -> "Table":
-        pass
+        new_cols = self.processor.process(self.columns)
+        return Table(new_cols, self.processor, self.pk_col_index)
 
-    def inverse_preprocess(self) -> "Table":
-        pass
+    def postprocess(self) -> "Table":
+        new_cols = self.processor.inverse_process(self.columns)
+        return Table(new_cols, self.processor, self.pk_col_index)
