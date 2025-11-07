@@ -61,7 +61,7 @@ class CategoricalColumn(Column):
         return list(set(self.values))
 
 
-class PrimaryKeyColumn(Column):
+class PrimaryKeyColumn(CategoricalColumn):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "primary_key"

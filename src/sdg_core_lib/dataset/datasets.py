@@ -2,9 +2,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from copy import deepcopy
 
-from dataset import ColumnRegistry, NumericColumn
-from dataset.Processor import Processor
-from dataset.columns import Column
+from dataset import ColumnRegistry, NumericColumn, CategoricalColumn, PrimaryKeyColumn, Column
+from dataset.processor import Processor
 
 
 class Dataset(ABC):
@@ -48,6 +47,7 @@ class Table(Dataset):
         self.pk_col_index = pk_index
         self.shape = self.get_shape()
 
+
     @classmethod
     def from_json(cls, json_data: list[dict], processor: Processor) -> 'Table':
         pk_index = None
@@ -74,7 +74,6 @@ class Table(Dataset):
 
         return Table(columns, processor, pk_index)
 
-
     def clone(self) -> 'Table':
         return Table(deepcopy(self.columns), self.processor, self.pk_col_index)
 
@@ -99,15 +98,11 @@ class Table(Dataset):
             for col in self.columns
         ]
 
-
-    def preprocess(self) -> "Table":
-        pass
-
-    def inverse_preprocess(self) -> 'Table':
-        pass
-
-    def get_primary_key(self) -> Column:
-        return self.columns[self.pk_col_index]
+    def get_primary_key(self) -> PrimaryKeyColumn:
+        column =  self.columns[self.pk_col_index]
+        if not isinstance(column, PrimaryKeyColumn):
+            raise ValueError(f"Column {column.name} is not a primary key")
+        return column
 
     def get_data(self) -> np.ndarray:
         return np.array([col.get_data() for col in self.columns]).T
@@ -118,9 +113,18 @@ class Table(Dataset):
         row_shape_total = self.columns[0].get_internal_shape()[0]
         return row_shape_total, col_shape_total
 
-    def get_numeric_column(self) -> list[NumericColumn]:
+    def get_numeric_column(self) -> list[Column]:
         return [col for col in self.columns if isinstance(col, NumericColumn)]
 
+    def get_categoric_column(self) -> list[Column]:
+        return [col for col in self.columns if isinstance(col, CategoricalColumn)]
+
+    def _self_pk_integrity(self):
+        return self.get_primary_key().contains_unique()
 
 
+    def preprocess(self) -> "Table":
+        pass
 
+    def inverse_preprocess(self) -> "Table":
+        pass
