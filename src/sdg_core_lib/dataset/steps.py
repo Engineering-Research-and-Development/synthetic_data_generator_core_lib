@@ -25,7 +25,7 @@ class Step(ABC):
         raise NotImplementedError
 
     def save(self, directory_path: str):
-        if not self.operator:
+        if self.operator is None:
             raise ValueError("Scaler is not created")
         os.makedirs(directory_path, exist_ok=True)
         filename = os.path.join(directory_path, self.filename)
@@ -43,13 +43,30 @@ class Step(ABC):
 
     def transform(self, data: np.ndarray) -> np.ndarray:
         if self.operator is None:
-            raise ValueError("Scaler not initialized")
+            raise ValueError("Operator not initialized")
         return self.operator.transform(data)
 
     def inverse_transform(self, data: np.ndarray) -> np.ndarray:
         if self.operator is None:
-            raise ValueError("Scaler not initialized")
+            raise ValueError("Operator not initialized")
         return self.operator.inverse_transform(data)
+
+
+class NoneStep(Step):
+    def __init__(self, position: int, mode = None):
+        super().__init__(name="none", position=position, mode=mode)
+
+    def _set_operator(self):
+        pass
+
+    def fit_transform(self, data: np.ndarray) -> np.ndarray:
+        return data
+
+    def transform(self, data: np.ndarray) -> np.ndarray:
+        return data
+
+    def inverse_transform(self, data: np.ndarray) -> np.ndarray:
+        return data
 
 
 class ScalerWrapper(Step):
@@ -87,5 +104,5 @@ class OneHotEncoderWrapper(Step):
 
     def transform(self, data: np.ndarray) -> np.ndarray:
         if self.operator is None:
-            raise ValueError("Scaler not initialized")
+            raise ValueError("Operator not initialized")
         return self.operator.transform(data).toarray()

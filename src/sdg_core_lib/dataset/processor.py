@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
-from dataset import ColumnRegistry
-from dataset.steps import OneHotEncoderWrapper
-from sdg_core_lib.dataset import Column, NumericColumn, CategoricalColumn
+from sdg_core_lib.dataset.steps import OneHotEncoderWrapper
+from sdg_core_lib.dataset.columns import Column, NumericColumn, CategoricalColumn
 from sdg_core_lib.dataset.steps import Step, ScalerWrapper
 import numpy as np
 
@@ -10,71 +9,74 @@ import numpy as np
 class Processor(ABC):
     def __init__(self, dir_path: str):
         self.dir_path = dir_path
-        self.steps: list[Step] = []
+        self.steps: dict[int, list[Step]] = {}
 
-    def add_step(self, step: Step) -> 'Processor':
-        self.steps.append(step)
+    @abstractmethod
+    def _init_steps(self, data: list):
+        raise NotImplementedError
+
+    def add_step(self, step: Step, data_index: int) -> 'Processor':
+        self.steps.get(data_index).append(step)
         return self
 
     def _save_all(self):
-        [step.save(self.dir_path) for step in self.steps]
+        [step.save(self.dir_path) for step_list in self.steps.values() for step in step_list]
 
     def _load_all(self) -> 'Processor':
-        [step.load(self.dir_path) for step in self.steps]
+        [step.load(self.dir_path) for step_list in self.steps.values() for step in step_list]
         return self
 
-    @abstractmethod
-    def process(self, *args) -> np.ndarray:
-        raise NotImplementedError
+    def process(self, data: list) -> dict[int, np.ndarray]:
+        results = {idx: step.fit_transform(data[idx]) for idx, step_list in self.steps.items() for step in step_list}
+        self._save_all()
+        return results
 
-    @abstractmethod
-    def inverse_process(self, *args) -> np.ndarray:
-        raise NotImplementedError
+    def inverse_process(self, data: list) -> dict[int, np.ndarray]:
+        self._load_all()
+        return {idx: step.inverse_transform(data[idx]) for idx, step_list in self.steps.items() for step in reversed(step_list)}
 
 
 class TableProcessor(Processor):
     def __init__(self, dir_path: str):
         super().__init__(dir_path)
 
-    # TODO: 'sta cosa non mi piace. Scendo a compromessi per uno scaler per colonna,
-    #  ma la modalità la deve decidere qualcuno e non devo impazzire a creare
-    #  costruttori enormi per il processor
+    # TODO: External config?
     def _init_steps(self, columns: list[Column]):
         for col in columns:
+            self.steps[col.position] = []
             if isinstance(col, NumericColumn):
-                self.add_step(ScalerWrapper(col.position, "standard"))
+                self.add_step(ScalerWrapper(col.position, "standard"), col.position)
             elif isinstance(col, CategoricalColumn):
-                self.add_step(OneHotEncoderWrapper(col.position, "onehot"))
+                self.add_step(OneHotEncoderWrapper(col.position, "onehot"), col.position)
 
     def process(self, columns: list[Column]) -> list[Column]:
-        preprocessed_columns = []
         self._init_steps(columns)
-        for idx, col in enumerate(columns):
-            result = self.steps[idx].fit_transform(col.get_data())
+        col_data = [col.get_data() for col in columns]
+        results = super().process(col_data)
+        preprocessed_columns = []
+        for col in columns:
             preprocessed_columns.append(
-                ColumnRegistry.get_column(col.column_type)(
+                type(col)(
                     col.name,
                     col.value_type,
                     col.position,
-                    result,
+                    results.get(col.position),
                 )
             )
-        self._save_all()
         return preprocessed_columns
-
 
     def inverse_process(self, preprocessed_columns: list[Column]) -> list[Column]:
         self._init_steps(preprocessed_columns)
-        self._load_all()
+        col_data = [col.get_data() for col in preprocessed_columns]
+        results = super().inverse_process(col_data)
         post_processed_columns = []
-        for idx, col in enumerate(preprocessed_columns):
-            result = self.steps[idx].inverse_transform(col.get_data())
+        for col in preprocessed_columns:
             post_processed_columns.append(
-                ColumnRegistry.get_column(col.column_type)(
+                type(col)(
                     col.name,
                     col.value_type,
                     col.position,
-                    result,
+                    results.get(col.position),
                 )
             )
         return post_processed_columns

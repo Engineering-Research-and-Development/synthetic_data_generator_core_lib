@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 import numpy as np
 from copy import deepcopy
 
-from dataset import ColumnRegistry, NumericColumn, CategoricalColumn, PrimaryKeyColumn, Column
-from dataset.processor import Processor, TableProcessor
+from sdg_core_lib.dataset.columns import NumericColumn, CategoricalColumn, PrimaryKeyColumn, Column
+from sdg_core_lib.dataset.processor import Processor, TableProcessor
 
 
 class Dataset(ABC):
@@ -41,6 +41,12 @@ class Dataset(ABC):
 
 class Table(Dataset):
 
+    col_registry = {
+        "continuous": NumericColumn,
+        "categorical": CategoricalColumn,
+        "primary_key": PrimaryKeyColumn,
+    }
+
     def __init__(self, columns: list[Column], processor: TableProcessor, pk_index: int= None):
         super().__init__(processor)
         self.columns = columns
@@ -64,7 +70,7 @@ class Table(Dataset):
                     raise ValueError(f"A primary key for dataset already exists: {columns[pk_index].name} but another primary key was found: {col_name}")
                 pk_index = col_position
 
-            col = ColumnRegistry.get_column(col_type)(
+            col = cls.col_registry.get(col_type, ValueError())(
                 col_name,
                 col_value_type,
                 col_position,
