@@ -12,7 +12,7 @@ class Column(ABC):
         self.column_type = None
 
     def get_internal_shape(self) -> tuple[int, ...]:
-        return self.values.T.shape
+        return self.values.shape
 
     def get_metadata(self) -> dict:
         return {
@@ -26,8 +26,13 @@ class Column(ABC):
         return self.values
 
 
+class ComputingColumn(Column):
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
+        super().__init__(name, value_type, position, values)
 
-class NumericColumn(Column):
+
+
+class NumericColumn(ComputingColumn):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "continuous"
@@ -47,7 +52,7 @@ class NumericColumn(Column):
 
 
 
-class CategoricalColumn(Column):
+class CategoricalColumn(ComputingColumn):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "categorical"
@@ -61,7 +66,7 @@ class CategoricalColumn(Column):
         return list(set(self.values))
 
 
-class PrimaryKeyColumn(CategoricalColumn):
+class PrimaryKeyColumn(Column):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "primary_key"

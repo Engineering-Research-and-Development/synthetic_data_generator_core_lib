@@ -56,6 +56,12 @@ class NoneStep(Step):
     def __init__(self, position: int, mode = None):
         super().__init__(name="none", position=position, mode=mode)
 
+    def save(self, directory_path: str):
+        pass
+
+    def load(self, directory_path: str):
+        pass
+
     def _set_operator(self):
         pass
 

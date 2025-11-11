@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from dataset.steps import NoneStep
 from sdg_core_lib.dataset.steps import OneHotEncoderWrapper
 from sdg_core_lib.dataset.columns import Column, NumericColumn, CategoricalColumn
 from sdg_core_lib.dataset.steps import Step, ScalerWrapper
@@ -47,7 +48,9 @@ class TableProcessor(Processor):
             if isinstance(col, NumericColumn):
                 self.add_step(ScalerWrapper(col.position, "standard"), col.position)
             elif isinstance(col, CategoricalColumn):
-                self.add_step(OneHotEncoderWrapper(col.position, "onehot"), col.position)
+                self.add_step(OneHotEncoderWrapper(col.position), col.position)
+            else:
+                self.add_step(NoneStep(col.position), col.position)
 
     def process(self, columns: list[Column]) -> list[Column]:
         self._init_steps(columns)
