@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
-from sdg_core_lib.dataset.columns import NumericColumn, CategoricalColumn, PrimaryKeyColumn, Column
+from sdg_core_lib.dataset.columns import NumericColumn, CategoricalColumn, Column
 from sdg_core_lib.dataset.processor import Processor, TableProcessor
 
 
@@ -51,7 +51,7 @@ class Table(Dataset):
     col_registry = {
         "continuous": NumericColumn,
         "categorical": CategoricalColumn,
-        "primary_key": PrimaryKeyColumn,
+        "primary_key": Column,
     }
 
     def __init__(self, columns: list[Column], processor: TableProcessor, pk_indexes: list[int]= None):

@@ -1,8 +1,7 @@
 import numpy as np
-from abc import ABC
 
 
-class Column(ABC):
+class Column:
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         self.name = name
         self.value_type = value_type
@@ -60,15 +59,3 @@ class CategoricalColumn(Column):
 
     def get_categories(self) -> list[str]:
         return list(set(self.values))
-
-
-class PrimaryKeyColumn(Column):
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
-        super().__init__(name, value_type, position, values)
-        self.column_type = "primary_key"
-
-    def get_metadata(self) -> dict:
-        metadata = super().get_metadata()
-        metadata.update({"column_type": "primary_key"})
-        return metadata
-
