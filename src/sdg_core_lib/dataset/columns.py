@@ -27,7 +27,7 @@ class Column:
 
 
 
-class NumericColumn(Column):
+class Numeric(Column):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "continuous"
@@ -40,14 +40,14 @@ class NumericColumn(Column):
     def get_boundaries(self) -> tuple[float, float]:
         return self.values.min(), self.values.max()
 
-    def to_categorical(self, n_bins: int) -> 'CategoricalColumn':
+    def to_categorical(self, n_bins: int) -> 'Categorical':
         bins = np.linspace(self.values.min(), self.values.max(), n_bins)
         binned_values = np.digitize(self.values, bins)
-        return CategoricalColumn(self.name, self.value_type, self.position, binned_values)
+        return Categorical(self.name, self.value_type, self.position, binned_values)
 
 
 
-class CategoricalColumn(Column):
+class Categorical(Column):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "categorical"

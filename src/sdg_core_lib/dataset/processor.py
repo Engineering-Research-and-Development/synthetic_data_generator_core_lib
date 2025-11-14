@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from dataset.steps import NoneStep
 from sdg_core_lib.dataset.steps import OneHotEncoderWrapper
-from sdg_core_lib.dataset.columns import Column, NumericColumn, CategoricalColumn
+from sdg_core_lib.dataset.columns import Column, Numeric, Categorical
 from sdg_core_lib.dataset.steps import Step, ScalerWrapper
 import numpy as np
 
@@ -45,9 +45,9 @@ class TableProcessor(Processor):
     def _init_steps(self, columns: list[Column]):
         for col in columns:
             self.steps[col.position] = []
-            if isinstance(col, NumericColumn):
+            if isinstance(col, Numeric):
                 self.add_step(ScalerWrapper(col.position, "standard"), col.position)
-            elif isinstance(col, CategoricalColumn):
+            elif isinstance(col, Categorical):
                 self.add_step(OneHotEncoderWrapper(col.position), col.position)
             else:
                 self.add_step(NoneStep(col.position), col.position)
