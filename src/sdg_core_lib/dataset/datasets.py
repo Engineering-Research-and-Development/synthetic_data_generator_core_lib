@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
-from sdg_core_lib.dataset.columns import NumericColumn, CategoricalColumn, PrimaryKeyColumn, Column, ComputingColumn
+from sdg_core_lib.dataset.columns import NumericColumn, CategoricalColumn, PrimaryKeyColumn, Column
 from sdg_core_lib.dataset.processor import Processor, TableProcessor
 
 
@@ -54,16 +54,16 @@ class Table(Dataset):
         "primary_key": PrimaryKeyColumn,
     }
 
-    def __init__(self, columns: list[Column], processor: TableProcessor, pk_index: int= None):
+    def __init__(self, columns: list[Column], processor: TableProcessor, pk_indexes: list[int]= None):
         super().__init__(processor)
         self.columns = columns
-        self.pk_col_index = pk_index
+        self.pk_col_indexes = pk_indexes
         self.shape = self.get_shape()
 
 
     @classmethod
     def from_json(cls, json_data: list[dict], processor: TableProcessor) -> 'Table':
-        pk_index = None
+        pk_indexes = []
         columns = []
         for idx, col_data in enumerate(json_data):
             col_type = col_data.get("column_type", "")
@@ -73,9 +73,7 @@ class Table(Dataset):
             col_position = idx
 
             if col_type == "primary_key":
-                if pk_index is not None:
-                    raise ValueError(f"A primary key for dataset already exists: {columns[pk_index].name} but another primary key was found: {col_name}")
-                pk_index = col_position
+                pk_indexes.append(col_position)
 
             col = cls.col_registry.get(col_type, None)(
                 col_name,
@@ -85,7 +83,7 @@ class Table(Dataset):
             )
             columns.append(col)
 
-        return Table(columns, processor, pk_index)
+        return Table(columns, processor, pk_indexes)
 
     def clone(self, data: np.ndarray) -> 'Table':
         if self.get_shape()[1] != data.shape[1]:
@@ -93,7 +91,7 @@ class Table(Dataset):
         new_columns = []
         data_idx = 0
         for col in self.columns:
-            if isinstance(col, ComputingColumn):
+            if col.position not in self.pk_col_indexes:
                 col_shape = col.get_internal_shape()[1]
                 new_columns.append(
                     type(col)(
@@ -106,7 +104,7 @@ class Table(Dataset):
                 data_idx += col_shape
             else:
                 new_columns.append(col)
-        return Table(new_columns, self.processor, self.pk_col_index)
+        return Table(new_columns, self.processor, self.pk_col_indexes)
 
     def to_json(self) -> list[dict]:
         return [
@@ -129,14 +127,11 @@ class Table(Dataset):
             for col in self.columns
         ]
 
-    def get_primary_key(self) -> PrimaryKeyColumn:
-        column =  self.columns[self.pk_col_index]
-        if not isinstance(column, PrimaryKeyColumn):
-            raise ValueError(f"Column {column.name} is not a primary key")
-        return column
+    def get_primary_keys(self) -> list[Column]:
+        return [col for col in self.columns if col.position in self.pk_col_indexes]
 
     def get_data(self) -> np.ndarray:
-        return np.hstack([col.get_data() for col in self.columns if self._get_computing_column()])
+        return np.hstack([col.get_data() for col in self._get_computing_column()])
 
     def get_shape(self) -> tuple[int, ...]:
         col_shape_total = np.sum([col.get_internal_shape()[1] for col in self._get_computing_column()])
@@ -145,15 +140,16 @@ class Table(Dataset):
         return row_shape_total, col_shape_total
 
     def _get_computing_column(self):
-        return [col for col in self.columns if isinstance(col, ComputingColumn)]
+        return [col for col in self.columns if col.position not in self.pk_col_indexes]
 
-    def _self_pk_integrity(self):
-        return self.get_primary_key().contains_unique()
+    def _self_pk_integrity(self) -> bool:
+        pks_values = np.hstack([col.get_data() for col in self.get_primary_keys()])
+        return pks_values.shape[0] == np.unique(pks_values, axis=0).shape[0]
 
     def preprocess(self) -> "Table":
         new_cols = self.processor.process(self.columns)
-        return Table(new_cols, self.processor, self.pk_col_index)
+        return Table(new_cols, self.processor, self.pk_col_indexes)
 
     def postprocess(self) -> "Table":
         new_cols = self.processor.inverse_process(self.columns)
-        return Table(new_cols, self.processor, self.pk_col_index)
+        return Table(new_cols, self.processor, self.pk_col_indexes)

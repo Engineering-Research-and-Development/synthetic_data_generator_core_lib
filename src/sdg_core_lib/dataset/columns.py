@@ -26,13 +26,9 @@ class Column(ABC):
         return self.values
 
 
-class ComputingColumn(Column):
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
-        super().__init__(name, value_type, position, values)
 
 
-
-class NumericColumn(ComputingColumn):
+class NumericColumn(Column):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "continuous"
@@ -52,7 +48,7 @@ class NumericColumn(ComputingColumn):
 
 
 
-class CategoricalColumn(ComputingColumn):
+class CategoricalColumn(Column):
     def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
         super().__init__(name, value_type, position, values)
         self.column_type = "categorical"
@@ -76,7 +72,3 @@ class PrimaryKeyColumn(Column):
         metadata.update({"column_type": "primary_key"})
         return metadata
 
-    def contains_unique(self) -> bool:
-        if self.values.shape[0] == np.unique(self.values).shape[0]:
-            return True
-        return False
