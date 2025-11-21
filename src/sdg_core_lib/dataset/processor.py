@@ -64,6 +64,7 @@ class TableProcessor(Processor):
                     col.value_type,
                     col.position,
                     results.get(col.position),
+                    col.column_type
                 )
             )
         return preprocessed_columns
@@ -80,6 +81,7 @@ class TableProcessor(Processor):
                     col.value_type,
                     col.position,
                     results.get(col.position),
+                    col.column_type
                 )
             )
         return post_processed_columns

@@ -2,13 +2,13 @@ import numpy as np
 
 
 class Column:
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray, column_type: str):
         self.name = name
         self.value_type = value_type
         self.position = position
         self.values = values
+        self.column_type = column_type
         self.internal_shape = self.get_internal_shape()
-        self.column_type = None
 
     def get_internal_shape(self) -> tuple[int, ...]:
         return self.values.shape
@@ -26,11 +26,9 @@ class Column:
 
 
 
-
 class Numeric(Column):
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
-        super().__init__(name, value_type, position, values)
-        self.column_type = "continuous"
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray, column_type: str):
+        super().__init__(name, value_type, position, values, column_type)
 
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()
@@ -43,14 +41,13 @@ class Numeric(Column):
     def to_categorical(self, n_bins: int) -> 'Categorical':
         bins = np.linspace(self.values.min(), self.values.max(), n_bins)
         binned_values = np.digitize(self.values, bins)
-        return Categorical(self.name, self.value_type, self.position, binned_values)
+        return Categorical(self.name, self.value_type, self.position, binned_values, "categorical")
 
 
 
 class Categorical(Column):
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray):
-        super().__init__(name, value_type, position, values)
-        self.column_type = "categorical"
+    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray, column_type: str):
+        super().__init__(name, value_type, position, values, column_type)
 
     def get_metadata(self) -> dict:
         metadata = super().get_metadata()

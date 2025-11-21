@@ -54,6 +54,7 @@ class Table(Dataset):
         "primary_key": Column,
         "group_index": Column,
     }
+    processor: TableProcessor
 
     def __init__(self, columns: list[Column], processor: TableProcessor, pk_indexes: list[int]= None):
         super().__init__(processor)
@@ -84,6 +85,7 @@ class Table(Dataset):
                 col_value_type,
                 col_position,
                 col_values,
+                col_type
             )
             columns.append(col)
 
@@ -92,30 +94,37 @@ class Table(Dataset):
     def clone(self, data: np.ndarray) -> 'Table':
         if self.get_computing_shape()[-1] != data.shape[-1]:
             raise ValueError("Data does not match table shape on column axis")
+        n_rows = data.shape[0]
         new_columns = []
         data_idx = 0
         for col in self.columns:
-            #TODO: Fix the primary key insertion
             if col.position not in self.pk_col_indexes:
+                # Pick current internal column shape
                 col_shape = col.get_internal_shape()[1]
-                new_columns.append(
-                    type(col)(
-                        col.name,
-                        col.value_type,
-                        col.position,
-                        data[:, data_idx:data_idx+col_shape],
-                    )
-                )
+                # Insert data following the correct shape
+                data_to_insert = data[:, data_idx:data_idx+col_shape]
+                # update data index
                 data_idx += col_shape
             else:
-                new_columns.append(col)
+                # TODO: Improve primary key generation with a method
+                data_to_insert = np.arange(n_rows).reshape(-1, 1)
+
+            new_columns.append(
+                type(col)(
+                    col.name,
+                    col.value_type,
+                    col.position,
+                    data_to_insert,
+                    col.column_type
+                )
+            )
 
         return Table(new_columns, self.processor, self.pk_col_indexes)
 
     def to_json(self) -> list[dict]:
         return [
             {
-                "column_data": col.values.tolist(),
+                "column_data": col.values.reshape(-1,).tolist(),
                 "column_name": col.name,
                 "column_type": col.column_type,
                 "column_datatype": col.value_type,
@@ -191,8 +200,12 @@ class TimeSeries(Table):
                 col_value_type,
                 col_position,
                 col_values,
+                col_type
             )
             columns.append(col)
+
+        if group_index is None:
+            raise ValueError("Time series must have a group index to identify isolated experiments")
 
         return TimeSeries(columns, processor, pk_indexes, group_index)
 
@@ -200,8 +213,21 @@ class TimeSeries(Table):
     def clone(self, data: np.ndarray) -> 'TimeSeries':
         if len(data.shape) == 3:
             # collapsing time steps
+            time_steps = data.shape[1]
             data = data.reshape(-1, data.shape[2])
+        else:
+            raise ValueError("Data must be a 3D array")
         sub_table = super().clone(data)
+        # Generate new Group Index and update pk_column
+        new_group_index = np.repeat(np.arange(data.shape[0]/time_steps, dtype="int"), repeats=time_steps).reshape(-1, 1)
+        new_group_col = type(sub_table.columns[self.group_index])(
+            sub_table.columns[self.group_index].name,
+            sub_table.columns[self.group_index].value_type,
+            sub_table.columns[self.group_index].position,
+            new_group_index,
+            sub_table.columns[self.group_index].column_type,
+        )
+        sub_table.columns[self.group_index] = new_group_col
         return TimeSeries(sub_table.columns, sub_table.processor, sub_table.pk_col_indexes, self.group_index)
 
 

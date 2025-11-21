@@ -6,7 +6,7 @@ from sdg_core_lib.post_process.functions.UnspecializedFunction import (
 
 
 class FunctionApplier:
-    def __init__(self, functions: list[UnspecializedFunction], data: list[np.array]):
+    def __init__(self, functions: list[UnspecializedFunction], data: list[np.ndarray]):
         self.functions = functions
         self.data = data
 
