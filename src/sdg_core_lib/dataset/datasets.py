@@ -145,6 +145,12 @@ class Table(Dataset):
     def get_primary_keys(self) -> list[Column]:
         return [col for col in self.columns if col.position in self.pk_col_indexes]
 
+    def get_numeric_columns(self):
+        return [col for col in self.columns if isinstance(col, Numeric)]
+
+    def get_categorical_columns(self):
+        return [col for col in self.columns if isinstance(col, Categorical)]
+
     def get_computing_data(self) -> np.ndarray:
         return np.hstack([col.get_data() for col in self._get_computing_column()])
 
