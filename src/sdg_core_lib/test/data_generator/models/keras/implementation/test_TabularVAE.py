@@ -1,10 +1,8 @@
-import numpy as np
 import pytest
 import os
 import shutil
-from sklearn.preprocessing import StandardScaler
 
-from sdg_core_lib.NumericDataset import NumericDataset
+from sdg_core_lib.dataset.datasets import Table
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
 from sdg_core_lib.data_generator.models.keras.VAE import VAE
 from sdg_core_lib.data_generator.models.keras.implementation.TabularVAE import (
@@ -14,7 +12,7 @@ from sdg_core_lib.data_generator.models.keras.implementation.TabularVAE import (
 
 @pytest.fixture()
 def data():
-    return NumericDataset(
+    return Table.from_json(
         [
             {
                 "column_name": "A",
@@ -22,7 +20,7 @@ def data():
                 "column_datatype": "float64",
                 "column_data": [1.0, 2.0, 3.0, 4.0, 5.0],
             }
-        ]
+        ], None
     )
 
 
@@ -55,15 +53,6 @@ def test_instantiate(model_data_no_load):
     assert model.input_shape == (13,)
     assert model._epochs == 1
     assert type(model._model) is VAE
-    assert model._scaler is None
-
-
-def test_preprocess(model_data_no_load, data):
-    model = TabularVAE(**model_data_no_load)
-    assert model._scaler is None
-    scaled_data = model._pre_process(data)
-    assert model._scaler is not None and type(model._scaler) is StandardScaler
-    assert type(scaled_data) is np.ndarray
 
 
 def test_self_description(model_data_no_load):
@@ -93,23 +82,20 @@ def test_save(model_data_no_load):
     model.save(model_path)
     assert os.path.isfile(os.path.join(model_path, "encoder.keras"))
     assert os.path.isfile(os.path.join(model_path, "decoder.keras"))
-    assert os.path.isfile(os.path.join(model_path, "scaler.skops"))
     shutil.rmtree(model_path)
 
 
 def test_train_wrong(model_data_no_load, data):
     model = TabularVAE(**model_data_no_load)
     with pytest.raises(ValueError) as exception_info:
-        model.train(data)
+        model.train(data.get_computing_data())
     assert exception_info.type is ValueError
 
 
 def test_train_correct(model_data_correct_train, data):
     model = TabularVAE(**model_data_correct_train)
     assert model.training_info is None
-    assert model._scaler is None
-    model.train(data)
-    assert type(model._scaler) is StandardScaler
+    model.train(data.get_computing_data())
     assert type(model.training_info) is TrainingInfo
 
 

@@ -1,10 +1,8 @@
 import keras
 from keras import layers
 
-from sdg_core_lib import NumericDataset
 from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo, AllowedData
 from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
-from sdg_core_lib.preprocess.scale import standardize_simple_tabular_input
 from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
 
 
@@ -70,17 +68,6 @@ class TabularVAE(KerasBaseVAE):
         vae = VAE(encoder, decoder, self._beta, name="TabularVAE")
         vae.summary()
         return vae
-
-    def _pre_process(self, data: NumericDataset, **kwargs):
-        cont_np_data = data.continuous_data.to_numpy()
-        if not self._scaler:
-            scaler, np_input_scaled, _ = standardize_simple_tabular_input(
-                train_data=cont_np_data
-            )
-            self._scaler = scaler
-        else:
-            np_input_scaled = self._scale(cont_np_data)
-        return np_input_scaled
 
     @classmethod
     def self_describe(cls):

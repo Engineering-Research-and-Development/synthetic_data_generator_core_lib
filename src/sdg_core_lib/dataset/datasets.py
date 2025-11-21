@@ -92,7 +92,7 @@ class Table(Dataset):
         return Table(columns, processor, pk_indexes)
 
     def clone(self, data: np.ndarray) -> 'Table':
-        if self.get_computing_shape()[-1] != data.shape[-1]:
+        if self.get_computing_shape()[1] != data.shape[1]:
             raise ValueError("Data does not match table shape on column axis")
         n_rows = data.shape[0]
         new_columns = []
@@ -218,13 +218,13 @@ class TimeSeries(Table):
 
     def clone(self, data: np.ndarray) -> 'TimeSeries':
         if len(data.shape) == 3:
-            # collapsing time steps
-            time_steps = data.shape[1]
-            data = data.reshape(-1, data.shape[2])
+            time_steps = data.shape[-1]
+            data = data.transpose(0, 2, 1).reshape(-1, data.shape[1])
         else:
             raise ValueError("Data must be a 3D array")
         sub_table = super().clone(data)
-        # Generate new Group Index and update pk_column
+        # Generate new Group Index and update the column
+        # TODO: Currently we support only "integer" group indexes
         new_group_index = np.repeat(np.arange(data.shape[0]/time_steps, dtype="int"), repeats=time_steps).reshape(-1, 1)
         new_group_col = type(sub_table.columns[self.group_index])(
             sub_table.columns[self.group_index].name,
@@ -256,7 +256,7 @@ class TimeSeries(Table):
     def get_computing_data(self) -> np.ndarray:
         time_steps = self._get_experiment_length()
         data = np.hstack([col.get_data() for col in self._get_computing_column()])
-        return data.reshape(-1, time_steps, data.shape[1])
+        return data.reshape(-1, time_steps, data.shape[1]).transpose(0, 2, 1)
 
     def preprocess(self) -> "TimeSeries":
         new_cols = self.processor.process(self.columns)
