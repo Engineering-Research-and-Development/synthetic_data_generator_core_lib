@@ -217,6 +217,11 @@ class TimeSeries(Table):
 
 
     def clone(self, data: np.ndarray) -> 'TimeSeries':
+        """
+        Picks data in shape (batch, time_steps, features) and returns a new TimeSeries
+        :param data:
+        :return:
+        """
         if len(data.shape) == 3:
             time_steps = data.shape[-1]
             data = data.transpose(0, 2, 1).reshape(-1, data.shape[1])
@@ -254,6 +259,10 @@ class TimeSeries(Table):
         return exp_len
 
     def get_computing_data(self) -> np.ndarray:
+        """
+        Returns data in shape (batch, features, time_steps) for computing
+        :return:
+        """
         time_steps = self._get_experiment_length()
         data = np.hstack([col.get_data() for col in self._get_computing_column()])
         return data.reshape(-1, time_steps, data.shape[1]).transpose(0, 2, 1)
