@@ -12,7 +12,7 @@ class Dataset(ABC):
 
     @classmethod
     @abstractmethod
-    def from_json(cls, json_data: list[dict], processor: Processor) -> 'Dataset':
+    def from_json(cls, json_data: list[dict], save_path: str) -> 'Dataset':
         raise NotImplementedError
 
     @abstractmethod
@@ -27,12 +27,15 @@ class Dataset(ABC):
     def get_computing_shape(self) -> tuple[int, ...]:
         raise NotImplementedError
 
+    def get_shape_for_model(self) -> str:
+        return str(self.get_computing_shape()[1:])
+
     @abstractmethod
     def to_json(self) -> list[dict]:
         raise NotImplementedError
 
     @abstractmethod
-    def to_registry(self) -> list[dict]:
+    def to_skeleton(self) -> list[dict]:
         raise NotImplementedError
 
     @abstractmethod
@@ -42,8 +45,6 @@ class Dataset(ABC):
     @abstractmethod
     def postprocess(self) -> 'Dataset':
         raise NotImplementedError
-
-
 
 
 class Table(Dataset):
@@ -64,7 +65,7 @@ class Table(Dataset):
 
 
     @classmethod
-    def from_json(cls, json_data: list[dict], processor: TableProcessor) -> 'Table':
+    def from_json(cls, json_data: list[dict], save_path: str) -> 'Table':
         pk_indexes = []
         columns = []
         for idx, col_data in enumerate(json_data):
@@ -89,6 +90,7 @@ class Table(Dataset):
             )
             columns.append(col)
 
+        processor = TableProcessor(save_path)
         return Table(columns, processor, pk_indexes)
 
     def clone(self, data: np.ndarray) -> 'Table':
@@ -131,13 +133,15 @@ class Table(Dataset):
             }
             for col in self.columns]
 
-    def to_registry(self) -> list[dict]:
+    def to_skeleton(self) -> list[dict]:
         return [
             {
                 "feature_name": col.name,
                 "feature_position": col.position,
                 "column_type": col.column_type,
-                "type": col.value_type
+                "column_datatype": col.value_type,
+                "column_size": str(col.get_internal_shape()[1]),
+                "is_key": True if col.position in self.pk_col_indexes else False
             }
             for col in self.columns
         ]
@@ -152,12 +156,12 @@ class Table(Dataset):
         return [col for col in self.columns if isinstance(col, Categorical)]
 
     def get_computing_data(self) -> np.ndarray:
-        return np.hstack([col.get_data() for col in self._get_computing_column()])
+        return np.hstack([col.get_data() for col in self._get_computing_columns()])
 
     def get_computing_shape(self) -> tuple[int, ...]:
         return self.get_computing_data().shape
 
-    def _get_computing_column(self):
+    def _get_computing_columns(self):
         return [col for col in self.columns if col.position not in self.pk_col_indexes]
 
     def _self_pk_integrity(self) -> bool:
@@ -180,7 +184,7 @@ class TimeSeries(Table):
 
 
     @classmethod
-    def from_json(cls, json_data: list[dict], processor: TableProcessor) -> 'TimeSeries':
+    def from_json(cls, json_data: list[dict], save_path: str) -> 'TimeSeries':
         pk_indexes = []
         group_index = None
         columns = []
@@ -213,6 +217,7 @@ class TimeSeries(Table):
         if group_index is None:
             raise ValueError("Time series must have a group index to identify isolated experiments")
 
+        processor = TableProcessor(save_path)
         return TimeSeries(columns, processor, pk_indexes, group_index)
 
 
@@ -264,7 +269,7 @@ class TimeSeries(Table):
         :return:
         """
         time_steps = self._get_experiment_length()
-        data = np.hstack([col.get_data() for col in self._get_computing_column()])
+        data = np.hstack([col.get_data() for col in self._get_computing_columns()])
         return data.reshape(-1, time_steps, data.shape[1]).transpose(0, 2, 1)
 
     def preprocess(self) -> "TimeSeries":

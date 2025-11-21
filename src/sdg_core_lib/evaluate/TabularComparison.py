@@ -186,7 +186,7 @@ class TabularComparisonEvaluator:
         real_unique = np.unique(real_data, axis=0)
         real_unique_len = real_unique.shape[0]
 
-        concat_data = np.hstack([real_unique, synth_unique])
+        concat_data = np.vstack([real_unique, synth_unique])
         concat_unique = np.unique(concat_data, axis=0)
         conc_unique_len = concat_unique.shape[0]
 
