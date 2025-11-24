@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from dataset.steps import NoneStep
+from sdg_core_lib.dataset.steps import NoneStep
 from sdg_core_lib.dataset.steps import OneHotEncoderWrapper
 from sdg_core_lib.dataset.columns import Column, Numeric, Categorical
 from sdg_core_lib.dataset.steps import Step, ScalerWrapper

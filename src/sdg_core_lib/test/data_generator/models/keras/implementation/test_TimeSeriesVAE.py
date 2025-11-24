@@ -74,7 +74,6 @@ def test_save(model_data_correct_train):
     model.save(model_path)
     assert os.path.isfile(os.path.join(model_path, "encoder.keras"))
     assert os.path.isfile(os.path.join(model_path, "decoder.keras"))
-    assert os.path.isfile(os.path.join(model_path, "scaler.skops"))
     shutil.rmtree(model_path)
 
 

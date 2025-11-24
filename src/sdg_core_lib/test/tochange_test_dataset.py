@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import numpy as np
 
-from sdg_core_lib.NumericDataset import NumericDataset
+from sdg_core_lib.dataset.datasets import Table
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ def empty_dataset():
 
 
 def test_initialization(correct_dataset):
-    dataset = NumericDataset(correct_dataset)
+    dataset = Table(correct_dataset)
     assert len(dataset.columns) == 4
     assert len(dataset.categorical_columns) == 1
     assert len(dataset.continuous_columns) == 2
@@ -74,7 +74,7 @@ def test_initialization(correct_dataset):
 
 
 def test_dataset_complexity(complex_dataset):
-    dataset = NumericDataset(complex_dataset)
+    dataset = Table(complex_dataset)
     print(np.array(dataset.dataframe.to_numpy().tolist()).shape)
     assert len(dataset.columns) == 1
     assert len(dataset.categorical_columns) == 0

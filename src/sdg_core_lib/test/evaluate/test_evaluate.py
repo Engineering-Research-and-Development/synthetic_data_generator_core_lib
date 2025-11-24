@@ -1,7 +1,7 @@
 import pytest
 
 from sdg_core_lib.dataset.datasets import Table
-from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
+from sdg_core_lib.evaluate.evaluators import TabularComparisonEvaluator
 
 dummy_json = [
     {
