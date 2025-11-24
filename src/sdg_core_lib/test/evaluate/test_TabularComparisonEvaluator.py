@@ -30,6 +30,7 @@ dummy_json = [
     },
 ]
 
+
 @pytest.fixture()
 def real_data():
     return Table.from_json(dummy_json, None)

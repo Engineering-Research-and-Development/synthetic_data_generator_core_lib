@@ -16,25 +16,41 @@ class Processor(ABC):
     def _init_steps(self, data: list):
         raise NotImplementedError
 
-    def add_step(self, step: Step, data_index: int) -> 'Processor':
+    def add_step(self, step: Step, data_index: int) -> "Processor":
         self.steps.get(data_index).append(step)
         return self
 
     def _save_all(self):
-        [step.save(self.dir_path) for step_list in self.steps.values() for step in step_list]
+        [
+            step.save(self.dir_path)
+            for step_list in self.steps.values()
+            for step in step_list
+        ]
 
-    def _load_all(self) -> 'Processor':
-        [step.load(self.dir_path) for step_list in self.steps.values() for step in step_list]
+    def _load_all(self) -> "Processor":
+        [
+            step.load(self.dir_path)
+            for step_list in self.steps.values()
+            for step in step_list
+        ]
         return self
 
     def process(self, data: list) -> dict[int, np.ndarray]:
-        results = {idx: step.fit_transform(data[idx]) for idx, step_list in self.steps.items() for step in step_list}
+        results = {
+            idx: step.fit_transform(data[idx])
+            for idx, step_list in self.steps.items()
+            for step in step_list
+        }
         self._save_all()
         return results
 
     def inverse_process(self, data: list) -> dict[int, np.ndarray]:
         self._load_all()
-        return {idx: step.inverse_transform(data[idx]) for idx, step_list in self.steps.items() for step in reversed(step_list)}
+        return {
+            idx: step.inverse_transform(data[idx])
+            for idx, step_list in self.steps.items()
+            for step in reversed(step_list)
+        }
 
 
 class TableProcessor(Processor):
@@ -64,7 +80,7 @@ class TableProcessor(Processor):
                     col.value_type,
                     col.position,
                     results.get(col.position),
-                    col.column_type
+                    col.column_type,
                 )
             )
         return preprocessed_columns
@@ -81,7 +97,7 @@ class TableProcessor(Processor):
                     col.value_type,
                     col.position,
                     results.get(col.position),
-                    col.column_type
+                    col.column_type,
                 )
             )
         return post_processed_columns

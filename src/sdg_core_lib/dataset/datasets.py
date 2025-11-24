@@ -6,13 +6,12 @@ from sdg_core_lib.dataset.processor import Processor, TableProcessor
 
 
 class Dataset(ABC):
-
     def __init__(self, processor: Processor):
         self.processor = processor
 
     @classmethod
     @abstractmethod
-    def from_json(cls, json_data: list[dict], save_path: str) -> 'Dataset':
+    def from_json(cls, json_data: list[dict], save_path: str) -> "Dataset":
         raise NotImplementedError
 
     @classmethod
@@ -21,7 +20,7 @@ class Dataset(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def clone(self, new_data: np.ndarray) -> 'Dataset':
+    def clone(self, new_data: np.ndarray) -> "Dataset":
         raise NotImplementedError
 
     @abstractmethod
@@ -44,16 +43,15 @@ class Dataset(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def preprocess(self) -> 'Dataset':
+    def preprocess(self) -> "Dataset":
         raise NotImplementedError
 
     @abstractmethod
-    def postprocess(self) -> 'Dataset':
+    def postprocess(self) -> "Dataset":
         raise NotImplementedError
 
 
 class Table(Dataset):
-
     col_registry = {
         "continuous": Numeric,
         "categorical": Categorical,
@@ -62,15 +60,19 @@ class Table(Dataset):
     }
     processor: TableProcessor
 
-    def __init__(self, columns: list[Column], processor: TableProcessor, pk_indexes: list[int]= None):
+    def __init__(
+        self,
+        columns: list[Column],
+        processor: TableProcessor,
+        pk_indexes: list[int] = None,
+    ):
         super().__init__(processor)
         self.columns = columns
         self.pk_col_indexes = pk_indexes
         self.shape = self.get_computing_shape()
 
-
     @classmethod
-    def from_json(cls, json_data: list[dict], save_path: str) -> 'Table':
+    def from_json(cls, json_data: list[dict], save_path: str) -> "Table":
         pk_indexes = []
         columns = []
         group_index = None
@@ -94,11 +96,7 @@ class Table(Dataset):
                 pk_indexes.append(col_position)
 
             col = cls.col_registry.get(col_type, None)(
-                col_name,
-                col_value_type,
-                col_position,
-                col_values,
-                col_type
+                col_name, col_value_type, col_position, col_values, col_type
             )
             columns.append(col)
 
@@ -125,8 +123,7 @@ class Table(Dataset):
 
         return cls.from_json(data_map, save_path)
 
-
-    def clone(self, data: np.ndarray) -> 'Table':
+    def clone(self, data: np.ndarray) -> "Table":
         if self.get_computing_shape()[1] != data.shape[1]:
             raise ValueError("Data does not match table shape on column axis")
         n_rows = data.shape[0]
@@ -137,7 +134,7 @@ class Table(Dataset):
                 # Pick current internal column shape
                 col_shape = col.get_internal_shape()[1]
                 # Insert data following the correct shape
-                data_to_insert = data[:, data_idx:data_idx+col_shape]
+                data_to_insert = data[:, data_idx : data_idx + col_shape]
                 # update data index
                 data_idx += col_shape
             else:
@@ -150,7 +147,7 @@ class Table(Dataset):
                     col.value_type,
                     col.position,
                     data_to_insert,
-                    col.column_type
+                    col.column_type,
                 )
             )
 
@@ -159,12 +156,15 @@ class Table(Dataset):
     def to_json(self) -> list[dict]:
         return [
             {
-                "column_data": col.values.reshape(-1,).tolist(),
+                "column_data": col.values.reshape(
+                    -1,
+                ).tolist(),
                 "column_name": col.name,
                 "column_type": col.column_type,
                 "column_datatype": col.value_type,
             }
-            for col in self.columns]
+            for col in self.columns
+        ]
 
     def to_skeleton(self) -> list[dict]:
         return [
@@ -210,13 +210,14 @@ class Table(Dataset):
 
 
 class TimeSeries(Table):
-    def __init__(self, inner_table: Table, group_index: int=None):
+    def __init__(self, inner_table: Table, group_index: int = None):
         self.group_index = group_index
-        super().__init__(inner_table.columns, inner_table.processor, inner_table.pk_col_indexes)
-
+        super().__init__(
+            inner_table.columns, inner_table.processor, inner_table.pk_col_indexes
+        )
 
     @classmethod
-    def from_json(cls, json_data: list[dict], save_path: str) -> 'TimeSeries':
+    def from_json(cls, json_data: list[dict], save_path: str) -> "TimeSeries":
         inner_table = super().from_json(json_data, save_path)
 
         group_index = None
@@ -226,12 +227,13 @@ class TimeSeries(Table):
                 break
 
         if group_index is None:
-            raise ValueError("Time series must have a group index to identify isolated experiments")
+            raise ValueError(
+                "Time series must have a group index to identify isolated experiments"
+            )
 
         return TimeSeries(inner_table, group_index)
 
-
-    def clone(self, data: np.ndarray) -> 'TimeSeries':
+    def clone(self, data: np.ndarray) -> "TimeSeries":
         """
         Picks data in shape (batch, time_steps, features) and returns a new TimeSeries
         :param data:
@@ -245,7 +247,9 @@ class TimeSeries(Table):
         sub_table = super().clone(data)
         # Generate new Group Index and update the column
         # TODO: Currently we support only "integer" group indexes
-        new_group_index = np.repeat(np.arange(data.shape[0]/time_steps, dtype="int"), repeats=time_steps).reshape(-1, 1)
+        new_group_index = np.repeat(
+            np.arange(data.shape[0] / time_steps, dtype="int"), repeats=time_steps
+        ).reshape(-1, 1)
         new_group_col = type(sub_table.columns[self.group_index])(
             sub_table.columns[self.group_index].name,
             sub_table.columns[self.group_index].value_type,
@@ -256,15 +260,18 @@ class TimeSeries(Table):
         sub_table.columns[self.group_index] = new_group_col
         return TimeSeries(sub_table, self.group_index)
 
-
     def _get_experiment_length(self):
         # TODO: Currently we support only same-shape experiments
         exp_len = None
         experiment_column = self.columns[self.group_index]
-        experiment_indexes = experiment_column.get_data().reshape(-1,)
+        experiment_indexes = experiment_column.get_data().reshape(
+            -1,
+        )
         experiment_numbers = np.unique(experiment_indexes, axis=0)
 
-        for number in experiment_numbers.reshape(-1,):
+        for number in experiment_numbers.reshape(
+            -1,
+        ):
             experiment_row = np.argwhere(experiment_indexes == number)
             if exp_len is None:
                 exp_len = experiment_row.shape[0]
@@ -283,16 +290,11 @@ class TimeSeries(Table):
         return data.reshape(-1, time_steps, data.shape[1]).transpose(0, 2, 1)
 
     def preprocess(self) -> "TimeSeries":
-        #new_cols = self.processor.process(self.columns)
+        # new_cols = self.processor.process(self.columns)
         preprocessed_table = super().preprocess()
         return TimeSeries(preprocessed_table, self.group_index)
 
     def postprocess(self) -> "TimeSeries":
-        #new_cols = self.processor.inverse_process(self.columns)
+        # new_cols = self.processor.inverse_process(self.columns)
         postprocessed_table = super().postprocess()
         return TimeSeries(postprocessed_table, self.group_index)
-
-
-
-
-

@@ -2,7 +2,14 @@ import numpy as np
 
 
 class Column:
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray, column_type: str):
+    def __init__(
+        self,
+        name: str,
+        value_type: str,
+        position: int,
+        values: np.ndarray,
+        column_type: str,
+    ):
         self.name = name
         self.value_type = value_type
         self.position = position
@@ -25,9 +32,15 @@ class Column:
         return self.values
 
 
-
 class Numeric(Column):
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray, column_type: str):
+    def __init__(
+        self,
+        name: str,
+        value_type: str,
+        position: int,
+        values: np.ndarray,
+        column_type: str,
+    ):
         super().__init__(name, value_type, position, values, column_type)
 
     def get_metadata(self) -> dict:
@@ -38,15 +51,23 @@ class Numeric(Column):
     def get_boundaries(self) -> tuple[float, float]:
         return self.values.min(), self.values.max()
 
-    def to_categorical(self, n_bins: int) -> 'Categorical':
+    def to_categorical(self, n_bins: int) -> "Categorical":
         bins = np.linspace(self.values.min(), self.values.max(), n_bins)
         binned_values = np.digitize(self.values, bins)
-        return Categorical(self.name, self.value_type, self.position, binned_values, "categorical")
-
+        return Categorical(
+            self.name, self.value_type, self.position, binned_values, "categorical"
+        )
 
 
 class Categorical(Column):
-    def __init__(self, name: str, value_type: str, position: int, values: np.ndarray, column_type: str):
+    def __init__(
+        self,
+        name: str,
+        value_type: str,
+        position: int,
+        values: np.ndarray,
+        column_type: str,
+    ):
         super().__init__(name, value_type, position, values, column_type)
 
     def get_metadata(self) -> dict:

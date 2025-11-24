@@ -79,7 +79,10 @@ def test_infer(setup):
     n_rows = infer_request["n_rows"]
     save_filepath = output_folder
 
-    results, metrics, = infer(
+    (
+        results,
+        metrics,
+    ) = infer(
         model_info=model_info,
         dataset=dataset,
         n_rows=n_rows,
@@ -90,7 +93,6 @@ def test_infer(setup):
     assert metrics is not None
 
 
-
 def test_infer_nodata_wrong(setup):
     model_info = infer_nodata_request_wrong["model"]
     model_info["image"] = output_folder
@@ -98,7 +100,10 @@ def test_infer_nodata_wrong(setup):
     save_filepath = output_folder
 
     with pytest.raises(ValueError) as exception_info:
-        _, _, = infer(
+        (
+            _,
+            _,
+        ) = infer(
             model_info=model_info,
             dataset={"dataset_type": "table", "data": []},
             n_rows=n_rows,
@@ -124,4 +129,3 @@ def test_infer_nodata(setup, teardown):
     print(results)
     assert metrics is not None
     print(metrics)
-

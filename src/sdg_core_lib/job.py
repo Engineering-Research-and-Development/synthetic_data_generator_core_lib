@@ -1,12 +1,16 @@
 from sdg_core_lib.dataset.datasets import Table, TimeSeries
-from sdg_core_lib.evaluate.evaluators import TabularComparisonEvaluator, TimeSeriesComparisonEvaluator
+from sdg_core_lib.evaluate.evaluators import (
+    TabularComparisonEvaluator,
+    TimeSeriesComparisonEvaluator,
+)
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 
 dataset_mapping = {
     "table": {"dataset": Table, "evaluator": TabularComparisonEvaluator},
-    "time_series": {"dataset": TimeSeries, "evaluator": TimeSeriesComparisonEvaluator}
+    "time_series": {"dataset": TimeSeries, "evaluator": TimeSeriesComparisonEvaluator},
 }
+
 
 def train(
     model_info: dict, dataset: dict, n_rows: int, save_filepath: str
@@ -45,7 +49,6 @@ def train(
     evaluator = dataset_evaluator_class(
         real_data=data,
         synthetic_data=synthetic_data,
-
     )
     report = evaluator.compute()
     results = synthetic_data.to_json()
@@ -56,7 +59,6 @@ def train(
 def infer(
     model_info: dict, dataset: dict, n_rows: int, save_filepath: str
 ) -> tuple[list[dict], dict]:
-
     dataset_type = dataset.get("dataset_type", "")
     dataset_class = dataset_mapping[dataset_type]["dataset"]
     dataset_evaluator_class = dataset_mapping[dataset_type]["evaluator"]

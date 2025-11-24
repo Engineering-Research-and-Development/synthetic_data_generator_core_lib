@@ -30,7 +30,9 @@ def data():
                 "column_name": "A",
                 "column_type": "group_index",
                 "column_datatype": "int",
-                "column_data": np.repeat(np.arange(20, dtype="int"), repeats=51).reshape(-1, 1)
+                "column_data": np.repeat(
+                    np.arange(20, dtype="int"), repeats=51
+                ).reshape(-1, 1),
             },
             {
                 "column_name": "A",
@@ -43,8 +45,9 @@ def data():
                 "column_type": "continuous",
                 "column_datatype": "float64",
                 "column_data": np.linspace(-10, 10, 1020).tolist(),
-            }
-        ], None
+            },
+        ],
+        None,
     )
 
 

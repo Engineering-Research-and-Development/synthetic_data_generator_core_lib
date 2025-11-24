@@ -40,7 +40,6 @@ class TabularComparisonEvaluator:
         self._synth_categorical_columns = synthetic_data.get_categorical_columns()
         self.report = MetricReport()
 
-
     def compute(self):
         if len(self._numerical_columns) <= 1 and len(self._categorical_columns) <= 1:
             return {"available": "false"}
@@ -59,7 +58,14 @@ class TabularComparisonEvaluator:
         :param data2: second column
         :return: Cramer's V
         """
-        confusion_matrix = pd.crosstab(data1.reshape(-1,), data2.reshape(-1,))
+        confusion_matrix = pd.crosstab(
+            data1.reshape(
+                -1,
+            ),
+            data2.reshape(
+                -1,
+            ),
+        )
         chi2 = ss.chi2_contingency(confusion_matrix)[0]
         # Total number of observations.
         n = confusion_matrix.to_numpy().sum()
@@ -92,14 +98,16 @@ class TabularComparisonEvaluator:
             return 0
 
         contingency_scores_distances = []
-        for idx, (col, synth_col) in enumerate(zip(self._categorical_columns[:-1], self._synth_categorical_columns[:-1])):
-            for col_2, synth_col_2 in zip(self._categorical_columns[idx + 1 :], self._synth_categorical_columns[idx + 1 :]):
-                v_real = self._compute_cramer_v(
-                    col.get_data(), col_2.get_data()
-                )
+        for idx, (col, synth_col) in enumerate(
+            zip(self._categorical_columns[:-1], self._synth_categorical_columns[:-1])
+        ):
+            for col_2, synth_col_2 in zip(
+                self._categorical_columns[idx + 1 :],
+                self._synth_categorical_columns[idx + 1 :],
+            ):
+                v_real = self._compute_cramer_v(col.get_data(), col_2.get_data())
                 v_synth = self._compute_cramer_v(
-                    synth_col.get_data(),
-                    synth_col_2.get_data()
+                    synth_col.get_data(), synth_col_2.get_data()
                 )
                 contingency_scores_distances.append(np.abs(v_real - v_synth))
 
@@ -119,9 +127,15 @@ class TabularComparisonEvaluator:
             return 0
 
         wass_distance_scores = []
-        for col, synt_col in zip(self._numerical_columns, self._synth_numerical_columns):
-            real_data = col.get_data().reshape(-1,)
-            synth_data = synt_col.get_data().reshape(-1,)
+        for col, synt_col in zip(
+            self._numerical_columns, self._synth_numerical_columns
+        ):
+            real_data = col.get_data().reshape(
+                -1,
+            )
+            synth_data = synt_col.get_data().reshape(
+                -1,
+            )
             distance = np.abs(np.max(real_data) - np.min(real_data))
             wass_dist = ss.wasserstein_distance(real_data, synth_data)
             wass_dist = np.clip(wass_dist, 0, distance) / distance
@@ -227,11 +241,13 @@ class TabularComparisonEvaluator:
         # that have values found in the real data.
         category_adherence_score: dict[str, float] = {}
 
-        for real_cat, synth_cat in zip(self._categorical_columns, self._synth_categorical_columns):
+        for real_cat, synth_cat in zip(
+            self._categorical_columns, self._synth_categorical_columns
+        ):
             real_data = real_cat.get_data()
             synth_data = synth_cat.get_data()
-            extra_values = np.array(set(np.unique(synth_data)) - set(
-                np.unique(real_data))
+            extra_values = np.array(
+                set(np.unique(synth_data)) - set(np.unique(real_data))
             )
             # Count how many synthetic records use these extra values.
             extra_count = np.sum(np.isin(synth_data, extra_values))
@@ -244,15 +260,16 @@ class TabularComparisonEvaluator:
         # that lie within the min-max boundaries of the real data.
         boundary_adherence_score: dict[str, float] = {}
 
-        for real_num, synth_num in zip(self._numerical_columns, self._synth_numerical_columns):
+        for real_num, synth_num in zip(
+            self._numerical_columns, self._synth_numerical_columns
+        ):
             # Obtain min and max boundaries from the real data.
             min_boundary = real_num.get_data().min()
             max_boundary = real_num.get_data().max()
             # Filter synthetic records that fall within these boundaries.
             synth_data = synth_num.get_data()
             in_boundary = synth_data[
-                (synth_data >= min_boundary)
-                & (synth_data <= max_boundary)
+                (synth_data >= min_boundary) & (synth_data <= max_boundary)
             ]
             in_boundary_count = in_boundary.shape[0]
             adherence_percentage = np.round(in_boundary_count / total_records * 100, 2)
@@ -275,7 +292,6 @@ class TabularComparisonEvaluator:
                     value=boundary_adherence_score,
                 )
             )
-
 
 
 class TimeSeriesComparisonEvaluator:
@@ -306,7 +322,6 @@ class TimeSeriesComparisonEvaluator:
         self._synth_numerical_columns = synthetic_data.get_numeric_columns()
         self._synth_categorical_columns = synthetic_data.get_categorical_columns()
         self.report = MetricReport()
-
 
     def compute(self):
         if len(self._numerical_columns) <= 1 and len(self._categorical_columns) <= 1:

@@ -54,7 +54,7 @@ class Step(ABC):
 
 
 class NoneStep(Step):
-    def __init__(self, position: int, mode = None):
+    def __init__(self, position: int, mode=None):
         super().__init__(name="none", position=position, mode=mode)
 
     def save(self, directory_path: str):
@@ -91,7 +91,7 @@ class ScalerWrapper(Step):
 
 
 class LabelEncoderWrapper(Step):
-    def __init__(self, position: int, mode = None):
+    def __init__(self, position: int, mode=None):
         super().__init__(name="encoder", position=position, mode=mode)
 
     def _set_operator(self):
@@ -99,7 +99,7 @@ class LabelEncoderWrapper(Step):
 
 
 class OneHotEncoderWrapper(Step):
-    def __init__(self, position: int, mode = None):
+    def __init__(self, position: int, mode=None):
         super().__init__(name="encoder", position=position, mode=mode)
 
     def _set_operator(self):
