@@ -1,11 +1,11 @@
-from sdg_core_lib.dataset.datasets import Dataset, Table, TimeSeries
-from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
+from sdg_core_lib.dataset.datasets import Table, TimeSeries
+from sdg_core_lib.evaluate.evaluators import TabularComparisonEvaluator, TimeSeriesComparisonEvaluator
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 
-dataset_mapping: dict[str, type[Dataset]] = {
-    "table": Table,
-    "time_series": TimeSeries
+dataset_mapping = {
+    "table": {"dataset": Table, "evaluator": TabularComparisonEvaluator},
+    "time_series": {"dataset": TimeSeries, "evaluator": TimeSeriesComparisonEvaluator}
 }
 
 def train(
@@ -27,7 +27,10 @@ def train(
 
     data_payload = dataset.get("data", [])
     dataset_type = dataset.get("dataset_type", "")
-    data = dataset_mapping[dataset_type].from_json(data_payload, save_filepath)
+    dataset_class = dataset_mapping[dataset_type]["dataset"]
+    dataset_evaluator_class = dataset_mapping[dataset_type]["evaluator"]
+
+    data = dataset_class.from_json(data_payload, save_filepath)
 
     preprocessed_data = data.preprocess()
     preprocess_schema = data.to_skeleton()
@@ -39,7 +42,7 @@ def train(
     synthetic_data = preprocessed_data.clone(predicted_data)
     synthetic_data = synthetic_data.postprocess()
 
-    evaluator = TabularComparisonEvaluator(
+    evaluator = dataset_evaluator_class(
         real_data=data,
         synthetic_data=synthetic_data,
 
@@ -55,13 +58,16 @@ def infer(
 ) -> tuple[list[dict], dict]:
 
     dataset_type = dataset.get("dataset_type", "")
+    dataset_class = dataset_mapping[dataset_type]["dataset"]
+    dataset_evaluator_class = dataset_mapping[dataset_type]["evaluator"]
+
     data_payload = dataset.get("data", [])
     data = None
     if len(data_payload) == 0:
         data_skeleton = model_info.get("training_data_info")
-        preprocessed_data = dataset_mapping[dataset_type].from_skeleton(data_skeleton, save_filepath)
+        preprocessed_data = dataset_class.from_skeleton(data_skeleton, save_filepath)
     else:
-        data = dataset_mapping[dataset_type].from_json(data_payload, save_filepath)
+        data = dataset_class.from_json(data_payload, save_filepath)
         preprocessed_data = data.preprocess()
 
     model = model_factory(model_info)
@@ -71,7 +77,7 @@ def infer(
 
     report = {"available": "false"}
     if data is not None:
-        evaluator = TabularComparisonEvaluator(
+        evaluator = dataset_evaluator_class(
             real_data=data,
             synthetic_data=synthetic_data,
         )
