@@ -15,6 +15,11 @@ class Dataset(ABC):
     def from_json(cls, json_data: list[dict], save_path: str) -> 'Dataset':
         raise NotImplementedError
 
+    @classmethod
+    @abstractmethod
+    def from_skeleton(cls, skeleton: list[dict], save_path: str):
+        raise NotImplementedError
+
     @abstractmethod
     def clone(self, new_data: np.ndarray) -> 'Dataset':
         raise NotImplementedError
@@ -68,15 +73,22 @@ class Table(Dataset):
     def from_json(cls, json_data: list[dict], save_path: str) -> 'Table':
         pk_indexes = []
         columns = []
+        group_index = None
+
         for idx, col_data in enumerate(json_data):
             col_type = col_data.get("column_type", "")
             col_name = col_data.get("column_name", "")
-            col_values = np.array(col_data.get("column_data", [])).reshape(-1, 1)
+            col_values = np.array(col_data.get("column_data", []))
+            if len(col_values.shape) == 1:
+                col_values = col_values.reshape(-1, 1)
             col_value_type = col_data.get("column_datatype", "")
             col_position = idx
 
             if col_type == "group_index":
-                raise NotImplementedError("Tables don't support data grouping. Please, refer to TimeSeries Documentation")
+                if group_index is not None:
+                    raise ValueError("Group index already set")
+                group_index = col_position
+                pk_indexes.append(col_position)
 
             if col_type == "primary_key":
                 pk_indexes.append(col_position)
@@ -92,6 +104,27 @@ class Table(Dataset):
 
         processor = TableProcessor(save_path)
         return Table(columns, processor, pk_indexes)
+
+    @classmethod
+    def from_skeleton(cls, skeleton: list[dict], save_path: str):
+        data_map = []
+
+        for col_data in sorted(skeleton, key=lambda x: int(x["column_position"])):
+            col_type = col_data.get("column_type", "")
+            col_name = col_data.get("column_name", "")
+            col_value_type = col_data.get("column_datatype", "")
+            col_size = col_data.get("column_size", 1)
+
+            new_column = {
+                "column_name": col_name,
+                "column_type": col_type,
+                "column_data": np.zeros((1, col_size)),
+                "column_datatype": col_value_type,
+            }
+            data_map.append(new_column)
+
+        return cls.from_json(data_map, save_path)
+
 
     def clone(self, data: np.ndarray) -> 'Table':
         if self.get_computing_shape()[1] != data.shape[1]:
@@ -141,7 +174,6 @@ class Table(Dataset):
                 "column_type": col.column_type,
                 "column_datatype": col.value_type,
                 "column_size": str(col.get_internal_shape()[1]),
-                "is_key": True if col.position in self.pk_col_indexes else False
             }
             for col in self.columns
         ]
@@ -178,47 +210,25 @@ class Table(Dataset):
 
 
 class TimeSeries(Table):
-    def __init__(self, columns: list[Column], processor: TableProcessor, pk_indexes: list[int]= None, group_index: int=None):
+    def __init__(self, inner_table: Table, group_index: int=None):
         self.group_index = group_index
-        super().__init__(columns, processor, pk_indexes)
+        super().__init__(inner_table.columns, inner_table.processor, inner_table.pk_col_indexes)
 
 
     @classmethod
     def from_json(cls, json_data: list[dict], save_path: str) -> 'TimeSeries':
-        pk_indexes = []
+        inner_table = super().from_json(json_data, save_path)
+
         group_index = None
-        columns = []
-        for idx, col_data in enumerate(json_data):
-            col_type = col_data.get("column_type", "")
-            col_name = col_data.get("column_name", "")
-            col_values = np.array(col_data.get("column_data", [])).reshape(-1, 1)
-            col_value_type = col_data.get("column_datatype", "")
-            col_position = idx
-
-            if col_type == "group_index":
-                if group_index is not None:
-                    raise ValueError("Group index already set")
-                group_index = col_position
-                pk_indexes.append(col_position)
-
-
-            if col_type == "primary_key":
-                pk_indexes.append(col_position)
-
-            col = cls.col_registry.get(col_type, None)(
-                col_name,
-                col_value_type,
-                col_position,
-                col_values,
-                col_type
-            )
-            columns.append(col)
+        for col in inner_table.columns:
+            if col.column_type == "group_index":
+                group_index = col.position
+                break
 
         if group_index is None:
             raise ValueError("Time series must have a group index to identify isolated experiments")
 
-        processor = TableProcessor(save_path)
-        return TimeSeries(columns, processor, pk_indexes, group_index)
+        return TimeSeries(inner_table, group_index)
 
 
     def clone(self, data: np.ndarray) -> 'TimeSeries':
@@ -244,7 +254,7 @@ class TimeSeries(Table):
             sub_table.columns[self.group_index].column_type,
         )
         sub_table.columns[self.group_index] = new_group_col
-        return TimeSeries(sub_table.columns, sub_table.processor, sub_table.pk_col_indexes, self.group_index)
+        return TimeSeries(sub_table, self.group_index)
 
 
     def _get_experiment_length(self):
@@ -273,12 +283,14 @@ class TimeSeries(Table):
         return data.reshape(-1, time_steps, data.shape[1]).transpose(0, 2, 1)
 
     def preprocess(self) -> "TimeSeries":
-        new_cols = self.processor.process(self.columns)
-        return TimeSeries(new_cols, self.processor, self.pk_col_indexes, self.group_index)
+        #new_cols = self.processor.process(self.columns)
+        preprocessed_table = super().preprocess()
+        return TimeSeries(preprocessed_table, self.group_index)
 
     def postprocess(self) -> "TimeSeries":
-        new_cols = self.processor.inverse_process(self.columns)
-        return TimeSeries(new_cols, self.processor, self.pk_col_indexes, self.group_index)
+        #new_cols = self.processor.inverse_process(self.columns)
+        postprocessed_table = super().postprocess()
+        return TimeSeries(postprocessed_table, self.group_index)
 
 
 

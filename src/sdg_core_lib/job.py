@@ -1,19 +1,16 @@
-import copy
-import pandas as pd
-
 from sdg_core_lib.dataset.datasets import Dataset, Table, TimeSeries
 from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 
-dataset_mapping: dict[str, Dataset] = {
+dataset_mapping: dict[str, type[Dataset]] = {
     "table": Table,
     "time_series": TimeSeries
 }
 
 def train(
     model_info: dict, dataset: dict, n_rows: int, save_filepath: str
-) -> tuple[list[dict], dict, UnspecializedModel, Dataset]:
+) -> tuple[list[dict], dict, UnspecializedModel, list[dict]]:
     """
     Main function to run the job.
 
@@ -50,7 +47,7 @@ def train(
     report = evaluator.compute()
     results = synthetic_data.to_json()
 
-    return results, report, model, data
+    return results, report, model, preprocess_schema
 
 
 def infer(
