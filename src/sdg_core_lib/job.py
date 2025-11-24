@@ -25,8 +25,8 @@ def train(
     :return: a tuple containing a list of metrics, a dictionary with the model's info, the trained model, and the generated dataset
     """
 
-    data_payload = dataset["data"]
-    dataset_type = dataset["dataset_type"]
+    data_payload = dataset.get("data", [])
+    dataset_type = dataset.get("dataset_type", "")
     data = dataset_mapping[dataset_type].from_json(data_payload, save_filepath)
 
     preprocessed_data = data.preprocess()
@@ -52,5 +52,31 @@ def train(
 
 def infer(
     model_info: dict, dataset: dict, n_rows: int, save_filepath: str
-) -> tuple[list[dict], dict, UnspecializedModel, Dataset]:
-    pass
+) -> tuple[list[dict], dict]:
+
+    dataset_type = dataset.get("dataset_type", "")
+    data_payload = dataset.get("data", [])
+    data = None
+    if len(data_payload) == 0:
+        data_skeleton = model_info.get("training_data_info")
+        preprocessed_data = dataset_mapping[dataset_type].from_skeleton(data_skeleton, save_filepath)
+    else:
+        data = dataset_mapping[dataset_type].from_json(data_payload, save_filepath)
+        preprocessed_data = data.preprocess()
+
+    model = model_factory(model_info)
+    predicted_data = model.infer(n_rows)
+    synthetic_data = preprocessed_data.clone(predicted_data)
+    synthetic_data = synthetic_data.postprocess()
+
+    report = {"available": "false"}
+    if data is not None:
+        evaluator = TabularComparisonEvaluator(
+            real_data=data,
+            synthetic_data=synthetic_data,
+        )
+        report = evaluator.compute()
+
+    results = synthetic_data.to_json()
+
+    return results, report

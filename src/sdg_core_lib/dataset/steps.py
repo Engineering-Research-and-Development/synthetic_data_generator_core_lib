@@ -26,10 +26,11 @@ class Step(ABC):
 
     def save(self, directory_path: str):
         if self.operator is None:
-            raise ValueError("Scaler is not created")
+            raise ValueError("Operator is not created")
         os.makedirs(directory_path, exist_ok=True)
         filename = os.path.join(directory_path, self.filename)
-        sio.dump(self.operator, filename)
+        if not os.path.exists(filename):
+            sio.dump(self.operator, filename)
 
     def load(self, directory_path: str):
         filename = os.path.join(directory_path, self.filename)
