@@ -8,13 +8,13 @@ dummy_json = [
         "column_name": "a",
         "column_type": "continuous",
         "column_data": [1, 2, 3, 1, 2, 3],
-        "column_datatype": "string",
+        "column_datatype": "int",
     },
     {
         "column_name": "b",
         "column_type": "categorical",
         "column_data": [1, 1, 1, 2, 2, 2],
-        "column_datatype": "string",
+        "column_datatype": "int",
     },
     {
         "column_name": "c",
@@ -26,7 +26,7 @@ dummy_json = [
         "column_name": "d",
         "column_type": "categorical",
         "column_data": ["a", "b", "c", "d", "e", "f"],
-        "column_datatype": "string",
+        "column_datatype": "str",
     },
 ]
 

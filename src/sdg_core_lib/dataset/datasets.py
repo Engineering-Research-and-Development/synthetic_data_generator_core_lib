@@ -76,14 +76,19 @@ class Table(Dataset):
         pk_indexes = []
         columns = []
         group_index = None
+        if len(json_data) < 1:
+            raise ValueError("Empty dataset")
 
         for idx, col_data in enumerate(json_data):
             col_type = col_data.get("column_type", "")
             col_name = col_data.get("column_name", "")
-            col_values = np.array(col_data.get("column_data", []))
+            col_values = np.array(col_data.get("column_data", []), dtype=col_data.get("column_datatype", ""))
             if len(col_values.shape) == 1:
                 col_values = col_values.reshape(-1, 1)
             col_value_type = col_data.get("column_datatype", "")
+
+            if not isinstance(col_values.dtype, type(np.dtype(col_value_type))):
+                raise ValueError("Column data types do not match")
             col_position = idx
 
             if col_type == "group_index":

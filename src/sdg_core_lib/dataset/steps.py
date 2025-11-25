@@ -11,6 +11,7 @@ from sklearn.preprocessing import (
 import os
 import skops.io as sio
 
+# TODO: What if steps change data types? Should I implement some "old_type / new_type" mechanics?
 
 class Step(ABC):
     def __init__(self, name: str, position: int, mode: str):
