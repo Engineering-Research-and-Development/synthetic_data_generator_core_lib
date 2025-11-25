@@ -69,7 +69,6 @@ class Table(Dataset):
         super().__init__(processor)
         self.columns = columns
         self.pk_col_indexes = pk_indexes
-        self.shape = self.get_computing_shape()
 
     @classmethod
     def from_json(cls, json_data: list[dict], save_path: str) -> "Table":
