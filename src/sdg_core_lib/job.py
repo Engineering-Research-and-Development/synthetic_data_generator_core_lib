@@ -37,7 +37,7 @@ def train(
     data = dataset_class.from_json(data_payload, save_filepath)
 
     preprocessed_data = data.preprocess()
-    preprocess_schema = data.to_skeleton()
+    preprocess_schema = preprocessed_data.to_skeleton()
     model = model_factory(model_info, preprocessed_data.get_shape_for_model())
     model.train(data=preprocessed_data.get_computing_data())
     model.save(save_filepath)

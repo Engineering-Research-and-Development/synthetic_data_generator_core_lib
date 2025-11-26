@@ -63,13 +63,14 @@ def test_train(setup):
         save_filepath=save_filepath,
     )
 
-    print(metrics)
-
     assert isinstance(results, list)
     assert results is not None
     assert metrics is not None
+    print(metrics)
     assert model is not None
+    print(model.training_info.to_json())
     assert data is not None
+    print(data)
 
 
 def test_infer(setup):

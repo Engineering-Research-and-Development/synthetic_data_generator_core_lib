@@ -124,7 +124,7 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         self._model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=learning_rate)
         )
-        history = self._model.fit(data, epochs=epochs, batch_size=batch_size, verbose=0)
+        history = self._model.fit(data, epochs=epochs, batch_size=batch_size, verbose=1)
         self.training_info = TrainingInfo(
             loss_fn="ELBO",
             train_loss=history.history["loss"][-1].numpy().item(),

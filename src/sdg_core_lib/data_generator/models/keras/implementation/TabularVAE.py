@@ -39,7 +39,7 @@ class TabularVAE(KerasBaseVAE):
         epochs: int = 200,
     ):
         super().__init__(metadata, model_name, input_shape, load_path, latent_dim)
-        self._beta = 1
+        self._beta = 0.15
         self._learning_rate = learning_rate
         self._epochs = epochs
         self._batch_size = batch_size
@@ -50,8 +50,8 @@ class TabularVAE(KerasBaseVAE):
 
     def _build(self, input_shape: tuple[int, ...]):
         encoder_inputs = keras.Input(shape=input_shape)
-        x = layers.Dense(32, activation="relu")(encoder_inputs)
-        x = layers.Dense(64, activation="relu")(x)
+        x = layers.Dense(64, activation="relu")(encoder_inputs)
+        x = layers.Dense(128, activation="relu")(x)
         x = layers.Dense(16, activation="relu")(x)
         z_mean = layers.Dense(self._latent_dim, name="z_mean")(x)
         z_log_var = layers.Dense(self._latent_dim, name="z_log_var")(x)
@@ -60,8 +60,8 @@ class TabularVAE(KerasBaseVAE):
 
         latent_inputs = keras.Input(shape=(self._latent_dim,))
         y = layers.Dense(16, activation="relu")(latent_inputs)
+        y = layers.Dense(128, activation="relu")(y)
         y = layers.Dense(64, activation="relu")(y)
-        y = layers.Dense(32, activation="relu")(y)
         decoder_outputs = layers.Dense(input_shape[0], activation="linear")(y)
         decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
 

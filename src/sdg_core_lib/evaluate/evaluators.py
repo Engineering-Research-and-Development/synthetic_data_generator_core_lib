@@ -185,6 +185,23 @@ class TabularComparisonEvaluator:
                 )
             )
 
+    @staticmethod
+    def _give_unique_rows(dirty_data: np.ndarray):
+        """
+        Works on 0-axis of a numpy array to search unique values
+        :param dirty_data:
+        :return:
+        """
+        data = dirty_data.tolist()
+        seen = {}
+        unique = []
+        for o in data:
+            if str(o) not in seen:
+                seen[str(o)] = True
+                unique.append(o)
+
+        return np.array(unique)
+
     def _evaluate_novelty(self):
         """
         This function evaluates in two steps the following metrics
@@ -193,15 +210,15 @@ class TabularComparisonEvaluator:
         """
         synthetic_data = self._synth_data.get_computing_data()
         synth_len = synthetic_data.shape[0]
-        synth_unique = np.unique(synthetic_data, axis=0)
+        synth_unique = self._give_unique_rows(synthetic_data)
         synth_unique_len = synth_unique.shape[0]
 
         real_data = self._real_data.get_computing_data()
-        real_unique = np.unique(real_data, axis=0)
+        real_unique = self._give_unique_rows(real_data)
         real_unique_len = real_unique.shape[0]
 
         concat_data = np.vstack([real_unique, synth_unique])
-        concat_unique = np.unique(concat_data, axis=0)
+        concat_unique = self._give_unique_rows(concat_data)
         conc_unique_len = concat_unique.shape[0]
 
         new_synt_data = synth_len - (
