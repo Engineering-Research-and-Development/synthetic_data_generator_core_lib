@@ -47,8 +47,8 @@ def evaluator_correct(real_data, synthetic_data):
 
 
 def test_init(evaluator_correct, real_data, synthetic_data):
-    assert [col.type_name for col in evaluator_correct._numerical_columns] == ["a", "c"]
-    assert [col.type_name for col in evaluator_correct._categorical_columns] == ["b", "d"]
+    assert [col.name for col in evaluator_correct._numerical_columns] == ["a", "c"]
+    assert [col.name for col in evaluator_correct._categorical_columns] == ["b", "d"]
 
 
 def test_evaluate(evaluator_correct):

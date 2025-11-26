@@ -270,7 +270,7 @@ class TabularComparisonEvaluator:
             extra_count = np.sum(np.isin(synth_data, extra_values))
             # Define adherence as the percentage of records that do NOT have extra values.
             adherence_percentage = np.round((1 - extra_count / total_records) * 100, 2)
-            category_adherence_score[real_cat.type_name] = float(adherence_percentage)
+            category_adherence_score[real_cat.name] = float(adherence_percentage)
 
         # --- Numerical Boundary Adherence ---
         # For each numerical column, compute the percentage of synthetic entries
@@ -290,7 +290,7 @@ class TabularComparisonEvaluator:
             ]
             in_boundary_count = in_boundary.shape[0]
             adherence_percentage = np.round(in_boundary_count / total_records * 100, 2)
-            boundary_adherence_score[real_num.type_name] = float(adherence_percentage)
+            boundary_adherence_score[real_num.name] = float(adherence_percentage)
 
         if not len(self._categorical_columns) == 0:
             self.report.add_metric(

@@ -16,7 +16,7 @@ def correct_instance():
 
 
 def test_check_parameters(correct_instance):
-    param_mapping = {param.type_name: param for param in correct_instance.parameters}
+    param_mapping = {param.name: param for param in correct_instance.parameters}
     param_names = param_mapping.keys()
     assert param_mapping["mean"].value == 0.0
     assert isinstance(param_mapping["mean"].value, float)

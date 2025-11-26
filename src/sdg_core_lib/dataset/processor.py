@@ -11,13 +11,15 @@ class Processor(ABC):
     def __init__(self, dir_path: str):
         self.dir_path = dir_path
         self.steps: dict[int, list[Step]] = {}
+        self.idx_to_data: dict[int, int]= {}
 
     @abstractmethod
     def _init_steps(self, data: list):
         raise NotImplementedError
 
-    def add_step(self, step: Step, data_index: int) -> "Processor":
-        self.steps.get(data_index).append(step)
+    def add_steps(self, steps: list[Step], col_position: int, data_position: int)-> 'Processor':
+        self.steps[col_position] = steps
+        self.idx_to_data[col_position] = data_position
         return self
 
     def _save_all(self):
@@ -37,7 +39,7 @@ class Processor(ABC):
 
     def process(self, data: list) -> dict[int, np.ndarray]:
         results = {
-            idx: step.fit_transform(data[idx])
+            idx: step.fit_transform(data[self.idx_to_data[idx]])
             for idx, step_list in self.steps.items()
             for step in step_list
         }
@@ -47,7 +49,7 @@ class Processor(ABC):
     def inverse_process(self, data: list) -> dict[int, np.ndarray]:
         self._load_all()
         return {
-            idx: step.inverse_transform(data[idx])
+            idx: step.inverse_transform(data[self.idx_to_data[idx]])
             for idx, step_list in self.steps.items()
             for step in reversed(step_list)
         }
@@ -59,14 +61,16 @@ class TableProcessor(Processor):
 
     # TODO: External config?
     def _init_steps(self, columns: list[Column]):
-        for col in columns:
-            self.steps[col.position] = []
+        for idx, col in enumerate(columns):
+            step_list = []
             if isinstance(col, Numeric):
-                self.add_step(ScalerWrapper(col.position, col.name, "standard"), col.position)
+                step_list.append(ScalerWrapper(col.position, col.name, "standard"))
             elif isinstance(col, Categorical):
-                self.add_step(OneHotEncoderWrapper(col.position, col.name), col.position)
+                step_list.append(OneHotEncoderWrapper(col.position, col.name))
             else:
-                self.add_step(NoneStep(col.position), col.position)
+                step_list.append(NoneStep(col.position))
+
+            self.add_steps(step_list, col_position=col.position, data_position=idx)
 
     def process(self, columns: list[Column]) -> list[Column]:
         self._init_steps(columns)

@@ -100,13 +100,13 @@ class LabelEncoderWrapper(Step):
         return LabelEncoder()
 
     def fit_transform(self, data: np.ndarray) -> np.ndarray:
-        return super().fit_transform(data).reshape(*data.shape)
+        return super().fit_transform(data.reshape(-1,)).reshape(*data.shape)
 
     def transform(self, data: np.ndarray) -> np.ndarray:
-        return super().transform(data).reshape(*data.shape)
+        return super().transform(data.reshape(-1,)).reshape(*data.shape)
 
     def inverse_transform(self, data: np.ndarray) -> np.ndarray:
-        return super().inverse_transform(data).reshape(*data.shape)
+        return super().inverse_transform(data.reshape(-1,)).reshape(*data.shape)
 
 
 class OneHotEncoderWrapper(Step):
