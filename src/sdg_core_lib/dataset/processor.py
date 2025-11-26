@@ -61,14 +61,18 @@ class TableProcessor(Processor):
 
     # TODO: External config?
     def _init_steps(self, columns: list[Column]):
+        if len(columns) == 0:
+            raise ValueError("No columns provided for processing")
         for idx, col in enumerate(columns):
             step_list = []
             if isinstance(col, Numeric):
                 step_list.append(ScalerWrapper(col.position, col.name, "standard"))
             elif isinstance(col, Categorical):
                 step_list.append(OneHotEncoderWrapper(col.position, col.name))
-            else:
+            elif type(col) is Column:
                 step_list.append(NoneStep(col.position))
+            else:
+                raise NotImplementedError()
 
             self.add_steps(step_list, col_position=col.position, data_position=idx)
 
