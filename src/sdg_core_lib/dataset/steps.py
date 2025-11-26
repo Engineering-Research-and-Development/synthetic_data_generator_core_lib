@@ -15,13 +15,13 @@ import skops.io as sio
 
 
 class Step(ABC):
-    def __init__(self, name: str, position: int, col_name: str, mode: str):
-        self.name = name
+    def __init__(self, type: str, position: int, col_name: str, mode: str):
+        self.name = type
         self.mode = mode
         self.position = position
         self.col_name = col_name
         self.operator = None
-        self.filename = f"{self.position}_{self.col_name}_{self.name}.skops"
+        self.filename = f"{self.position}_{self.col_name}_{self.mode}_{self.name}.skops"
 
     @abstractmethod
     def _set_operator(self):
@@ -58,7 +58,7 @@ class Step(ABC):
 
 class NoneStep(Step):
     def __init__(self, position: int, mode=None):
-        super().__init__(name="none", position=position, col_name="", mode=mode)
+        super().__init__(type="none", position=position, col_name="", mode=mode)
 
     def save(self, directory_path: str):
         pass
@@ -81,7 +81,7 @@ class NoneStep(Step):
 
 class ScalerWrapper(Step):
     def __init__(self, position: int, col_name: str, mode: Literal["minmax", "standard"] = "standard",):
-        super().__init__(name="scaler", position=position, col_name=col_name, mode=mode)
+        super().__init__(type="scaler", position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         if self.mode == "minmax":
@@ -93,16 +93,16 @@ class ScalerWrapper(Step):
 
 
 class LabelEncoderWrapper(Step):
-    def __init__(self, position: int, col_name: str, mode=None):
-        super().__init__(name="label_encoder", position=position, col_name=col_name, mode=mode)
+    def __init__(self, position: int, col_name: str, mode="label"):
+        super().__init__(type="encoder", position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         return LabelEncoder()
 
 
 class OneHotEncoderWrapper(Step):
-    def __init__(self, position: int, col_name: str, mode=None):
-        super().__init__(name="one_hot_encoder", position=position, col_name=col_name, mode=mode)
+    def __init__(self, position: int, col_name: str, mode="one_hot"):
+        super().__init__(type="encoder", position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         return OneHotEncoder()
