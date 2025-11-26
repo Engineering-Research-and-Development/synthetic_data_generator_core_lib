@@ -15,13 +15,13 @@ import skops.io as sio
 
 
 class Step(ABC):
-    def __init__(self, type: str, position: int, col_name: str, mode: str):
-        self.name = type
+    def __init__(self, type_name: str, position: int, col_name: str, mode: str):
+        self.type_name = type_name
         self.mode = mode
         self.position = position
         self.col_name = col_name
         self.operator = None
-        self.filename = f"{self.position}_{self.col_name}_{self.mode}_{self.name}.skops"
+        self.filename = f"{self.position}_{self.col_name}_{self.mode}_{self.type_name}.skops"
 
     @abstractmethod
     def _set_operator(self):
@@ -57,8 +57,8 @@ class Step(ABC):
 
 
 class NoneStep(Step):
-    def __init__(self, position: int, mode=None):
-        super().__init__(type="none", position=position, col_name="", mode=mode)
+    def __init__(self, position: int, mode="", type_name="none"):
+        super().__init__(type_name=type_name, position=position, col_name="", mode=mode)
 
     def save(self, directory_path: str):
         pass
@@ -80,8 +80,8 @@ class NoneStep(Step):
 
 
 class ScalerWrapper(Step):
-    def __init__(self, position: int, col_name: str, mode: Literal["minmax", "standard"] = "standard",):
-        super().__init__(type="scaler", position=position, col_name=col_name, mode=mode)
+    def __init__(self, position: int, col_name: str, mode: Literal["minmax", "standard"] = "standard", type_name="scaler"):
+        super().__init__(type_name=type_name, position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         if self.mode == "minmax":
@@ -93,16 +93,25 @@ class ScalerWrapper(Step):
 
 
 class LabelEncoderWrapper(Step):
-    def __init__(self, position: int, col_name: str, mode="label"):
-        super().__init__(type="encoder", position=position, col_name=col_name, mode=mode)
+    def __init__(self, position: int, col_name: str, mode="label", type_name="encoder"):
+        super().__init__(type_name=type_name, position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         return LabelEncoder()
 
+    def fit_transform(self, data: np.ndarray) -> np.ndarray:
+        return super().fit_transform(data).reshape(*data.shape)
+
+    def transform(self, data: np.ndarray) -> np.ndarray:
+        return super().transform(data).reshape(*data.shape)
+
+    def inverse_transform(self, data: np.ndarray) -> np.ndarray:
+        return super().inverse_transform(data).reshape(*data.shape)
+
 
 class OneHotEncoderWrapper(Step):
-    def __init__(self, position: int, col_name: str, mode="one_hot"):
-        super().__init__(type="encoder", position=position, col_name=col_name, mode=mode)
+    def __init__(self, position: int, col_name: str, mode="one_hot", type_name="encoder"):
+        super().__init__(type_name=type_name, position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         return OneHotEncoder()

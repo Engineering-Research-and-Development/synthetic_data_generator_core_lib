@@ -15,7 +15,7 @@ class IntervalThreshold(UnspecializedFunction):
         self._check_parameters()
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
+        param_mapping = {param.type_name: param for param in self.parameters}
         self.upper_bound = param_mapping["upper_bound"].value
         self.lower_bound = param_mapping["lower_bound"].value
         self.upper_strict = param_mapping["upper_strict"].value

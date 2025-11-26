@@ -16,7 +16,7 @@ class NormalTester(UnspecializedFunction):
         self._check_parameters()
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
+        param_mapping = {param.type_name: param for param in self.parameters}
         self.mean = param_mapping["mean"].value
         self.std = param_mapping["standard_deviation"].value
 

@@ -13,7 +13,7 @@ class MonoThreshold(UnspecializedFunction):
         self._check_parameters()
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
+        param_mapping = {param.type_name: param for param in self.parameters}
         self.value = param_mapping["value"].value
         self.strict = param_mapping["strict"].value
 

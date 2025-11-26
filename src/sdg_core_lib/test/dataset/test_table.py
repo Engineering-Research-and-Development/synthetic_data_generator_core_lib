@@ -154,7 +154,7 @@ def test_self_pk_integrity(temp_folder):
 def test_empty_table(temp_folder):
     empty_data = []
     with pytest.raises(ValueError):
-        table = Table.from_json(empty_data, temp_folder)
+        Table.from_json(empty_data, temp_folder)
 
 
 def test_mixed_data_types(temp_folder):
