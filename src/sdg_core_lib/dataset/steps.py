@@ -13,13 +13,15 @@ import skops.io as sio
 
 # TODO: What if steps change data types? Should I implement some "old_type / new_type" mechanics?
 
+
 class Step(ABC):
-    def __init__(self, name: str, position: int, mode: str):
+    def __init__(self, name: str, position: int, col_name: str, mode: str):
         self.name = name
         self.mode = mode
         self.position = position
+        self.col_name = col_name
         self.operator = None
-        self.filename = f"{self.position}_{self.name}.skops"
+        self.filename = f"{self.position}_{self.col_name}_{self.name}.skops"
 
     @abstractmethod
     def _set_operator(self):
@@ -56,7 +58,7 @@ class Step(ABC):
 
 class NoneStep(Step):
     def __init__(self, position: int, mode=None):
-        super().__init__(name="none", position=position, mode=mode)
+        super().__init__(name="none", position=position, col_name="", mode=mode)
 
     def save(self, directory_path: str):
         pass
@@ -78,9 +80,8 @@ class NoneStep(Step):
 
 
 class ScalerWrapper(Step):
-    def __init__(self, position: int, mode: Literal["minmax", "standard"] = "standard"):
-        super().__init__(name="scaler", position=position, mode=mode)
-        self.operator = None
+    def __init__(self, position: int, col_name: str, mode: Literal["minmax", "standard"] = "standard",):
+        super().__init__(name="scaler", position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         if self.mode == "minmax":
@@ -92,25 +93,22 @@ class ScalerWrapper(Step):
 
 
 class LabelEncoderWrapper(Step):
-    def __init__(self, position: int, mode=None):
-        super().__init__(name="encoder", position=position, mode=mode)
+    def __init__(self, position: int, col_name: str, mode=None):
+        super().__init__(name="label_encoder", position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         return LabelEncoder()
 
 
 class OneHotEncoderWrapper(Step):
-    def __init__(self, position: int, mode=None):
-        super().__init__(name="encoder", position=position, mode=mode)
+    def __init__(self, position: int, col_name: str, mode=None):
+        super().__init__(name="one_hot_encoder", position=position, col_name=col_name, mode=mode)
 
     def _set_operator(self):
         return OneHotEncoder()
 
     def fit_transform(self, data: np.ndarray) -> np.ndarray:
-        self.operator = self._set_operator()
-        return self.operator.fit_transform(data).toarray()
+        return super().fit_transform(data).toarray()
 
     def transform(self, data: np.ndarray) -> np.ndarray:
-        if self.operator is None:
-            raise ValueError("Operator not initialized")
-        return self.operator.transform(data).toarray()
+        return super().transform(data).toarray()

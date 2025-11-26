@@ -124,7 +124,9 @@ def test_timeseries_preprocess(sample_timeseries):
 
     for categoric in preprocessed.get_categorical_columns():
         feature_data = categoric.get_data().flatten()
-        assert np.all(np.isin(feature_data, [0, 1]))  # Categorical data should be one-hot encoded
+        assert np.all(
+            np.isin(feature_data, [0, 1])
+        )  # Categorical data should be one-hot encoded
 
 
 def test_timeseries_postprocess(sample_timeseries):
@@ -135,8 +137,12 @@ def test_timeseries_postprocess(sample_timeseries):
     # Verify the data is restored (approximately due to floating point)
     original_data = sample_timeseries.get_computing_data()
     restored_data = postprocessed.get_computing_data()
-    assert np.allclose(original_data[:,0,:].astype("float"), restored_data[:,0,:].astype("float"), atol=1e-6)
-    assert np.all(original_data[:,1,:] == restored_data[:,1,:])
+    assert np.allclose(
+        original_data[:, 0, :].astype("float"),
+        restored_data[:, 0, :].astype("float"),
+        atol=1e-6,
+    )
+    assert np.all(original_data[:, 1, :] == restored_data[:, 1, :])
 
 
 def test_timeseries_invalid_experiment_lengths(temp_folder):

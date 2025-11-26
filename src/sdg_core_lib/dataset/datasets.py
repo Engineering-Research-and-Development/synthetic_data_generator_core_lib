@@ -81,7 +81,10 @@ class Table(Dataset):
         for idx, col_data in enumerate(json_data):
             col_type = col_data.get("column_type", "")
             col_name = col_data.get("column_name", "")
-            col_values = np.array(col_data.get("column_data", []), dtype=col_data.get("column_datatype", ""))
+            col_values = np.array(
+                col_data.get("column_data", []),
+                dtype=col_data.get("column_datatype", ""),
+            )
             if len(col_values.shape) == 1:
                 col_values = col_values.reshape(-1, 1)
             col_value_type = col_data.get("column_datatype", "")

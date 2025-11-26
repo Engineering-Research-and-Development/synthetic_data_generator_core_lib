@@ -62,9 +62,9 @@ class TableProcessor(Processor):
         for col in columns:
             self.steps[col.position] = []
             if isinstance(col, Numeric):
-                self.add_step(ScalerWrapper(col.position, "standard"), col.position)
+                self.add_step(ScalerWrapper(col.position, col.name, "standard"), col.position)
             elif isinstance(col, Categorical):
-                self.add_step(OneHotEncoderWrapper(col.position), col.position)
+                self.add_step(OneHotEncoderWrapper(col.position, col.name), col.position)
             else:
                 self.add_step(NoneStep(col.position), col.position)
 
