@@ -1,6 +1,6 @@
 import shutil
 import pytest
-from sdg_core_lib.job import job
+from sdg_core_lib.job import train, infer
 import json
 import os
 
@@ -37,15 +37,15 @@ def test_train_timeseries(setup):
     n_rows = train_request_2["n_rows"]
     save_filepath = output_folder
 
-    results, metrics, model, data = job(
+    results, metrics, model, data = train(
         model_info=model_info,
         dataset=dataset,
         n_rows=n_rows,
         save_filepath=save_filepath,
-        train=True,
     )
     assert isinstance(results, list)
     assert results is not None
+    print(results)
     assert model is not None
     assert data is not None
 
@@ -56,18 +56,21 @@ def test_train(setup):
     n_rows = train_request["n_rows"]
     save_filepath = output_folder
 
-    results, metrics, model, data = job(
+    results, metrics, model, data = train(
         model_info=model_info,
         dataset=dataset,
         n_rows=n_rows,
         save_filepath=save_filepath,
-        train=True,
     )
+
     assert isinstance(results, list)
     assert results is not None
     assert metrics is not None
+    print(metrics)
     assert model is not None
+    print(model.training_info.to_json())
     assert data is not None
+    print(data)
 
 
 def test_infer(setup):
@@ -77,18 +80,18 @@ def test_infer(setup):
     n_rows = infer_request["n_rows"]
     save_filepath = output_folder
 
-    results, metrics, model, data = job(
+    (
+        results,
+        metrics,
+    ) = infer(
         model_info=model_info,
         dataset=dataset,
         n_rows=n_rows,
         save_filepath=save_filepath,
-        train=False,
     )
     assert isinstance(results, list)
     assert results is not None
     assert metrics is not None
-    assert model is not None
-    assert data is not None
 
 
 def test_infer_nodata_wrong(setup):
@@ -98,12 +101,14 @@ def test_infer_nodata_wrong(setup):
     save_filepath = output_folder
 
     with pytest.raises(ValueError) as exception_info:
-        _, _, _, _ = job(
+        (
+            _,
+            _,
+        ) = infer(
             model_info=model_info,
-            dataset=[],
+            dataset={"dataset_type": "table", "data": []},
             n_rows=n_rows,
             save_filepath=save_filepath,
-            train=False,
         )
     assert exception_info.type is ValueError
 
@@ -114,15 +119,14 @@ def test_infer_nodata(setup, teardown):
     n_rows = infer_nodata_request["n_rows"]
     save_filepath = output_folder
 
-    results, metrics, model, data = job(
+    results, metrics = infer(
         model_info=model_info,
-        dataset=[],
+        dataset={"dataset_type": "table", "data": []},
         n_rows=n_rows,
         save_filepath=save_filepath,
-        train=False,
     )
     assert isinstance(results, list)
     assert results is not None
+    print(results)
     assert metrics is not None
-    assert model is not None
-    assert data is not None
+    print(metrics)

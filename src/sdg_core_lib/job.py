@@ -1,15 +1,20 @@
-import copy
-import pandas as pd
-
-from sdg_core_lib.evaluate.TabularComparison import TabularComparisonEvaluator
-from sdg_core_lib.NumericDataset import NumericDataset
+from sdg_core_lib.dataset.datasets import Table, TimeSeries
+from sdg_core_lib.evaluate.evaluators import (
+    TabularComparisonEvaluator,
+    TimeSeriesComparisonEvaluator,
+)
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 
+dataset_mapping = {
+    "table": {"dataset": Table, "evaluator": TabularComparisonEvaluator},
+    "time_series": {"dataset": TimeSeries, "evaluator": TimeSeriesComparisonEvaluator},
+}
 
-def job(
-    model_info: dict, dataset: list, n_rows: int, save_filepath: str, train: bool
-) -> tuple[list[dict], dict, UnspecializedModel, NumericDataset]:
+
+def train(
+    model_info: dict, dataset: dict, n_rows: int, save_filepath: str
+) -> tuple[list[dict], dict, UnspecializedModel, list[dict]]:
     """
     Main function to run the job.
 
@@ -21,36 +26,65 @@ def job(
     :param dataset: a list of dataframes
     :param n_rows: the number of rows to generate
     :param save_filepath: the path to save the results
-    :param train: a boolean indicating if the model should be trained
     :return: a tuple containing a list of metrics, a dictionary with the model's info, the trained model, and the generated dataset
     """
 
-    if len(dataset) == 0:
-        data_info = model_info.get("training_data_info", [])
-        data = NumericDataset(dataset=data_info)
-    else:
-        data = NumericDataset(dataset=dataset)
+    data_payload = dataset.get("data", [])
+    dataset_type = dataset.get("dataset_type", "")
+    dataset_class = dataset_mapping[dataset_type]["dataset"]
+    dataset_evaluator_class = dataset_mapping[dataset_type]["evaluator"]
 
-    model = model_factory(model_info, data.input_shape)
-    if train:
-        model.train(data=data)
-        model.save(save_filepath)
+    data = dataset_class.from_json(data_payload, save_filepath)
+
+    preprocessed_data = data.preprocess()
+    preprocess_schema = preprocessed_data.to_skeleton()
+    model = model_factory(model_info, preprocessed_data.get_shape_for_model())
+    model.train(data=preprocessed_data.get_computing_data())
+    model.save(save_filepath)
 
     predicted_data = model.infer(n_rows)
-    df_predict = pd.DataFrame(data=predicted_data.tolist(), columns=data.columns)
+    synthetic_data = preprocessed_data.clone(predicted_data)
+    synthetic_data = synthetic_data.postprocess()
 
-    report = {"available": False}
-    if len(data.dataframe) > 0:
-        evaluator = TabularComparisonEvaluator(
-            real_data=data.dataframe,
-            synthetic_data=df_predict,
-            numerical_columns=data.continuous_columns,
-            categorical_columns=data.categorical_columns,
+    evaluator = dataset_evaluator_class(
+        real_data=data,
+        synthetic_data=synthetic_data,
+    )
+    report = evaluator.compute()
+    results = synthetic_data.to_json()
+
+    return results, report, model, preprocess_schema
+
+
+def infer(
+    model_info: dict, dataset: dict, n_rows: int, save_filepath: str
+) -> tuple[list[dict], dict]:
+    dataset_type = dataset.get("dataset_type", "")
+    dataset_class = dataset_mapping[dataset_type]["dataset"]
+    dataset_evaluator_class = dataset_mapping[dataset_type]["evaluator"]
+
+    data_payload = dataset.get("data", [])
+    data = None
+    if len(data_payload) == 0:
+        data_skeleton = model_info.get("training_data_info")
+        preprocessed_data = dataset_class.from_skeleton(data_skeleton, save_filepath)
+    else:
+        data = dataset_class.from_json(data_payload, save_filepath)
+        preprocessed_data = data.preprocess()
+
+    model = model_factory(model_info)
+    predicted_data = model.infer(n_rows)
+    synthetic_data = preprocessed_data.clone(predicted_data)
+    synthetic_data = synthetic_data.postprocess()
+
+    report = {"available": "false"}
+    if data is not None:
+        evaluator = dataset_evaluator_class(
+            real_data=data,
+            synthetic_data=synthetic_data,
         )
         report = evaluator.compute()
 
-    generated = copy.deepcopy(data)
-    generated.dataframe = df_predict
-    results = generated.parse_tabular_data_json()
+    results = synthetic_data.to_json()
 
-    return results, report, model, data
+    return results, report

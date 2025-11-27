@@ -1,5 +1,5 @@
 {
-	"dataset": [
+	"dataset": { "data": [
 		{
 			"column_data": [
 				13.71,
@@ -157,6 +157,8 @@
 			"column_datatype": "int64"
 		}
 	],
+            "dataset_type": "table"
+      },
   	"behavious_id" : [],
 	"model": {
 		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE",

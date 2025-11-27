@@ -1,14 +1,12 @@
 from abc import ABC
 
 import numpy as np
-import skops.io as sio
 import os
 import keras
 from keras import saving
 
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
-from sdg_core_lib.NumericDataset import NumericDataset
 
 os.environ["KERAS_BACKEND"] = "tensorflow"
 
@@ -35,7 +33,8 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         self._batch_size = None
         self._epochs = None
 
-    def _load_files(self, folder_path: str):
+    @staticmethod
+    def _load_files(folder_path: str):
         """
         Loads the saved VAE model files from the given folder path.
 
@@ -45,11 +44,8 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         """
         encoder_filename = os.path.join(folder_path, "encoder.keras")
         decoder_filename = os.path.join(folder_path, "decoder.keras")
-        scaler_filename = os.path.join(folder_path, "scaler.skops")
         encoder = saving.load_model(encoder_filename)
         decoder = saving.load_model(decoder_filename)
-        if os.path.isfile(scaler_filename):
-            self._scaler = sio.load(scaler_filename)
         return encoder, decoder
 
     def _load_model(self, encoder, decoder):
@@ -84,26 +80,11 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         decoder_filename = os.path.join(folder_path, "decoder.keras")
         saving.save_model(self._model.encoder, encoder_filename)
         saving.save_model(self._model.decoder, decoder_filename)
-        scaler_filename = os.path.join(folder_path, "scaler.skops")
-        sio.dump(self._scaler, scaler_filename)
 
-    def fine_tune(self, data: np.array, **kwargs):
+    def fine_tune(self, data: np.ndarray, **kwargs):
         raise NotImplementedError
 
     def _build(self, input_shape: str):
-        raise NotImplementedError
-
-    def _scale(self, data: np.array):
-        if self._scaler is not None:
-            return self._scaler.transform(data)
-        return data
-
-    def _inverse_scale(self, data: np.array):
-        if self._scaler is not None:
-            return self._scaler.inverse_transform(data)
-        return data
-
-    def _pre_process(self, data: NumericDataset, **kwargs):
         raise NotImplementedError
 
     def _set_hyperparams(self, learning_rate, batch_size, epochs):
@@ -119,7 +100,7 @@ class KerasBaseVAE(UnspecializedModel, ABC):
 
     def train(
         self,
-        data: NumericDataset,
+        data: np.ndarray,
         learning_rate: float = None,
         batch_size: int = None,
         epochs: int = None,
@@ -135,7 +116,6 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         :raises ValueError: if the model shape does not match data shape
         :return: None
         """
-        data = self._pre_process(data)
         learning_rate = (
             learning_rate if learning_rate is not None else self._learning_rate
         )
@@ -144,7 +124,7 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         self._model.compile(
             optimizer=keras.optimizers.Adam(learning_rate=learning_rate)
         )
-        history = self._model.fit(data, epochs=epochs, batch_size=batch_size, verbose=0)
+        history = self._model.fit(data, epochs=epochs, batch_size=batch_size, verbose=1)
         self.training_info = TrainingInfo(
             loss_fn="ELBO",
             train_loss=history.history["loss"][-1].numpy().item(),
@@ -164,7 +144,6 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         """
         z_random = np.random.normal(size=(n_rows, self._latent_dim))
         results = self._model.decoder.predict(z_random)
-        results = self._inverse_scale(results)
         return results
 
     @classmethod

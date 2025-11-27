@@ -1,12 +1,10 @@
 import numpy as np
 import keras
 
-from sdg_core_lib.NumericDataset import NumericDataset
 from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo, AllowedData
 from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
 from keras import layers
 
-from sdg_core_lib.preprocess.scale import standardize_simple_tabular_time_series
 from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
 
 
@@ -112,35 +110,6 @@ class TimeSeriesVAE(KerasBaseVAE):
         decoder.summary()
         vae.summary()
         return vae
-
-    def _scale(self, data: np.array):
-        batch, feats, steps = data.shape
-        if self._scaler is None:
-            return data
-        data_reshaped = data.transpose(0, 2, 1).reshape(-1, feats)
-        data_scaled = self._scaler.transform(data_reshaped)
-        data_scaled = data_scaled.reshape(batch, steps, feats).transpose(0, 2, 1)
-        return data_scaled
-
-    def _inverse_scale(self, data: np.array):
-        if self._scaler is None:
-            return data
-        batch, feats, steps = data.shape
-        data_reshaped = data.transpose(0, 2, 1).reshape(-1, feats)
-        data_unscaled = self._scaler.inverse_transform(data_reshaped)
-        data_unscaled = data_unscaled.reshape(batch, steps, feats).transpose(0, 2, 1)
-        return data_unscaled
-
-    def _pre_process(self, data: NumericDataset, **kwargs):
-        np_data = np.array(data.dataframe.values.tolist())
-        if not self._scaler:
-            scaler, np_input_scaled, _ = standardize_simple_tabular_time_series(
-                train_data=np_data
-            )
-            self._scaler = scaler
-        else:
-            np_input_scaled = self._scale(np_data)
-        return np_input_scaled
 
     @classmethod
     def self_describe(cls):

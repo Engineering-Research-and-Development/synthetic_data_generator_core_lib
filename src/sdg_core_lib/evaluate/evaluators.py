@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 import scipy.stats as ss
 
-from sdg_core_lib.evaluate.Metrics import (
+from sdg_core_lib.dataset.datasets import Table, TimeSeries
+from sdg_core_lib.evaluate.metrics import (
     MetricReport,
     StatisticalMetric,
     AdherenceMetric,
@@ -24,20 +25,24 @@ class TabularComparisonEvaluator:
 
     def __init__(
         self,
-        real_data: pd.DataFrame,
-        synthetic_data: pd.DataFrame,
-        numerical_columns: list[str],
-        categorical_columns: list[str],
+        real_data: Table,
+        synthetic_data: Table,
     ):
+        if type(real_data) is not Table:
+            raise ValueError("real_data must be a Table")
+        if type(synthetic_data) is not Table:
+            raise ValueError("synthetic_data must be a Table")
         self._real_data = real_data
-        self._synthetic_data = synthetic_data
-        self._numerical_columns = numerical_columns
-        self._categorical_columns = categorical_columns
+        self._synth_data = synthetic_data
+        self._numerical_columns = real_data.get_numeric_columns()
+        self._categorical_columns = real_data.get_categorical_columns()
+        self._synth_numerical_columns = synthetic_data.get_numeric_columns()
+        self._synth_categorical_columns = synthetic_data.get_categorical_columns()
         self.report = MetricReport()
 
     def compute(self):
         if len(self._numerical_columns) <= 1 and len(self._categorical_columns) <= 1:
-            return
+            return {"available": "false"}
 
         self._evaluate_statistical_properties()
         self._evaluate_adherence()
@@ -46,14 +51,21 @@ class TabularComparisonEvaluator:
         return self.report.to_json()
 
     @staticmethod
-    def _compute_cramer_v(data1: np.array, data2: np.array):
+    def _compute_cramer_v(data1: np.ndarray, data2: np.ndarray):
         """
         Computes Cramer's V on a pair of categorical columns
         :param data1: first column
         :param data2: second column
         :return: Cramer's V
         """
-        confusion_matrix = pd.crosstab(data1, data2)
+        confusion_matrix = pd.crosstab(
+            data1.reshape(
+                -1,
+            ),
+            data2.reshape(
+                -1,
+            ),
+        )
         chi2 = ss.chi2_contingency(confusion_matrix)[0]
         # Total number of observations.
         n = confusion_matrix.to_numpy().sum()
@@ -86,14 +98,16 @@ class TabularComparisonEvaluator:
             return 0
 
         contingency_scores_distances = []
-        for idx, col in enumerate(self._categorical_columns[:-1]):
-            for col2 in self._categorical_columns[idx + 1 :]:
-                v_real = self._compute_cramer_v(
-                    self._real_data[col].to_numpy(), self._real_data[col2].to_numpy()
-                )
+        for idx, (col, synth_col) in enumerate(
+            zip(self._categorical_columns[:-1], self._synth_categorical_columns[:-1])
+        ):
+            for col_2, synth_col_2 in zip(
+                self._categorical_columns[idx + 1 :],
+                self._synth_categorical_columns[idx + 1 :],
+            ):
+                v_real = self._compute_cramer_v(col.get_data(), col_2.get_data())
                 v_synth = self._compute_cramer_v(
-                    self._synthetic_data[col].to_numpy(),
-                    self._synthetic_data[col2].to_numpy(),
+                    synth_col.get_data(), synth_col_2.get_data()
                 )
                 contingency_scores_distances.append(np.abs(v_real - v_synth))
 
@@ -113,9 +127,15 @@ class TabularComparisonEvaluator:
             return 0
 
         wass_distance_scores = []
-        for col in self._numerical_columns:
-            real_data = self._real_data[col].to_numpy()
-            synth_data = self._synthetic_data[col].to_numpy()
+        for col, synt_col in zip(
+            self._numerical_columns, self._synth_numerical_columns
+        ):
+            real_data = col.get_data().reshape(
+                -1,
+            )
+            synth_data = synt_col.get_data().reshape(
+                -1,
+            )
             distance = np.abs(np.max(real_data) - np.min(real_data))
             wass_dist = ss.wasserstein_distance(real_data, synth_data)
             wass_dist = np.clip(wass_dist, 0, distance) / distance
@@ -165,22 +185,40 @@ class TabularComparisonEvaluator:
                 )
             )
 
+    @staticmethod
+    def _give_unique_rows(dirty_data: np.ndarray):
+        """
+        Works on 0-axis of a numpy array to search unique values
+        :param dirty_data:
+        :return:
+        """
+        data = dirty_data.tolist()
+        seen = {}
+        unique = []
+        for o in data:
+            if str(o) not in seen:
+                seen[str(o)] = True
+                unique.append(o)
+
+        return np.array(unique)
+
     def _evaluate_novelty(self):
         """
         This function evaluates in two steps the following metrics
         1) The number of unique samples generated in the synthetic dataset with respect to the real data
         2) The number of duplicated samples in the synthetic dataset
         """
-        synth_len = self._synthetic_data.shape[0]
-
-        synth_unique = self._synthetic_data.drop_duplicates()
+        synthetic_data = self._synth_data.get_computing_data()
+        synth_len = synthetic_data.shape[0]
+        synth_unique = self._give_unique_rows(synthetic_data)
         synth_unique_len = synth_unique.shape[0]
 
-        real_unique = self._real_data.drop_duplicates()
+        real_data = self._real_data.get_computing_data()
+        real_unique = self._give_unique_rows(real_data)
         real_unique_len = real_unique.shape[0]
 
-        concat_df = pd.concat([real_unique, synth_unique], axis=0)
-        concat_unique = concat_df.drop_duplicates()
+        concat_data = np.vstack([real_unique, synth_unique])
+        concat_unique = self._give_unique_rows(concat_data)
         conc_unique_len = concat_unique.shape[0]
 
         new_synt_data = synth_len - (
@@ -213,49 +251,46 @@ class TabularComparisonEvaluator:
             - category_adherence_score: dict mapping column name to adherence percentage.
             - boundary_adherence_score: dict mapping column name to adherence percentage.
         """
-        # Ensure synthetic data is not empty
-        total_records = self._synthetic_data.shape[0]
-        if total_records == 0:
-            raise ValueError("Synthetic data is empty.")
+        total_records = self._synth_data.get_computing_data().shape[0]
 
         # --- Categorical Adherence ---
         # For each categorical column, compute the percentage of synthetic entries
         # that have values found in the real data.
         category_adherence_score: dict[str, float] = {}
-        real_categorical = self._real_data[self._categorical_columns]
-        synth_categorical = self._synthetic_data[self._categorical_columns]
 
-        for col in self._categorical_columns:
-            # Identify values present in synthetic data but missing in real data.
-            extra_values = set(synth_categorical[col].unique()) - set(
-                real_categorical[col].unique()
+        for real_cat, synth_cat in zip(
+            self._categorical_columns, self._synth_categorical_columns
+        ):
+            real_data = real_cat.get_data()
+            synth_data = synth_cat.get_data()
+            extra_values = np.array(
+                set(np.unique(synth_data)) - set(np.unique(real_data))
             )
             # Count how many synthetic records use these extra values.
-            extra_count = synth_categorical[col].isin(extra_values).sum()
+            extra_count = np.sum(np.isin(synth_data, extra_values))
             # Define adherence as the percentage of records that do NOT have extra values.
             adherence_percentage = np.round((1 - extra_count / total_records) * 100, 2)
-            category_adherence_score[col] = float(adherence_percentage)
+            category_adherence_score[real_cat.name] = float(adherence_percentage)
 
         # --- Numerical Boundary Adherence ---
         # For each numerical column, compute the percentage of synthetic entries
         # that lie within the min-max boundaries of the real data.
         boundary_adherence_score: dict[str, float] = {}
-        real_numerical = self._real_data[self._numerical_columns]
-        synth_numerical = self._synthetic_data[self._numerical_columns]
 
-        for col in self._numerical_columns:
+        for real_num, synth_num in zip(
+            self._numerical_columns, self._synth_numerical_columns
+        ):
             # Obtain min and max boundaries from the real data.
-            stats = real_numerical[col].describe()
-            min_boundary = stats["min"]
-            max_boundary = stats["max"]
+            min_boundary = real_num.get_data().min()
+            max_boundary = real_num.get_data().max()
             # Filter synthetic records that fall within these boundaries.
-            in_boundary = synth_numerical[
-                (synth_numerical[col] >= min_boundary)
-                & (synth_numerical[col] <= max_boundary)
+            synth_data = synth_num.get_data()
+            in_boundary = synth_data[
+                (synth_data >= min_boundary) & (synth_data <= max_boundary)
             ]
             in_boundary_count = in_boundary.shape[0]
             adherence_percentage = np.round(in_boundary_count / total_records * 100, 2)
-            boundary_adherence_score[col] = float(adherence_percentage)
+            boundary_adherence_score[real_num.name] = float(adherence_percentage)
 
         if not len(self._categorical_columns) == 0:
             self.report.add_metric(
@@ -274,3 +309,39 @@ class TabularComparisonEvaluator:
                     value=boundary_adherence_score,
                 )
             )
+
+
+class TimeSeriesComparisonEvaluator:
+    """
+    Evaluates the quality of a synthetic dataset with respect to a real one.
+
+    The evaluation is based on the following metrics:
+    - Statistical properties: wasserstein distance and Cramer's V
+    - Adherence: evaluates how well the synthetic data adheres to the real data distribution
+    - Novelty: evaluates how many new values are generated in the synthetic dataset
+
+    The evaluation is performed on a per-column basis, and the results are aggregated.
+    """
+
+    def __init__(
+        self,
+        real_data: TimeSeries,
+        synthetic_data: TimeSeries,
+    ):
+        if type(real_data) is not TimeSeries:
+            raise ValueError("real_data must be a TimeSeries")
+        if type(synthetic_data) is not TimeSeries:
+            raise ValueError("synthetic_data must be a TimeSeries")
+        self._real_data = real_data
+        self._synth_data = synthetic_data
+        self._numerical_columns = real_data.get_numeric_columns()
+        self._categorical_columns = real_data.get_categorical_columns()
+        self._synth_numerical_columns = synthetic_data.get_numeric_columns()
+        self._synth_categorical_columns = synthetic_data.get_categorical_columns()
+        self.report = MetricReport()
+
+    def compute(self):
+        if len(self._numerical_columns) <= 1 and len(self._categorical_columns) <= 1:
+            return {"available": "false"}
+
+        return {"available": "false"}

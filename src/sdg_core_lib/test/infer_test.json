@@ -1,5 +1,5 @@
 {
-	"dataset": [
+	"dataset": { "data": [
 		{
 			"column_data": [
 				13.71,
@@ -157,6 +157,8 @@
 			"column_datatype": "int64"
 		}
 	],
+    "dataset_type":  "table"
+    },
   	"functions_id" : [],
 	"model": {
 		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE",
@@ -164,5 +166,5 @@
         "image": "C:\\Users\\giumartine\\PycharmProjects\\SyntheticGenerator\\synthetic-data-generator\\src\\generator\\server\\saved_models\\trained_models\\Test-T_VAETabularVAE20250319.150458",
         "input_shape": "(13,)"
 	},
-    "n_rows": 1000
+    "n_rows": 100
 }

@@ -1,4 +1,4 @@
-from sdg_core_lib.evaluate.Metrics import (
+from sdg_core_lib.evaluate.metrics import (
     Metric,
     StatisticalMetric,
     AdherenceMetric,
