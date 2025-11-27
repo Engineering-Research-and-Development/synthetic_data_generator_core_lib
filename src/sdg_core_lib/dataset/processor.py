@@ -11,13 +11,15 @@ class Processor(ABC):
     def __init__(self, dir_path: str):
         self.dir_path = dir_path
         self.steps: dict[int, list[Step]] = {}
-        self.idx_to_data: dict[int, int]= {}
+        self.idx_to_data: dict[int, int] = {}
 
     @abstractmethod
     def _init_steps(self, data: list):
         raise NotImplementedError
 
-    def add_steps(self, steps: list[Step], col_position: int, data_position: int)-> 'Processor':
+    def add_steps(
+        self, steps: list[Step], col_position: int, data_position: int
+    ) -> "Processor":
         self.steps[col_position] = steps
         self.idx_to_data[col_position] = data_position
         return self

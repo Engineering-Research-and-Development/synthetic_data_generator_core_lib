@@ -5,7 +5,12 @@ import numpy as np
 import pytest
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from sdg_core_lib.dataset.steps import ScalerWrapper, NoneStep, LabelEncoderWrapper, OneHotEncoderWrapper
+from sdg_core_lib.dataset.steps import (
+    ScalerWrapper,
+    NoneStep,
+    LabelEncoderWrapper,
+    OneHotEncoderWrapper,
+)
 
 
 @pytest.fixture
@@ -19,16 +24,16 @@ def temp_dir():
 
 class TestScalerWrapper:
     """Test suite for ScalerWrapper class."""
-    
+
     @pytest.fixture
     def sample_data(self):
         """Generate sample test data."""
         return np.array([[1, 2], [3, 4], [5, 6]], dtype=np.float64)
-    
-    @pytest.mark.parametrize("mode,expected_scaler_type", [
-        ("standard", StandardScaler),
-        ("minmax", MinMaxScaler)
-    ])
+
+    @pytest.mark.parametrize(
+        "mode,expected_scaler_type",
+        [("standard", StandardScaler), ("minmax", MinMaxScaler)],
+    )
     def test_initialization(self, mode, expected_scaler_type):
         """Test that ScalerWrapper initializes with correct parameters."""
         step = ScalerWrapper(position=0, col_name="test_col", mode=mode)
@@ -37,7 +42,7 @@ class TestScalerWrapper:
         assert step.position == 0
         assert step.col_name == "test_col"
         assert step.filename == f"0_test_col_{mode}_scaler.skops"
-    
+
     def test_fit_transform(self, sample_data):
         """Test fit_transform method."""
         step = ScalerWrapper(position=0, col_name="test_col", mode="standard")
@@ -45,14 +50,14 @@ class TestScalerWrapper:
         assert transformed.shape == sample_data.shape
         assert step.operator is not None
         assert hasattr(step.operator, "transform")
-    
+
     def test_inverse_transform(self, sample_data):
         """Test inverse_transform method."""
         step = ScalerWrapper(position=0, col_name="test_col", mode="minmax")
         transformed = step.fit_transform(sample_data)
         inverse_transformed = step.inverse_transform(transformed)
         np.testing.assert_allclose(inverse_transformed, sample_data, rtol=1e-6)
-    
+
     def test_save_and_load(self, sample_data, temp_dir):
         """Test save and load functionality."""
         step = ScalerWrapper(position=0, col_name="test_col", mode="standard")
@@ -69,12 +74,12 @@ class TestScalerWrapper:
 
 class TestNoneStep:
     """Test suite for NoneStep class."""
-    
+
     @pytest.fixture
     def sample_data(self):
         """Generate sample test data."""
         return np.array([[1, 2], [3, 4], [5, 6]], dtype=np.float64)
-    
+
     def test_initialization(self):
         """Test that NoneStep initializes with correct parameters."""
         step = NoneStep(position=1)
@@ -87,13 +92,13 @@ class TestNoneStep:
         step = NoneStep(position=0)
         result = step.fit_transform(sample_data)
         np.testing.assert_array_equal(result, sample_data)
-    
+
     def test_transform_returns_same_data(self, sample_data):
         """Test that transform returns the input data unchanged."""
         step = NoneStep(position=0)
         result = step.transform(sample_data)
         np.testing.assert_array_equal(result, sample_data)
-    
+
     def test_inverse_transform_returns_same_data(self, sample_data):
         """Test that inverse_transform returns the input data unchanged."""
         step = NoneStep(position=0)
@@ -103,19 +108,23 @@ class TestNoneStep:
 
 class TestLabelEncoderWrapper:
     """Test suite for LabelEncoderWrapper class."""
-    
+
     @pytest.fixture
     def categorical_data(self):
         """Generate sample categorical data."""
         return np.array(["a", "b", "c", "a", "b"]).reshape(-1, 1)
-    
+
     def test_fit_transform(self, categorical_data):
         """Test fit_transform with categorical data."""
         step = LabelEncoderWrapper(position=0, col_name="category")
         transformed = step.fit_transform(categorical_data)
         assert transformed.shape == categorical_data.shape  # Same number of samples
-        assert set(transformed.flatten().tolist()) == {0, 1, 2}  # Should encode to 0, 1, 2
-    
+        assert set(transformed.flatten().tolist()) == {
+            0,
+            1,
+            2,
+        }  # Should encode to 0, 1, 2
+
     def test_inverse_transform(self, categorical_data):
         """Test inverse_transform to get back original categories."""
         step = LabelEncoderWrapper(position=0, col_name="category")
@@ -126,12 +135,12 @@ class TestLabelEncoderWrapper:
 
 class TestOneHotEncoderWrapper:
     """Test suite for OneHotEncoderWrapper class."""
-    
+
     @pytest.fixture
     def categorical_data(self):
         """Generate sample categorical data."""
         return np.array(["a", "b", "c", "a", "b"]).reshape(-1, 1)
-    
+
     def test_fit_transform(self, categorical_data):
         """Test fit_transform with one-hot encoding."""
         step = OneHotEncoderWrapper(position=0, col_name="category")
@@ -139,14 +148,14 @@ class TestOneHotEncoderWrapper:
         assert transformed.shape == (5, 3)  # 5 samples, 3 categories
         assert np.all(transformed.sum(axis=1) == 1)  # Each row sums to 1 (one-hot)
         assert set(transformed.flatten().tolist()) == {0.0, 1.0}  # Only 0s and 1s
-    
+
     def test_inverse_transform(self, categorical_data):
         """Test inverse_transform to get back original categories."""
         step = OneHotEncoderWrapper(position=0, col_name="category")
         transformed = step.fit_transform(categorical_data)
         inverse_transformed = step.inverse_transform(transformed)
         np.testing.assert_array_equal(inverse_transformed, categorical_data)
-        
+
     def test_handles_unknown_categories(self):
         """Test behavior with unknown categories during transform."""
         train_data = np.array(["a", "b", "c"]).reshape(-1, 1)

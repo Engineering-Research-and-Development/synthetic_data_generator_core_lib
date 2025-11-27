@@ -14,13 +14,21 @@ def test_data_dir(tmp_path_factory):
 @pytest.fixture
 def numeric_column():
     """Create a sample numeric column."""
-    return Numeric("age", "int", 0, np.array([25, 30, 35, 40, 45]).reshape(-1, 1), "continuous")
+    return Numeric(
+        "age", "int", 0, np.array([25, 30, 35, 40, 45]).reshape(-1, 1), "continuous"
+    )
 
 
 @pytest.fixture
 def categorical_column():
     """Create a sample categorical column."""
-    return Categorical("gender", "str", 1, np.array(["M", "F", "M", "F", "M"]).reshape(-1, 1), "categorical")
+    return Categorical(
+        "gender",
+        "str",
+        1,
+        np.array(["M", "F", "M", "F", "M"]).reshape(-1, 1),
+        "categorical",
+    )
 
 
 @pytest.fixture
@@ -56,20 +64,20 @@ class TestTableProcessor:
         """Test inverse processing of data."""
         # Process data first
         processed = table_processor.process([numeric_column, categorical_column])
-        
+
         # Inverse process
         inverse_processed = table_processor.inverse_process(processed)
-        
+
         # Verify results
         assert len(inverse_processed) == 2
         assert isinstance(inverse_processed[0], Column)
         assert isinstance(inverse_processed[1], Categorical)
-        
+
         # Check numeric values are approximately equal
         np.testing.assert_allclose(
             inverse_processed[0].values.astype(float),
             numeric_column.values.astype(float),
-            rtol=1e-6
+            rtol=1e-6,
         )
 
     def test_empty_columns(self, table_processor):
@@ -92,7 +100,9 @@ class TestTableIntegration:
         processed = sample_table.preprocess()
         assert len(processed.columns) == 2
         # Numeric column should be scaled
-        assert not np.array_equal(processed.columns[0].values, sample_table.columns[0].values)
+        assert not np.array_equal(
+            processed.columns[0].values, sample_table.columns[0].values
+        )
         # Categorical column should be one-hot encoded
         assert processed.columns[1].values.shape[1] > 1
 
@@ -100,12 +110,12 @@ class TestTableIntegration:
         """Test table postprocessing."""
         processed = sample_table.preprocess()
         restored = processed.postprocess()
-        
+
         # Check numeric values are approximately equal
         np.testing.assert_allclose(
             restored.columns[0].values.astype(float),
             sample_table.columns[0].values.astype(float),
-            rtol=1e-6
+            rtol=1e-6,
         )
 
     def test_empty_table_initialization(self, test_data_dir):
@@ -120,11 +130,12 @@ class TestEdgeCases:
 
     def test_invalid_column_type(self, table_processor):
         """Test processing with invalid column type."""
+
         class InvalidColumn(Column):
             pass
-            
+
         invalid_col = InvalidColumn("test", "int", 0, np.array([1, 2, 3]), "invalid")
-        
+
         with pytest.raises(NotImplementedError):
             table_processor.process([invalid_col])
 
@@ -134,11 +145,11 @@ class TestEdgeCases:
         processor = TableProcessor(str(test_data_dir))
         cols = processor.process([numeric_column])
         processor._save_all()
-        
+
         # Create new processor and load state
         new_processor = TableProcessor(str(test_data_dir))
         new_processor.inverse_process(cols)
-        
+
         # Verify loaded state
         assert len(new_processor.steps) == 1
         assert 0 in new_processor.steps
