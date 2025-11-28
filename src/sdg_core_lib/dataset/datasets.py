@@ -178,9 +178,9 @@ class Table(Dataset):
             {
                 "feature_name": col.name,
                 "feature_position": col.position,
-                "column_type": col.column_type,
-                "column_datatype": col.value_type,
-                "column_size": str(col.get_internal_shape()[1]),
+                "is_categorical": True if isinstance(col, Categorical) else False,
+                "type": col.value_type,
+                "feature_size": str(col.get_internal_shape()[1]),
             }
             for col in self.columns
         ]
