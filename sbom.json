@@ -136,7 +136,7 @@
       "version": "2.19.2"
     },
     {
-      "bom-ref": "Werkzeug==3.1.3",
+      "bom-ref": "Werkzeug==3.1.4",
       "description": "The comprehensive WSGI web application library.",
       "externalReferences": [
         {
@@ -150,12 +150,7 @@
           "url": "https://werkzeug.palletsprojects.com/"
         },
         {
-          "comment": "from packaging metadata Project-URL: Issue Tracker",
-          "type": "issue-tracker",
-          "url": "https://github.com/pallets/werkzeug/issues/"
-        },
-        {
-          "comment": "from packaging metadata Project-URL: Source Code",
+          "comment": "from packaging metadata Project-URL: Source",
           "type": "other",
           "url": "https://github.com/pallets/werkzeug/"
         },
@@ -167,21 +162,21 @@
         {
           "comment": "from packaging metadata Project-URL: Changes",
           "type": "release-notes",
-          "url": "https://werkzeug.palletsprojects.com/changes/"
+          "url": "https://werkzeug.palletsprojects.com/page/changes/"
         }
       ],
       "licenses": [
         {
           "license": {
             "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: BSD License"
+            "id": "BSD-3-Clause"
           }
         }
       ],
       "name": "Werkzeug",
-      "purl": "pkg:pypi/werkzeug@3.1.3",
+      "purl": "pkg:pypi/werkzeug@3.1.4",
       "type": "library",
-      "version": "3.1.3"
+      "version": "3.1.4"
     },
     {
       "bom-ref": "absl-py==2.3.1",
@@ -695,7 +690,7 @@
       "version": "25.9.23"
     },
     {
-      "bom-ref": "fonttools==4.60.1",
+      "bom-ref": "fonttools==4.61.0",
       "description": "Tools to manipulate font files",
       "externalReferences": [
         {
@@ -713,9 +708,9 @@
         }
       ],
       "name": "fonttools",
-      "purl": "pkg:pypi/fonttools@4.60.1",
+      "purl": "pkg:pypi/fonttools@4.61.0",
       "type": "library",
-      "version": "4.60.1"
+      "version": "4.61.0"
     },
     {
       "bom-ref": "fqdn==1.5.1",
@@ -741,7 +736,7 @@
       "version": "1.5.1"
     },
     {
-      "bom-ref": "gast==0.6.0",
+      "bom-ref": "gast==0.7.0",
       "description": "Python AST that abstracts the underlying Python version",
       "externalReferences": [
         {
@@ -759,9 +754,9 @@
         }
       ],
       "name": "gast",
-      "purl": "pkg:pypi/gast@0.6.0",
+      "purl": "pkg:pypi/gast@0.7.0",
       "type": "library",
-      "version": "0.6.0"
+      "version": "0.7.0"
     },
     {
       "bom-ref": "google-pasta==0.2.0",
@@ -2135,7 +2130,7 @@
       "version": "14.2.0"
     },
     {
-      "bom-ref": "rpds-py==0.29.0",
+      "bom-ref": "rpds-py==0.30.0",
       "description": "Python bindings to Rust's persistent data structures (rpds)",
       "externalReferences": [
         {
@@ -2183,9 +2178,9 @@
         }
       ],
       "name": "rpds-py",
-      "purl": "pkg:pypi/rpds-py@0.29.0",
+      "purl": "pkg:pypi/rpds-py@0.30.0",
       "type": "library",
-      "version": "0.29.0"
+      "version": "0.30.0"
     },
     {
       "bom-ref": "scikit-learn==1.5.2",
@@ -2279,7 +2274,7 @@
       "version": "1.16.3"
     },
     {
-      "bom-ref": "sdg-core-lib==0.1.3",
+      "bom-ref": "sdg-core-lib==0.1.4",
       "description": "Add your description here",
       "externalReferences": [
         {
@@ -2290,7 +2285,7 @@
       ],
       "name": "sdg-core-lib",
       "type": "library",
-      "version": "0.1.3"
+      "version": "0.1.4"
     },
     {
       "bom-ref": "seaborn==0.13.2",
@@ -2919,7 +2914,7 @@
       "dependsOn": [
         "MarkupSafe==3.0.3"
       ],
-      "ref": "Werkzeug==3.1.3"
+      "ref": "Werkzeug==3.1.4"
     },
     {
       "ref": "absl-py==2.3.1"
@@ -3003,13 +2998,13 @@
         "matplotlib==3.10.7",
         "scipy==1.16.3"
       ],
-      "ref": "fonttools==4.60.1"
+      "ref": "fonttools==4.61.0"
     },
     {
       "ref": "fqdn==1.5.1"
     },
     {
-      "ref": "gast==0.6.0"
+      "ref": "gast==0.7.0"
     },
     {
       "dependsOn": [
@@ -3062,7 +3057,7 @@
         "rfc3339-validator==0.1.4",
         "rfc3986-validator==0.1.1",
         "rfc3987-syntax==1.1.0",
-        "rpds-py==0.29.0",
+        "rpds-py==0.30.0",
         "uri-template==1.3.0",
         "webcolors==25.10.0"
       ],
@@ -3114,7 +3109,7 @@
       "dependsOn": [
         "contourpy==1.3.3",
         "cycler==0.12.1",
-        "fonttools==4.60.1",
+        "fonttools==4.61.0",
         "kiwisolver==1.4.9",
         "numpy==2.0.2",
         "packaging==25.0",
@@ -3225,7 +3220,7 @@
     {
       "dependsOn": [
         "attrs==25.4.0",
-        "rpds-py==0.29.0",
+        "rpds-py==0.30.0",
         "typing_extensions==4.15.0"
       ],
       "ref": "referencing==0.37.0"
@@ -3263,7 +3258,7 @@
       "ref": "rich==14.2.0"
     },
     {
-      "ref": "rpds-py==0.29.0"
+      "ref": "rpds-py==0.30.0"
     },
     {
       "dependsOn": [
@@ -3299,7 +3294,7 @@
         "statsmodels==0.14.5",
         "tensorflow==2.18.0"
       ],
-      "ref": "sdg-core-lib==0.1.3"
+      "ref": "sdg-core-lib==0.1.4"
     },
     {
       "dependsOn": [
@@ -3353,7 +3348,7 @@
     {
       "dependsOn": [
         "Markdown==3.10",
-        "Werkzeug==3.1.3",
+        "Werkzeug==3.1.4",
         "absl-py==2.3.1",
         "grpcio==1.76.0",
         "numpy==2.0.2",
@@ -3370,7 +3365,7 @@
         "absl-py==2.3.1",
         "astunparse==1.6.3",
         "flatbuffers==25.9.23",
-        "gast==0.6.0",
+        "gast==0.7.0",
         "google-pasta==0.2.0",
         "grpcio==1.76.0",
         "h5py==3.15.1",
@@ -3429,7 +3424,7 @@
     }
   ],
   "metadata": {
-    "timestamp": "2025-11-28T15:47:11.155520+00:00",
+    "timestamp": "2025-12-01T09:39:03.182555+00:00",
     "tools": {
       "components": [
         {
@@ -3533,7 +3528,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:c1bd0d91-47e6-4dc7-a693-3622d0b63d4d",
+  "serialNumber": "urn:uuid:2749c2a5-db2d-4d26-9159-0ac883a1aa07",
   "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
