@@ -180,6 +180,7 @@ class Table(Dataset):
                 "feature_position": col.position,
                 "is_categorical": True if isinstance(col, Categorical) else False,
                 "type": col.value_type,
+                "feature_type": col.column_type,
                 "feature_size": str(col.get_internal_shape()[1]),
             }
             for col in self.columns
