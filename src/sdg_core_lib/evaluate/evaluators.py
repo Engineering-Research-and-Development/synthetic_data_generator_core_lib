@@ -186,7 +186,7 @@ class TabularComparisonEvaluator:
             )
 
     @staticmethod
-    def _give_unique_rows(dirty_data: np.ndarray):
+    def _give_stringed_unique_rows(dirty_data: np.ndarray):
         """
         Works on 0-axis of a numpy array to search unique values
         :param dirty_data:
@@ -198,7 +198,7 @@ class TabularComparisonEvaluator:
         for o in data:
             if str(o) not in seen:
                 seen[str(o)] = True
-                unique.append(o)
+                unique.append(str(o))
 
         return np.array(unique)
 
@@ -210,34 +210,27 @@ class TabularComparisonEvaluator:
         """
         synthetic_data = self._synth_data.get_computing_data()
         synth_len = synthetic_data.shape[0]
-        synth_unique = self._give_unique_rows(synthetic_data)
+        synth_unique = self._give_stringed_unique_rows(synthetic_data)
         synth_unique_len = synth_unique.shape[0]
 
         real_data = self._real_data.get_computing_data()
-        real_unique = self._give_unique_rows(real_data)
-        real_unique_len = real_unique.shape[0]
+        real_unique = self._give_stringed_unique_rows(real_data)
 
-        concat_data = np.vstack([real_unique, synth_unique])
-        concat_unique = self._give_unique_rows(concat_data)
-        conc_unique_len = concat_unique.shape[0]
-
-        new_synt_data = synth_len - (
-            (real_unique_len + synth_unique_len) - conc_unique_len
-        )
+        new_synt_data = len([data for data in synth_unique if data not in real_unique])
 
         self.report.add_metric(
             NoveltyMetric(
-                title="Unique Synthetic Data",
+                title="Synthetic Data Uniqueness Score (Unique Synthetic Rows / Total Synthetic Rows)",
                 unit_measure="%",
-                value=np.round(synth_unique_len / conc_unique_len * 100, 2).item(),
+                value=np.round((synth_unique_len / synth_len) * 100, 2).item(),
             )
         )
 
         self.report.add_metric(
             NoveltyMetric(
-                title="New Synthetic Data",
+                title="Synthetic Data Novelty Score (Synthetic Rows not in Original Data / Total Synthetic Rows)",
                 unit_measure="%",
-                value=np.round(new_synt_data / conc_unique_len * 100, 2).item(),
+                value=np.round((new_synt_data / synth_len) * 100, 2).item(),
             )
         )
 

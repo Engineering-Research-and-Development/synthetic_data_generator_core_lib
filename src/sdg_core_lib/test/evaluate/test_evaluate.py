@@ -77,11 +77,13 @@ def test_evaluate(evaluator_correct):
     )
     assert (
         0 <= novelty_metrics[0]["value"] <= 100
-        and novelty_metrics[0]["title"] == "Unique Synthetic Data"
+        and novelty_metrics[0]["title"]
+        == "Synthetic Data Uniqueness Score (Unique Synthetic Rows / Total Synthetic Rows)"
     )
     assert (
         0 <= novelty_metrics[1]["value"] <= 100
-        and novelty_metrics[1]["title"] == "New Synthetic Data"
+        and novelty_metrics[1]["title"]
+        == "Synthetic Data Novelty Score (Synthetic Rows not in Original Data / Total Synthetic Rows)"
     )
 
 
