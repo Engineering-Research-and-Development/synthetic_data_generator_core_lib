@@ -1,5 +1,4 @@
 import pytest
-from unittest.mock import patch
 
 from sdg_core_lib.dataset.datasets import Table
 from sdg_core_lib.evaluate.tables import TabularComparisonEvaluator

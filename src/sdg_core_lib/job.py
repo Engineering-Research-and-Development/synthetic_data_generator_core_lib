@@ -1,8 +1,6 @@
 from sdg_core_lib.dataset.datasets import Table, TimeSeries
-from sdg_core_lib.evaluate.tables import (
-    TabularComparisonEvaluator,
-    TimeSeriesComparisonEvaluator,
-)
+from sdg_core_lib.evaluate.tables import TabularComparisonEvaluator
+from sdg_core_lib.evaluate.time_series import TimeSeriesComparisonEvaluator
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
 

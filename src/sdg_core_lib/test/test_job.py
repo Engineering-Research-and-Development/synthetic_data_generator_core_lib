@@ -45,7 +45,6 @@ def test_train_timeseries(setup):
     )
     assert isinstance(results, list)
     assert results is not None
-    print(results)
     assert model is not None
     assert data is not None
 
