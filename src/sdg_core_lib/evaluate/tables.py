@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as ss
 
-from sdg_core_lib.dataset.datasets import Table, TimeSeries
+from sdg_core_lib.dataset.datasets import Table
 from sdg_core_lib.evaluate.metrics import (
     MetricReport,
     StatisticalMetric,
@@ -41,51 +41,18 @@ class TabularComparisonEvaluator:
         self.report = MetricReport()
 
     def compute(self):
-        if len(self._numerical_columns) <= 1 and len(self._categorical_columns) <= 1:
+        if len(self._numerical_columns) < 1 and len(self._categorical_columns) < 1:
             return {"available": "false"}
 
-        self._evaluate_statistical_properties()
+        self._evaluate_wasserstein_distance()
+        self._evaluate_cramer_v_distance()
+        self._evaluate_categorical_frequency_absolute_difference()
         self._evaluate_adherence()
         self._evaluate_novelty()
-
         return self.report.to_json()
 
-    @staticmethod
-    def _compute_cramer_v(data1: np.ndarray, data2: np.ndarray):
-        """
-        Computes Cramer's V on a pair of categorical columns
-        :param data1: first column
-        :param data2: second column
-        :return: Cramer's V
-        """
-        confusion_matrix = pd.crosstab(
-            data1.reshape(
-                -1,
-            ),
-            data2.reshape(
-                -1,
-            ),
-        )
-        chi2 = ss.chi2_contingency(confusion_matrix)[0]
-        # Total number of observations.
-        n = confusion_matrix.to_numpy().sum()
-        if n == 0:
-            return 0.0
-        phi2 = chi2 / n
-        r, k = confusion_matrix.shape
-        # Check for potential division by zero in the correction terms.
-        if n - 1 == 0:
-            return 0.0
-        phi2_corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
-        r_corr = r - ((r - 1) ** 2) / (n - 1)
-        k_corr = k - ((k - 1) ** 2) / (n - 1)
-        denominator = min(k_corr - 1, r_corr - 1)
-        if denominator <= 0:
-            return 0.0
-        V = np.sqrt(phi2_corr / denominator)
-        return V
 
-    def _evaluate_cramer_v_distance(self) -> float:
+    def _evaluate_cramer_v_distance(self):
         """
         Evaluates Cramer's v with Bias Correction https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V on categorical data,
         evaluating pairwise columns. Each pair of columns is evaluated on both datasets, appending scores in a list
@@ -95,26 +62,35 @@ class TabularComparisonEvaluator:
         meaning that category pairs are perfectly balanced
         """
         if len(self._categorical_columns) < 2:
-            return 0
-
-        contingency_scores_distances = []
-        for idx, (col, synth_col) in enumerate(
-            zip(self._categorical_columns[:-1], self._synth_categorical_columns[:-1])
-        ):
-            for col_2, synth_col_2 in zip(
-                self._categorical_columns[idx + 1 :],
-                self._synth_categorical_columns[idx + 1 :],
+            result =  0
+        else:
+            contingency_scores_distances = []
+            for idx, (col, synth_col) in enumerate(
+                zip(self._categorical_columns[:-1], self._synth_categorical_columns[:-1])
             ):
-                v_real = self._compute_cramer_v(col.get_data(), col_2.get_data())
-                v_synth = self._compute_cramer_v(
-                    synth_col.get_data(), synth_col_2.get_data()
+                for col_2, synth_col_2 in zip(
+                    self._categorical_columns[idx + 1 :],
+                    self._synth_categorical_columns[idx + 1 :],
+                ):
+                    v_real = compute_cramer_v(col.get_data(), col_2.get_data())
+                    v_synth = compute_cramer_v(
+                        synth_col.get_data(), synth_col_2.get_data()
+                    )
+                    contingency_scores_distances.append(np.abs(v_real - v_synth))
+
+            final_score = 1 - np.mean(contingency_scores_distances)
+            result =  np.clip(final_score, 0, 1)
+
+        if not len(self._categorical_columns) == 0:
+            self.report.add_metric(
+                StatisticalMetric(
+                    title="Categorical Features Cramer's V",
+                    unit_measure="% - Range: from 0 (worst) to 100 (best)",
+                    value=np.round(result * 100, 2).item(),
                 )
-                contingency_scores_distances.append(np.abs(v_real - v_synth))
+            )
 
-        final_score = 1 - np.mean(contingency_scores_distances)
-        return np.clip(final_score, 0, 1)
-
-    def _evaluate_wasserstein_distance(self) -> float:
+    def _evaluate_wasserstein_distance(self):
         """
         Computing the Wasserstein distance for each numerical column. The score is computed using a different approach,
         trying to clip the values between 0 and 1. With 1 it means that the distribution of data is aligned, while with
@@ -124,83 +100,33 @@ class TabularComparisonEvaluator:
         :return: A single score, computed as 1 - mean(scores)
         """
         if len(self._numerical_columns) < 1:
-            return 0
-
-        wass_distance_scores = []
-        for col, synt_col in zip(
-            self._numerical_columns, self._synth_numerical_columns
-        ):
-            real_data = col.get_data().reshape(
-                -1,
-            )
-            synth_data = synt_col.get_data().reshape(
-                -1,
-            )
-            distance = np.abs(np.max(real_data) - np.min(real_data))
-            wass_dist = ss.wasserstein_distance(real_data, synth_data)
-            wass_dist = np.clip(wass_dist, 0, distance) / distance
-            wass_distance_scores.append(wass_dist)
-
-        return 1 - np.mean(wass_distance_scores)
-
-    def _evaluate_statistical_properties(self):
-        """
-        This function evaluates both Wasserstein distance for numerical features and Cramer's V for categorical ones,
-        providing a weighted mean of the scores based on the number of features
-        """
-        cramer_v = self._evaluate_cramer_v_distance()
-        wass_distance = self._evaluate_wasserstein_distance()
-        n_features = len(self._real_data.columns)
-        stat_compliance = (
-            len(self._categorical_columns) * cramer_v
-            + len(self._numerical_columns) * wass_distance
-        ) / n_features
-
-        if not (
-            len(self._numerical_columns) == 0 or len(self._categorical_columns) == 0
-        ):
-            self.report.add_metric(
-                StatisticalMetric(
-                    title="Total Statistical Compliance",
-                    unit_measure="%",
-                    value=np.round(stat_compliance * 100, 2).item(),
+            result = 0
+        else:
+            wass_distance_scores = []
+            for col, synt_col in zip(
+                self._numerical_columns, self._synth_numerical_columns
+            ):
+                real_data = col.get_data().reshape(
+                    -1,
                 )
-            )
-
-        if not len(self._categorical_columns) == 0:
-            self.report.add_metric(
-                StatisticalMetric(
-                    title="Categorical Features Cramer's V",
-                    unit_measure="%",
-                    value=np.round(cramer_v * 100, 2).item(),
+                synth_data = synt_col.get_data().reshape(
+                    -1,
                 )
-            )
+                distance = np.abs(np.max(real_data) - np.min(real_data))
+                wass_dist = ss.wasserstein_distance(real_data, synth_data)
+                wass_dist = np.clip(wass_dist, 0, distance) / distance
+                wass_distance_scores.append(wass_dist)
+
+            result = 1 - np.mean(wass_distance_scores)
 
         if not len(self._numerical_columns) == 0:
             self.report.add_metric(
                 StatisticalMetric(
                     title="Numerical Features Wasserstein Distance",
-                    unit_measure="%",
-                    value=np.round(wass_distance * 100, 2).item(),
+                    unit_measure="% - Range: from 0 (worst) to 100 (best)",
+                    value=np.round(result * 100, 2).item(),
                 )
             )
-
-    @staticmethod
-    def _give_stringed_unique_rows(dirty_data: np.ndarray):
-        """
-        Works on 0-axis of a numpy array to search unique values
-        :param dirty_data:
-        :return:
-        """
-        data = dirty_data.tolist()
-        seen = {}
-        unique = []
-        for o in data:
-            if str(o) not in seen:
-                seen[str(o)] = True
-                unique.append(str(o))
-
-        return np.array(unique)
 
     def _evaluate_novelty(self):
         """
@@ -210,18 +136,18 @@ class TabularComparisonEvaluator:
         """
         synthetic_data = self._synth_data.get_computing_data()
         synth_len = synthetic_data.shape[0]
-        synth_unique = self._give_stringed_unique_rows(synthetic_data)
+        synth_unique = give_stringed_unique_rows(synthetic_data)
         synth_unique_len = synth_unique.shape[0]
 
         real_data = self._real_data.get_computing_data()
-        real_unique = self._give_stringed_unique_rows(real_data)
+        real_unique = give_stringed_unique_rows(real_data)
 
         new_synt_data = len([data for data in synth_unique if data not in real_unique])
 
         self.report.add_metric(
             NoveltyMetric(
                 title="Synthetic Data Uniqueness Score (Unique Synthetic Rows / Total Synthetic Rows)",
-                unit_measure="%",
+                unit_measure="% - Range: from 0 (worst) to 100 (best)",
                 value=np.round((synth_unique_len / synth_len) * 100, 2).item(),
             )
         )
@@ -229,7 +155,7 @@ class TabularComparisonEvaluator:
         self.report.add_metric(
             NoveltyMetric(
                 title="Synthetic Data Novelty Score (Synthetic Rows not in Original Data / Total Synthetic Rows)",
-                unit_measure="%",
+                unit_measure="% - Range: from 0 (worst) to 100 (best)",
                 value=np.round((new_synt_data / synth_len) * 100, 2).item(),
             )
         )
@@ -289,7 +215,7 @@ class TabularComparisonEvaluator:
             self.report.add_metric(
                 AdherenceMetric(
                     title="Synthetic Categories Adherence to Real Categories",
-                    unit_measure="%",
+                    unit_measure="% - Range: from 0 (worst) to 100 (best)",
                     value=category_adherence_score,
                 )
             )
@@ -298,43 +224,94 @@ class TabularComparisonEvaluator:
             self.report.add_metric(
                 AdherenceMetric(
                     title="Synthetic Numerical Min-Max Boundaries Adherence",
-                    unit_measure="%",
+                    unit_measure="% - Range: from 0 (worst) to 100 (best)",
                     value=boundary_adherence_score,
                 )
             )
 
+    def _evaluate_categorical_frequency_absolute_difference(self):
+        result_dictionary = {}
+        for real_cat, synth_cat in zip(
+            self._categorical_columns, self._synth_categorical_columns
+        ):
+            feature_name = real_cat.name
+            result_dictionary[feature_name] = {}
+            real_data = real_cat.get_data()
+            synth_data = synth_cat.get_data()
+            real_samples = real_data.shape[0]
+            synthetic_samples = synth_data.shape[0]
+            real_categories, real_counts = np.unique(real_data, return_counts=True)
+            synthetic_categories, synthetic_counts = np.unique(synth_data, return_counts=True)
+            real_frequencies = real_counts / real_samples
+            real_frequencies = {k: v for k, v in zip(real_categories, real_frequencies)}
+            synthetic_frequencies = synthetic_counts / synthetic_samples
+            synthetic_frequencies = {k: v for k, v in zip(synthetic_categories, synthetic_frequencies)}
+            for cat in real_categories:
+                if cat in synthetic_categories:
+                    result_dictionary[feature_name][str(cat)] = np.round(np.abs(real_frequencies[cat] - synthetic_frequencies[cat])*100, 2).item()
+                else:
+                    result_dictionary[feature_name][str(cat)] = 100.00
+            for cat in synthetic_categories:
+                if cat not in real_categories:
+                    result_dictionary[feature_name][str(cat)] = 100.00
 
-class TimeSeriesComparisonEvaluator:
+        if len(self._categorical_columns) > 0:
+            self.report.add_metric(
+                StatisticalMetric(
+                    title="Categorical Frequency Absolute Difference",
+                    unit_measure="% - Range: from 100 (worst) to 0 (best)",
+                    value=result_dictionary,
+                )
+            )
+
+
+def compute_cramer_v(data1: np.ndarray, data2: np.ndarray):
     """
-    Evaluates the quality of a synthetic dataset with respect to a real one.
-
-    The evaluation is based on the following metrics:
-    - Statistical properties: wasserstein distance and Cramer's V
-    - Adherence: evaluates how well the synthetic data adheres to the real data distribution
-    - Novelty: evaluates how many new values are generated in the synthetic dataset
-
-    The evaluation is performed on a per-column basis, and the results are aggregated.
+    Computes Cramer's V on a pair of categorical columns
+    :param data1: first column
+    :param data2: second column
+    :return: Cramer's V
     """
+    confusion_matrix = pd.crosstab(
+        data1.reshape(
+            -1,
+        ),
+        data2.reshape(
+            -1,
+        ),
+    )
+    chi2 = ss.chi2_contingency(confusion_matrix)[0]
+    # Total number of observations.
+    n = confusion_matrix.to_numpy().sum()
+    if n == 0:
+        return 0.0
+    phi2 = chi2 / n
+    r, k = confusion_matrix.shape
+    # Check for potential division by zero in the correction terms.
+    if n - 1 == 0:
+        return 0.0
+    phi2_corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
+    r_corr = r - ((r - 1) ** 2) / (n - 1)
+    k_corr = k - ((k - 1) ** 2) / (n - 1)
+    denominator = min(k_corr - 1, r_corr - 1)
+    if denominator <= 0:
+        return 0.0
+    V = np.sqrt(phi2_corr / denominator)
+    return V
 
-    def __init__(
-        self,
-        real_data: TimeSeries,
-        synthetic_data: TimeSeries,
-    ):
-        if type(real_data) is not TimeSeries:
-            raise ValueError("real_data must be a TimeSeries")
-        if type(synthetic_data) is not TimeSeries:
-            raise ValueError("synthetic_data must be a TimeSeries")
-        self._real_data = real_data
-        self._synth_data = synthetic_data
-        self._numerical_columns = real_data.get_numeric_columns()
-        self._categorical_columns = real_data.get_categorical_columns()
-        self._synth_numerical_columns = synthetic_data.get_numeric_columns()
-        self._synth_categorical_columns = synthetic_data.get_categorical_columns()
-        self.report = MetricReport()
 
-    def compute(self):
-        if len(self._numerical_columns) <= 1 and len(self._categorical_columns) <= 1:
-            return {"available": "false"}
+def give_stringed_unique_rows(dirty_data: np.ndarray):
+    """
+    Works on 0-axis of a numpy array to search unique values
+    :param dirty_data:
+    :return:
+    """
+    data = dirty_data.tolist()
+    seen = {}
+    unique = []
+    for o in data:
+        if str(o) not in seen:
+            seen[str(o)] = True
+            unique.append(str(o))
 
-        return {"available": "false"}
+    return np.array(unique)

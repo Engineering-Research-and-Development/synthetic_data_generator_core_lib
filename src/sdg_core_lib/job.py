@@ -1,5 +1,5 @@
 from sdg_core_lib.dataset.datasets import Table, TimeSeries
-from sdg_core_lib.evaluate.evaluators import (
+from sdg_core_lib.evaluate.tables import (
     TabularComparisonEvaluator,
     TimeSeriesComparisonEvaluator,
 )
