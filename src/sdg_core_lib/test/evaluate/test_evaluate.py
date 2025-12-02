@@ -136,7 +136,7 @@ def test_evaluate(evaluator_correct):
     statistical_metrics_titles = [metric["title"] for metric in statistical_metrics]
 
     expected_metrics = [
-        "Categorical Features Cramer's V",
+        "Categorical Features Cramer s V",
         "Numerical Features Wasserstein Distance",
         "Categorical Frequency Absolute Difference",
     ]

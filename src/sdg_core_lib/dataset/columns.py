@@ -51,7 +51,7 @@ class Numeric(Column):
     def get_boundaries(self) -> tuple[float, float]:
         return self.values.min(), self.values.max()
 
-    def to_categorical(self, n_bins: int) -> "Categorical":
+    def to_categorical(self, n_bins: int = 10) -> "Categorical":
         bins = np.linspace(self.values.min(), self.values.max(), n_bins)
         binned_values = np.digitize(self.values, bins)
         return Categorical(

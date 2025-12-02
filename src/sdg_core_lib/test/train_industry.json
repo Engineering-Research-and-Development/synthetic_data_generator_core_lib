@@ -5,5 +5,5 @@
 		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE",
 		"model_name": "Test-T_VAE"
 	},
-    "n_rows": 1000
+    "n_rows": 100000
 }

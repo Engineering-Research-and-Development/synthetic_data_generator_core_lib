@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
@@ -61,16 +63,22 @@ class TabularComparisonEvaluator:
         :return: A score ranging from 0 to 1. A score of 0 is the worst possible score, while 1 is the best possible score,
         meaning that category pairs are perfectly balanced
         """
-        if len(self._categorical_columns) < 2:
+        total_real_categorical = deepcopy(self._categorical_columns)
+        total_real_categorical.extend([col.to_categorical() for col in self._numerical_columns])
+
+        total_synth_categorical = deepcopy(self._synth_categorical_columns)
+        total_synth_categorical.extend([col.to_categorical() for col in self._synth_numerical_columns])
+
+        if len(total_real_categorical) < 2:
             result =  0
         else:
             contingency_scores_distances = []
             for idx, (col, synth_col) in enumerate(
-                zip(self._categorical_columns[:-1], self._synth_categorical_columns[:-1])
+                zip(total_real_categorical[:-1], total_synth_categorical[:-1])
             ):
                 for col_2, synth_col_2 in zip(
-                    self._categorical_columns[idx + 1 :],
-                    self._synth_categorical_columns[idx + 1 :],
+                    total_real_categorical[idx + 1 :],
+                    total_synth_categorical[idx + 1 :],
                 ):
                     v_real = compute_cramer_v(col.get_data(), col_2.get_data())
                     v_synth = compute_cramer_v(
@@ -81,10 +89,10 @@ class TabularComparisonEvaluator:
             final_score = 1 - np.mean(contingency_scores_distances)
             result =  np.clip(final_score, 0, 1)
 
-        if not len(self._categorical_columns) == 0:
+        if not len(total_real_categorical) == 0:
             self.report.add_metric(
                 StatisticalMetric(
-                    title="Categorical Features Cramer's V",
+                    title="Categorical Features Cramer s V",
                     unit_measure="% - Range: from 0 (worst) to 100 (best)",
                     value=np.round(result * 100, 2).item(),
                 )
@@ -247,19 +255,23 @@ class TabularComparisonEvaluator:
             synthetic_frequencies = synthetic_counts / synthetic_samples
             synthetic_frequencies = {k: v for k, v in zip(synthetic_categories, synthetic_frequencies)}
             for cat in real_categories:
+                result_dictionary[feature_name][str(cat)] = {}
                 if cat in synthetic_categories:
-                    result_dictionary[feature_name][str(cat)] = np.round(np.abs(real_frequencies[cat] - synthetic_frequencies[cat])*100, 2).item()
+                    result_dictionary[feature_name][str(cat)]["difference"] = np.round((real_frequencies[cat] - synthetic_frequencies[cat])*100, 2).item()
+                    result_dictionary[feature_name][str(cat)]["real_frequency"] = np.round(real_frequencies[cat]*100, 2).item()
+                    result_dictionary[feature_name][str(cat)]["synthetic_frequency"] = np.round(synthetic_frequencies[cat]*100, 2).item()
                 else:
-                    result_dictionary[feature_name][str(cat)] = 100.00
+                    result_dictionary[feature_name][str(cat)]["difference"] = 100.00
             for cat in synthetic_categories:
                 if cat not in real_categories:
-                    result_dictionary[feature_name][str(cat)] = 100.00
+                    result_dictionary[feature_name][str(cat)] = {}
+                    result_dictionary[feature_name][str(cat)]["difference"] = -100.00
 
         if len(self._categorical_columns) > 0:
             self.report.add_metric(
                 StatisticalMetric(
                     title="Categorical Frequency Absolute Difference",
-                    unit_measure="% - Range: from 100 (worst) to 0 (best)",
+                    unit_measure="% - Range: from -100 to 100. Negative values imply overrepresentation in synthetic data, positive values imply underrepresentation. 0 Is optimal",
                     value=result_dictionary,
                 )
             )
