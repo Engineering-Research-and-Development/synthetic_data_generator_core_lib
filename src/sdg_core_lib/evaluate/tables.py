@@ -53,7 +53,6 @@ class TabularComparisonEvaluator:
         self._evaluate_novelty()
         return self.report.to_json()
 
-
     def _evaluate_cramer_v_distance(self):
         """
         Evaluates Cramer's v with Bias Correction https://en.wikipedia.org/wiki/Cram%C3%A9r%27s_V on categorical data,
@@ -64,18 +63,22 @@ class TabularComparisonEvaluator:
         meaning that category pairs are perfectly balanced
         """
         total_real_categorical = deepcopy(self._categorical_columns)
-        total_real_categorical.extend([col.to_categorical() for col in self._numerical_columns])
+        total_real_categorical.extend(
+            [col.to_categorical() for col in self._numerical_columns]
+        )
 
         total_synth_categorical = deepcopy(self._synth_categorical_columns)
-        total_synth_categorical.extend([col.to_categorical() for col in self._synth_numerical_columns])
+        total_synth_categorical.extend(
+            [col.to_categorical() for col in self._synth_numerical_columns]
+        )
 
-        if len(total_real_categorical) < 2:
-            result =  0
-        else:
+        result_dict = {}
+        if len(total_real_categorical) > 2:
             contingency_scores_distances = []
             for idx, (col, synth_col) in enumerate(
                 zip(total_real_categorical[:-1], total_synth_categorical[:-1])
             ):
+                result_dict[col.name] = {}
                 for col_2, synth_col_2 in zip(
                     total_real_categorical[idx + 1 :],
                     total_synth_categorical[idx + 1 :],
@@ -85,16 +88,16 @@ class TabularComparisonEvaluator:
                         synth_col.get_data(), synth_col_2.get_data()
                     )
                     contingency_scores_distances.append(np.abs(v_real - v_synth))
-
-            final_score = 1 - np.mean(contingency_scores_distances)
-            result =  np.clip(final_score, 0, 1)
+                    result_dict[col.name][col_2.name] = np.round(
+                        (np.abs(v_real - v_synth)) * 100, 2
+                    ).item()
 
         if not len(total_real_categorical) == 0:
             self.report.add_metric(
                 StatisticalMetric(
-                    title="Categorical Features Cramer s V",
-                    unit_measure="% - Range: from 0 (worst) to 100 (best)",
-                    value=np.round(result * 100, 2).item(),
+                    title="Categorical Features Cramer s V Differences (Real vs Synthetic)",
+                    unit_measure="% - Range: from 0 (Association is Perfectly Kept in Synthetic Data) to 100 (Association is not Kept in Synthetic Data)",
+                    value=result_dict,
                 )
             )
 
@@ -107,10 +110,8 @@ class TabularComparisonEvaluator:
         are related to the real dataset distribution. In the end, the score is scaled between 0 and 1
         :return: A single score, computed as 1 - mean(scores)
         """
-        if len(self._numerical_columns) < 1:
-            result = 0
-        else:
-            wass_distance_scores = []
+        result_dict = {}
+        if len(self._numerical_columns) > 1:
             for col, synt_col in zip(
                 self._numerical_columns, self._synth_numerical_columns
             ):
@@ -123,16 +124,14 @@ class TabularComparisonEvaluator:
                 distance = np.abs(np.max(real_data) - np.min(real_data))
                 wass_dist = ss.wasserstein_distance(real_data, synth_data)
                 wass_dist = np.clip(wass_dist, 0, distance) / distance
-                wass_distance_scores.append(wass_dist)
-
-            result = 1 - np.mean(wass_distance_scores)
+                result_dict[col.name] = np.round(wass_dist * 100, 2).item()
 
         if not len(self._numerical_columns) == 0:
             self.report.add_metric(
                 StatisticalMetric(
                     title="Numerical Features Wasserstein Distance",
-                    unit_measure="% - Range: from 0 (worst) to 100 (best)",
-                    value=np.round(result * 100, 2).item(),
+                    unit_measure="% - Range: from 0 (Synthetic features are distributed like Real Features) to 100 (Synthetic features are distributed differently from Real Features)",
+                    value=result_dict,
                 )
             )
 
@@ -249,17 +248,27 @@ class TabularComparisonEvaluator:
             real_samples = real_data.shape[0]
             synthetic_samples = synth_data.shape[0]
             real_categories, real_counts = np.unique(real_data, return_counts=True)
-            synthetic_categories, synthetic_counts = np.unique(synth_data, return_counts=True)
+            synthetic_categories, synthetic_counts = np.unique(
+                synth_data, return_counts=True
+            )
             real_frequencies = real_counts / real_samples
             real_frequencies = {k: v for k, v in zip(real_categories, real_frequencies)}
             synthetic_frequencies = synthetic_counts / synthetic_samples
-            synthetic_frequencies = {k: v for k, v in zip(synthetic_categories, synthetic_frequencies)}
+            synthetic_frequencies = {
+                k: v for k, v in zip(synthetic_categories, synthetic_frequencies)
+            }
             for cat in real_categories:
                 result_dictionary[feature_name][str(cat)] = {}
                 if cat in synthetic_categories:
-                    result_dictionary[feature_name][str(cat)]["difference"] = np.round((real_frequencies[cat] - synthetic_frequencies[cat])*100, 2).item()
-                    result_dictionary[feature_name][str(cat)]["real_frequency"] = np.round(real_frequencies[cat]*100, 2).item()
-                    result_dictionary[feature_name][str(cat)]["synthetic_frequency"] = np.round(synthetic_frequencies[cat]*100, 2).item()
+                    result_dictionary[feature_name][str(cat)]["difference"] = np.round(
+                        (real_frequencies[cat] - synthetic_frequencies[cat]) * 100, 2
+                    ).item()
+                    result_dictionary[feature_name][str(cat)]["real_frequency"] = (
+                        np.round(real_frequencies[cat] * 100, 2).item()
+                    )
+                    result_dictionary[feature_name][str(cat)]["synthetic_frequency"] = (
+                        np.round(synthetic_frequencies[cat] * 100, 2).item()
+                    )
                 else:
                     result_dictionary[feature_name][str(cat)]["difference"] = 100.00
             for cat in synthetic_categories:
@@ -292,23 +301,7 @@ def compute_cramer_v(data1: np.ndarray, data2: np.ndarray):
             -1,
         ),
     )
-    chi2 = ss.chi2_contingency(confusion_matrix)[0]
-    # Total number of observations.
-    n = confusion_matrix.to_numpy().sum()
-    if n == 0:
-        return 0.0
-    phi2 = chi2 / n
-    r, k = confusion_matrix.shape
-    # Check for potential division by zero in the correction terms.
-    if n - 1 == 0:
-        return 0.0
-    phi2_corr = max(0, phi2 - ((k - 1) * (r - 1)) / (n - 1))
-    r_corr = r - ((r - 1) ** 2) / (n - 1)
-    k_corr = k - ((k - 1) ** 2) / (n - 1)
-    denominator = min(k_corr - 1, r_corr - 1)
-    if denominator <= 0:
-        return 0.0
-    V = np.sqrt(phi2_corr / denominator)
+    V = ss.contingency.association(confusion_matrix)
     return V
 
 
