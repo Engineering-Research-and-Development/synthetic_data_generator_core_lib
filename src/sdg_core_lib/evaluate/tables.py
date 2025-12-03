@@ -95,7 +95,7 @@ class TabularComparisonEvaluator:
         if not len(total_real_categorical) == 0:
             self.report.add_metric(
                 StatisticalMetric(
-                    title="Categorical Features Cramer s V Differences (Real vs Synthetic)",
+                    title="Association Distance Index (Cramer's V, Real vs Synthetic)",
                     unit_measure="% - Range: from 0 (Association is Perfectly Kept in Synthetic Data) to 100 (Association is not Kept in Synthetic Data)",
                     value=result_dict,
                 )
@@ -129,7 +129,7 @@ class TabularComparisonEvaluator:
         if not len(self._numerical_columns) == 0:
             self.report.add_metric(
                 StatisticalMetric(
-                    title="Numerical Features Wasserstein Distance",
+                    title="Continuous Features Statical Distance (Wasserstein Distance)",
                     unit_measure="% - Range: from 0 (Synthetic features are distributed like Real Features) to 100 (Synthetic features are distributed differently from Real Features)",
                     value=result_dict,
                 )
@@ -279,7 +279,7 @@ class TabularComparisonEvaluator:
         if len(self._categorical_columns) > 0:
             self.report.add_metric(
                 StatisticalMetric(
-                    title="Categorical Frequency Absolute Difference",
+                    title="Categorical Frequency Difference",
                     unit_measure="% - Range: from -100 to 100. Negative values imply overrepresentation in synthetic data, positive values imply underrepresentation. 0 Is optimal",
                     value=result_dictionary,
                 )

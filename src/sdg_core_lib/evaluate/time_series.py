@@ -1,4 +1,4 @@
-from evaluate.metrics import MetricReport
+from sdg_core_lib.evaluate.metrics import MetricReport
 from sdg_core_lib.dataset.datasets import TimeSeries
 
 
