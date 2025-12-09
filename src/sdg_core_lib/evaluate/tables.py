@@ -31,9 +31,9 @@ class TabularComparisonEvaluator:
         synthetic_data: Table,
     ):
         if type(real_data) is not Table:
-            raise ValueError("real_data must be a Table")
+            raise TypeError("real_data must be a Table")
         if type(synthetic_data) is not Table:
-            raise ValueError("synthetic_data must be a Table")
+            raise TypeError("synthetic_data must be a Table")
         self._real_data = real_data
         self._synth_data = synthetic_data
         self._numerical_columns = real_data.get_numeric_columns()
