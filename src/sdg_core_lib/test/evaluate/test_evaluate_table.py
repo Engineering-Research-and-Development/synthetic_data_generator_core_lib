@@ -113,10 +113,10 @@ def test_init(evaluator_correct, real_data, synthetic_data):
 
 def test_init_with_invalid_inputs():
     # Test initialization with invalid inputs
-    with pytest.raises(ValueError, match="real_data must be a Table"):
+    with pytest.raises(TypeError, match="real_data must be a Table"):
         TabularComparisonEvaluator("not a table", Table.from_json(dummy_json, None))
 
-    with pytest.raises(ValueError, match="synthetic_data must be a Table"):
+    with pytest.raises(TypeError, match="synthetic_data must be a Table"):
         TabularComparisonEvaluator(Table.from_json(dummy_json, None), "not a table")
 
 
