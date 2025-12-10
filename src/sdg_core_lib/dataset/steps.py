@@ -154,7 +154,7 @@ class OneHotEncoderWrapper(Step):
         )
 
     def _set_operator(self):
-        return OneHotEncoder()
+        return OneHotEncoder(handle_unknown="infrequent_if_exist")
 
     def fit_transform(self, data: np.ndarray) -> np.ndarray:
         return super().fit_transform(data).toarray()
