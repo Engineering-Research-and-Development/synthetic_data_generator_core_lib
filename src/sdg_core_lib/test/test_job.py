@@ -3,6 +3,7 @@ import pytest
 from sdg_core_lib.job import train, infer
 import json
 import os
+from loguru import logger
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
 train_request = json.load(open(os.path.join(current_folder, "train_weather.json")))
@@ -65,11 +66,11 @@ def test_train(setup):
     assert isinstance(results, list)
     assert results is not None
     assert metrics is not None
-    print(metrics)
+    logger.info(metrics)
     assert model is not None
-    print(model.training_info.to_json())
+    logger.info(model.training_info.to_json())
     assert data is not None
-    print(data)
+    logger.info(data)
 
 
 def test_infer(setup):

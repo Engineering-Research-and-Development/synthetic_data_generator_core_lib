@@ -1,8 +1,11 @@
+from typing import override
+
+from evaluate.tables import TabularComparisonEvaluator
 from sdg_core_lib.evaluate.metrics import MetricReport
 from sdg_core_lib.dataset.datasets import TimeSeries
 
 
-class TimeSeriesComparisonEvaluator:
+class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
     """
     Evaluates the quality of a synthetic dataset with respect to a real one.
 
@@ -13,7 +16,7 @@ class TimeSeriesComparisonEvaluator:
 
     The evaluation is performed on a per-column basis, and the results are aggregated.
     """
-
+    @override
     def __init__(
         self,
         real_data: TimeSeries,

@@ -38,7 +38,7 @@ class TimeSeriesVAE(KerasBaseVAE):
         latent_dim: int = 2,
         learning_rate: float = 1e-3,
         batch_size: int = 16,
-        epochs: int = 60,
+        epochs: int = 100,
     ):
         super().__init__(metadata, model_name, input_shape, load_path, latent_dim)
         self._beta = 0.15
@@ -121,5 +121,7 @@ class TimeSeriesVAE(KerasBaseVAE):
                 AllowedData("float32", False),
                 AllowedData("int32", False),
                 AllowedData("int64", False),
+                AllowedData("int32", True),
+                AllowedData("str", True),
             ],
         ).get_model_info()

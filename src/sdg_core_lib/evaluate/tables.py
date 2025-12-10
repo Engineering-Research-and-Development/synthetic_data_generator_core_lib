@@ -270,11 +270,25 @@ class TabularComparisonEvaluator:
                         np.round(synthetic_frequencies[cat] * 100, 2).item()
                     )
                 else:
-                    result_dictionary[feature_name][str(cat)]["difference"] = 100.00
+                    result_dictionary[feature_name][str(cat)]["difference"] = (
+                        "Not Caught"
+                    )
+                    result_dictionary[feature_name][str(cat)]["real_frequency"] = (
+                        np.round(real_frequencies[cat] * 100, 2).item()
+                    )
+                    result_dictionary[feature_name][str(cat)]["synthetic_frequency"] = (
+                        0.00
+                    )
             for cat in synthetic_categories:
                 if cat not in real_categories:
                     result_dictionary[feature_name][str(cat)] = {}
-                    result_dictionary[feature_name][str(cat)]["difference"] = -100.00
+                    result_dictionary[feature_name][str(cat)]["difference"] = (
+                        "Does Exists in real data"
+                    )
+                    result_dictionary[feature_name][str(cat)]["real_frequency"] = 0.00
+                    result_dictionary[feature_name][str(cat)]["synthetic_frequency"] = (
+                        np.round(synthetic_frequencies[cat] * 100, 2).item()
+                    )
 
         if len(self._categorical_columns) > 0:
             self.report.add_metric(
