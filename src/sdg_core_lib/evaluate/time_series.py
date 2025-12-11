@@ -1,6 +1,6 @@
 from typing import override
 
-from evaluate.tables import TabularComparisonEvaluator
+from sdg_core_lib.evaluate.tables import TabularComparisonEvaluator
 from sdg_core_lib.evaluate.metrics import MetricReport
 from sdg_core_lib.dataset.datasets import TimeSeries
 
@@ -16,6 +16,7 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
 
     The evaluation is performed on a per-column basis, and the results are aggregated.
     """
+
     @override
     def __init__(
         self,
@@ -38,4 +39,4 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
         if len(self._numerical_columns) <= 1 and len(self._categorical_columns) <= 1:
             return {"available": "false"}
 
-        return {"available": "false"}
+        return super().compute()

@@ -73,6 +73,8 @@ def test_self_description(model_data_no_load):
         {"type": "float32", "is_categorical": False},
         {"type": "int32", "is_categorical": False},
         {"type": "int64", "is_categorical": False},
+        {"type": "int32", "is_categorical": True},
+        {"type": "str", "is_categorical": True},
     ]
 
 

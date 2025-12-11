@@ -76,4 +76,11 @@ class Categorical(Column):
         return metadata
 
     def get_categories(self) -> list[str]:
-        return list(set(self.values))
+        seen = {}
+        unique = []
+        for o in self.values:
+            if str(o) not in seen:
+                seen[str(o)] = True
+                unique.append(str(o))
+
+        return unique

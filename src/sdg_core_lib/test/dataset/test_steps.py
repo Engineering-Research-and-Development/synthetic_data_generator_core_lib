@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sdg_core_lib.dataset.steps import (
     ScalerWrapper,
     NoneStep,
-    LabelEncoderWrapper,
+    OrdinalEncoderWrapper,
     OneHotEncoderWrapper,
 )
 
@@ -116,7 +116,7 @@ class TestLabelEncoderWrapper:
 
     def test_fit_transform(self, categorical_data):
         """Test fit_transform with categorical data."""
-        step = LabelEncoderWrapper(position=0, col_name="category")
+        step = OrdinalEncoderWrapper(position=0, col_name="category")
         transformed = step.fit_transform(categorical_data)
         assert transformed.shape == categorical_data.shape  # Same number of samples
         assert set(transformed.flatten().tolist()) == {
@@ -127,7 +127,7 @@ class TestLabelEncoderWrapper:
 
     def test_inverse_transform(self, categorical_data):
         """Test inverse_transform to get back original categories."""
-        step = LabelEncoderWrapper(position=0, col_name="category")
+        step = OrdinalEncoderWrapper(position=0, col_name="category")
         transformed = step.fit_transform(categorical_data)
         inverse_transformed = step.inverse_transform(transformed)
         np.testing.assert_array_equal(inverse_transformed, categorical_data)

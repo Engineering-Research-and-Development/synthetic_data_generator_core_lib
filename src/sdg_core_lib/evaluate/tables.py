@@ -83,14 +83,18 @@ class TabularComparisonEvaluator:
                     total_real_categorical[idx + 1 :],
                     total_synth_categorical[idx + 1 :],
                 ):
-                    v_real = compute_cramer_v(col.get_data(), col_2.get_data())
-                    v_synth = compute_cramer_v(
-                        synth_col.get_data(), synth_col_2.get_data()
-                    )
-                    contingency_scores_distances.append(np.abs(v_real - v_synth))
-                    result_dict[col.name][col_2.name] = np.round(
-                        (np.abs(v_real - v_synth)) * 100, 2
-                    ).item()
+                    try:
+                        v_real = compute_cramer_v(col.get_data(), col_2.get_data())
+                        v_synth = compute_cramer_v(
+                            synth_col.get_data(), synth_col_2.get_data()
+                        )
+                        contingency_scores_distances.append(np.abs(v_real - v_synth))
+                        result = np.round((np.abs(v_real - v_synth)) * 100, 2).item()
+                        if np.isnan(result):
+                            result = "NaN"
+                        result_dict[col.name][col_2.name] = result
+                    except ValueError:
+                        result_dict[col.name][col_2.name] = "NaN"
 
         if not len(total_real_categorical) == 0:
             self.report.add_metric(
@@ -315,8 +319,8 @@ def compute_cramer_v(data1: np.ndarray, data2: np.ndarray):
             -1,
         ),
     )
-    V = ss.contingency.association(confusion_matrix)
-    return V
+    v = ss.contingency.association(confusion_matrix)
+    return v
 
 
 def give_stringed_unique_rows(dirty_data: np.ndarray):
