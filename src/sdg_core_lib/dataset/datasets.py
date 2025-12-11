@@ -214,6 +214,8 @@ class Table(Dataset):
 
     def postprocess(self) -> "Table":
         new_cols = self.processor.inverse_process(self.columns)
+        for col in new_cols:
+            col.values = col.values.astype(col.value_type)
         return Table(new_cols, self.processor, self.pk_col_indexes)
 
 
