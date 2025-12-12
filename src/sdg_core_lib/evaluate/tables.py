@@ -181,7 +181,7 @@ class TabularComparisonEvaluator:
             - category_adherence_score: dict mapping column name to adherence percentage.
             - boundary_adherence_score: dict mapping column name to adherence percentage.
         """
-        total_records = self._synth_data.get_computing_data().shape[0]
+        total_records = self._synth_data.columns[0].get_data().shape[0]
 
         # --- Categorical Adherence ---
         # For each categorical column, compute the percentage of synthetic entries
