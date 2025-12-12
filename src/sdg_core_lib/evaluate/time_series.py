@@ -34,7 +34,7 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
     def compute(self):
         numerical_columns = self._real_data.get_numeric_columns()
         categorical_columns = self._real_data.get_categorical_columns()
-        if len(numerical_columns) <= 1 and len(categorical_columns) <= 1:
+        if len(numerical_columns) < 1 and len(categorical_columns) < 1:
             return {"available": "false"}
 
         super().compute()
@@ -44,7 +44,7 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
 
     def _compute_multivariate_dependent_dtw(self):
         numerical_real_data = self._real_data.all_to_numeric()
-        if len(numerical_real_data.get_numeric_columns()) < 2:
+        if len(numerical_real_data.get_numeric_columns()) < 1:
             return
         numerical_synth_data = self._synth_data.all_to_numeric()
 
@@ -77,7 +77,7 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
         self.report.add_metric(
             TimeSeriesSpecificMetric(
                 title="Sample Mean Time Series Evolution Similarity (Multivariate Dependent Dynamic Time Warping",
-                unit_measure="Pure Number - Range: from 0 (Synthetic features are IDENTICAL like Real Features), no upper bound. Lower is better",
+                unit_measure="Pure Number - Range: from 0 (Synthetic features are IDENTICAL to Real Features), no upper bound. Lower is better",
                 value=result,
             )
         )

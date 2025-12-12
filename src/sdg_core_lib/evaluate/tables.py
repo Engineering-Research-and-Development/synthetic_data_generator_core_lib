@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import numpy as np
 import pandas as pd
 import scipy.stats as ss
@@ -68,7 +66,7 @@ class TabularComparisonEvaluator:
         )
 
         result_dict = {}
-        if len(total_real_categorical) > 2:
+        if len(total_real_categorical) >= 2:
             contingency_scores_distances = []
             for idx, (col, synth_col) in enumerate(
                 zip(total_real_categorical[:-1], total_synth_categorical[:-1])
@@ -112,7 +110,7 @@ class TabularComparisonEvaluator:
         numerical_columns = self._real_data.get_numeric_columns()
         synth_numerical_columns = self._synth_data.get_numeric_columns()
         result_dict = {}
-        if len(numerical_columns) > 1:
+        if len(numerical_columns) > 0:
             for col, synt_col in zip(numerical_columns, synth_numerical_columns):
                 real_data = col.get_data().reshape(
                     -1,
