@@ -189,10 +189,10 @@ class Table(Dataset):
     def get_primary_keys(self) -> list[Column]:
         return [col for col in self.columns if col.position in self.pk_col_indexes]
 
-    def get_numeric_columns(self):
+    def get_numeric_columns(self) -> list[Numeric]:
         return [col for col in self.columns if isinstance(col, Numeric)]
 
-    def get_categorical_columns(self):
+    def get_categorical_columns(self) ->list[Categorical]:
         return [col for col in self.columns if isinstance(col, Categorical)]
 
     def get_computing_data(self) -> np.ndarray:
@@ -216,6 +216,24 @@ class Table(Dataset):
         new_cols = self.processor.inverse_process(self.columns)
         for col in new_cols:
             col.values = col.values.astype(col.value_type)
+        return Table(new_cols, self.processor, self.pk_col_indexes)
+
+    def all_to_numeric(self) -> "Table":
+        new_cols = []
+        for col in self.columns:
+            if isinstance(col, Categorical):
+                new_cols.append(col.to_numeric())
+            else:
+                new_cols.append(col)
+        return Table(new_cols, self.processor, self.pk_col_indexes)
+
+    def all_to_categorical(self) -> "Table":
+        new_cols = []
+        for col in self.columns:
+            if isinstance(col, Numeric):
+                new_cols.append(col.to_categorical())
+            else:
+                new_cols.append(col)
         return Table(new_cols, self.processor, self.pk_col_indexes)
 
 

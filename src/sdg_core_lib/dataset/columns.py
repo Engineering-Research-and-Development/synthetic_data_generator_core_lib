@@ -78,9 +78,22 @@ class Categorical(Column):
     def get_categories(self) -> list[str]:
         seen = {}
         unique = []
-        for o in self.values:
+        for o in self.values.reshape(-1,):
             if str(o) not in seen:
                 seen[str(o)] = True
                 unique.append(str(o))
 
         return unique
+
+    def to_numeric(self) -> "Numeric":
+        all_categories = self.get_categories()
+        print(all_categories)
+        category_mapping = {category: i for i, category in enumerate(all_categories)}
+        print(category_mapping)
+        return Numeric(
+            self.name,
+            self.value_type,
+            self.position,
+            np.array([category_mapping[str(category)] for category in self.values.reshape(-1,)]).reshape(self.values.shape),
+            "numeric",
+        )

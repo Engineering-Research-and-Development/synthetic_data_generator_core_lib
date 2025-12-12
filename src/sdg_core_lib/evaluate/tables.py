@@ -36,14 +36,12 @@ class TabularComparisonEvaluator:
             raise TypeError("synthetic_data must be a Table")
         self._real_data = real_data
         self._synth_data = synthetic_data
-        self._numerical_columns = real_data.get_numeric_columns()
-        self._categorical_columns = real_data.get_categorical_columns()
-        self._synth_numerical_columns = synthetic_data.get_numeric_columns()
-        self._synth_categorical_columns = synthetic_data.get_categorical_columns()
         self.report = MetricReport()
 
     def compute(self):
-        if len(self._numerical_columns) < 1 and len(self._categorical_columns) < 1:
+        numerical_columns = self._real_data.get_numeric_columns()
+        categorical_columns = self._real_data.get_categorical_columns()
+        if len(numerical_columns) < 1 and len(categorical_columns) < 1:
             return {"available": "false"}
 
         self._evaluate_wasserstein_distance()
@@ -62,15 +60,8 @@ class TabularComparisonEvaluator:
         :return: A score ranging from 0 to 1. A score of 0 is the worst possible score, while 1 is the best possible score,
         meaning that category pairs are perfectly balanced
         """
-        total_real_categorical = deepcopy(self._categorical_columns)
-        total_real_categorical.extend(
-            [col.to_categorical() for col in self._numerical_columns]
-        )
-
-        total_synth_categorical = deepcopy(self._synth_categorical_columns)
-        total_synth_categorical.extend(
-            [col.to_categorical() for col in self._synth_numerical_columns]
-        )
+        total_real_categorical = self._real_data.all_to_categorical().get_categorical_columns()
+        total_synth_categorical = self._synth_data.all_to_categorical().get_categorical_columns()
 
         result_dict = {}
         if len(total_real_categorical) > 2:
@@ -114,10 +105,12 @@ class TabularComparisonEvaluator:
         are related to the real dataset distribution. In the end, the score is scaled between 0 and 1
         :return: A single score, computed as 1 - mean(scores)
         """
+        numerical_columns = self._real_data.get_numeric_columns()
+        synth_numerical_columns = self._synth_data.get_numeric_columns()
         result_dict = {}
-        if len(self._numerical_columns) > 1:
+        if len(numerical_columns) > 1:
             for col, synt_col in zip(
-                self._numerical_columns, self._synth_numerical_columns
+                numerical_columns, synth_numerical_columns
             ):
                 real_data = col.get_data().reshape(
                     -1,
@@ -130,7 +123,7 @@ class TabularComparisonEvaluator:
                 wass_dist = np.clip(wass_dist, 0, distance) / distance
                 result_dict[col.name] = np.round(wass_dist * 100, 2).item()
 
-        if not len(self._numerical_columns) == 0:
+        if not len(numerical_columns) == 0:
             self.report.add_metric(
                 StatisticalMetric(
                     title="Continuous Features Statical Distance (Wasserstein Distance)",
@@ -187,9 +180,13 @@ class TabularComparisonEvaluator:
         # For each categorical column, compute the percentage of synthetic entries
         # that have values found in the real data.
         category_adherence_score: dict[str, float] = {}
+        numerical_columns = self._real_data.get_numeric_columns()
+        synth_numerical_columns = self._synth_data.get_numeric_columns()
+        categorical_columns = self._real_data.get_categorical_columns()
+        synth_categorical_columns = self._synth_data.get_categorical_columns()
 
         for real_cat, synth_cat in zip(
-            self._categorical_columns, self._synth_categorical_columns
+            categorical_columns, synth_categorical_columns
         ):
             real_data = real_cat.get_data()
             synth_data = synth_cat.get_data()
@@ -208,7 +205,7 @@ class TabularComparisonEvaluator:
         boundary_adherence_score: dict[str, float] = {}
 
         for real_num, synth_num in zip(
-            self._numerical_columns, self._synth_numerical_columns
+            numerical_columns, synth_numerical_columns
         ):
             # Obtain min and max boundaries from the real data.
             min_boundary = real_num.get_data().min()
@@ -222,7 +219,7 @@ class TabularComparisonEvaluator:
             adherence_percentage = np.round(in_boundary_count / total_records * 100, 2)
             boundary_adherence_score[real_num.name] = float(adherence_percentage)
 
-        if not len(self._categorical_columns) == 0:
+        if not len(categorical_columns) == 0:
             self.report.add_metric(
                 AdherenceMetric(
                     title="Synthetic Categories Adherence to Real Categories",
@@ -231,7 +228,7 @@ class TabularComparisonEvaluator:
                 )
             )
 
-        if not len(self._numerical_columns) == 0:
+        if not len(numerical_columns) == 0:
             self.report.add_metric(
                 AdherenceMetric(
                     title="Synthetic Numerical Min-Max Boundaries Adherence",
@@ -241,9 +238,12 @@ class TabularComparisonEvaluator:
             )
 
     def _evaluate_categorical_frequency_absolute_difference(self):
+        categorical_columns = self._real_data.get_categorical_columns()
+        synth_categorical_columns = self._synth_data.get_categorical_columns()
+
         result_dictionary = {}
         for real_cat, synth_cat in zip(
-            self._categorical_columns, self._synth_categorical_columns
+            categorical_columns, synth_categorical_columns
         ):
             feature_name = real_cat.name
             result_dictionary[feature_name] = {}
@@ -294,7 +294,7 @@ class TabularComparisonEvaluator:
                         np.round(synthetic_frequencies[cat] * 100, 2).item()
                     )
 
-        if len(self._categorical_columns) > 0:
+        if len(categorical_columns) > 0:
             self.report.add_metric(
                 StatisticalMetric(
                     title="Categorical Frequency Difference",

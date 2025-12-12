@@ -16,9 +16,10 @@ dependencies = [
     "scikit-learn==1.5.2",
     "keras==3.6.0",
     "tensorflow==2.18.0",
-    "loguru",
-    "skops",
-    "statsmodels"
+    "loguru==0.7.3",
+    "skops==0.13.0",
+    "statsmodels==0.14.5",
+    "tslearn==0.7.0",
 ]
 
 [dependency-groups]
@@ -29,9 +30,10 @@ dev = [
     "scikit-learn==1.5.2",
     "keras==3.6.0",
     "tensorflow==2.18.0",
-    "loguru",
-    "skops",
-    "statsmodels"
+    "loguru==0.7.3",
+    "skops==0.13.0",
+    "statsmodels==0.14.5",
+    "tslearn==0.7.0"
 ]
 
 test = [
