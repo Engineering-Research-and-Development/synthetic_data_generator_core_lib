@@ -78,7 +78,9 @@ class Categorical(Column):
     def get_categories(self) -> list[str]:
         seen = {}
         unique = []
-        for o in self.values.reshape(-1,):
+        for o in self.values.reshape(
+            -1,
+        ):
             if str(o) not in seen:
                 seen[str(o)] = True
                 unique.append(str(o))
@@ -94,6 +96,13 @@ class Categorical(Column):
             self.name,
             self.value_type,
             self.position,
-            np.array([category_mapping[str(category)] for category in self.values.reshape(-1,)]).reshape(self.values.shape),
+            np.array(
+                [
+                    category_mapping[str(category)]
+                    for category in self.values.reshape(
+                        -1,
+                    )
+                ]
+            ).reshape(self.values.shape),
             "numeric",
         )

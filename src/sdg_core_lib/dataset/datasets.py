@@ -192,7 +192,7 @@ class Table(Dataset):
     def get_numeric_columns(self) -> list[Numeric]:
         return [col for col in self.columns if isinstance(col, Numeric)]
 
-    def get_categorical_columns(self) ->list[Categorical]:
+    def get_categorical_columns(self) -> list[Categorical]:
         return [col for col in self.columns if isinstance(col, Categorical)]
 
     def get_computing_data(self) -> np.ndarray:

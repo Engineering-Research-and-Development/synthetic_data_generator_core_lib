@@ -43,7 +43,6 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
         return self.report.to_json()
 
     def _compute_multivariate_dependent_dtw(self):
-
         numerical_real_data = self._real_data.all_to_numeric()
         if len(numerical_real_data.get_numeric_columns()) < 2:
             return
@@ -57,7 +56,9 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
         if real_data.shape[0] < min_size or synthetic_data.shape[0] < min_size:
             return
 
-        random_sample = np.random.choice(real_data.shape[0], size=min_size, replace=False)
+        random_sample = np.random.choice(
+            real_data.shape[0], size=min_size, replace=False
+        )
         real_data = real_data[random_sample]
         random_sample = np.random.choice(
             synthetic_data.shape[0], size=min_size, replace=False
@@ -80,4 +81,3 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
                 value=result,
             )
         )
-

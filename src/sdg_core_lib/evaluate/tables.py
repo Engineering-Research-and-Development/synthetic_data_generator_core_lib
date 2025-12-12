@@ -60,8 +60,12 @@ class TabularComparisonEvaluator:
         :return: A score ranging from 0 to 1. A score of 0 is the worst possible score, while 1 is the best possible score,
         meaning that category pairs are perfectly balanced
         """
-        total_real_categorical = self._real_data.all_to_categorical().get_categorical_columns()
-        total_synth_categorical = self._synth_data.all_to_categorical().get_categorical_columns()
+        total_real_categorical = (
+            self._real_data.all_to_categorical().get_categorical_columns()
+        )
+        total_synth_categorical = (
+            self._synth_data.all_to_categorical().get_categorical_columns()
+        )
 
         result_dict = {}
         if len(total_real_categorical) > 2:
@@ -109,9 +113,7 @@ class TabularComparisonEvaluator:
         synth_numerical_columns = self._synth_data.get_numeric_columns()
         result_dict = {}
         if len(numerical_columns) > 1:
-            for col, synt_col in zip(
-                numerical_columns, synth_numerical_columns
-            ):
+            for col, synt_col in zip(numerical_columns, synth_numerical_columns):
                 real_data = col.get_data().reshape(
                     -1,
                 )
@@ -185,9 +187,7 @@ class TabularComparisonEvaluator:
         categorical_columns = self._real_data.get_categorical_columns()
         synth_categorical_columns = self._synth_data.get_categorical_columns()
 
-        for real_cat, synth_cat in zip(
-            categorical_columns, synth_categorical_columns
-        ):
+        for real_cat, synth_cat in zip(categorical_columns, synth_categorical_columns):
             real_data = real_cat.get_data()
             synth_data = synth_cat.get_data()
             extra_values = np.array(
@@ -204,9 +204,7 @@ class TabularComparisonEvaluator:
         # that lie within the min-max boundaries of the real data.
         boundary_adherence_score: dict[str, float] = {}
 
-        for real_num, synth_num in zip(
-            numerical_columns, synth_numerical_columns
-        ):
+        for real_num, synth_num in zip(numerical_columns, synth_numerical_columns):
             # Obtain min and max boundaries from the real data.
             min_boundary = real_num.get_data().min()
             max_boundary = real_num.get_data().max()
@@ -242,9 +240,7 @@ class TabularComparisonEvaluator:
         synth_categorical_columns = self._synth_data.get_categorical_columns()
 
         result_dictionary = {}
-        for real_cat, synth_cat in zip(
-            categorical_columns, synth_categorical_columns
-        ):
+        for real_cat, synth_cat in zip(categorical_columns, synth_categorical_columns):
             feature_name = real_cat.name
             result_dictionary[feature_name] = {}
             real_data = real_cat.get_data()

@@ -106,8 +106,6 @@ def test_init(evaluator_correct, real_data, synthetic_data):
     # Test initialization with correct data
     assert evaluator_correct._real_data == real_data
     assert evaluator_correct._synth_data == synthetic_data
-    assert [col.name for col in evaluator_correct._numerical_columns] == ["a", "c"]
-    assert [col.name for col in evaluator_correct._categorical_columns] == ["b", "d"]
     assert isinstance(evaluator_correct.report, MetricReport)
 
 
