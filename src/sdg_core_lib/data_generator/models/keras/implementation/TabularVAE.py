@@ -79,5 +79,7 @@ class TabularVAE(KerasBaseVAE):
                 AllowedData("float32", False),
                 AllowedData("int32", False),
                 AllowedData("int64", False),
+                AllowedData("int32", True),
+                AllowedData("str", True),
             ],
         ).get_model_info()

@@ -63,6 +63,9 @@ class TableProcessor(Processor):
 
     # TODO: External config?
     def _init_steps(self, columns: list[Column]):
+        if len(self.steps.keys()) == len(columns):
+            pass
+
         if len(columns) == 0:
             raise ValueError("No columns provided for processing")
         for idx, col in enumerate(columns):

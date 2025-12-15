@@ -31,6 +31,12 @@ class NoveltyMetric(Metric):
         self.type = "novelty_metrics"
 
 
+class TimeSeriesSpecificMetric(Metric):
+    def __init__(self, title: str, unit_measure: str, value: float | int | dict):
+        super().__init__(title, unit_measure, value)
+        self.type = "time_series_metrics"
+
+
 class MetricReport:
     def __init__(self):
         self.report = {}

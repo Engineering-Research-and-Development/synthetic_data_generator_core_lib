@@ -1,6 +1,6 @@
 [project]
 name = "sdg-core-lib"
-version = "0.1.4"
+version = "0.1.5.dev1"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -16,9 +16,11 @@ dependencies = [
     "scikit-learn==1.5.2",
     "keras==3.6.0",
     "tensorflow==2.18.0",
-    "loguru",
-    "skops",
-    "statsmodels"
+    "loguru==0.7.3",
+    "skops==0.13.0",
+    "statsmodels==0.14.5",
+    "tslearn==0.7.0",
+    "autokeras==3.0.0",
 ]
 
 [dependency-groups]
@@ -29,9 +31,11 @@ dev = [
     "scikit-learn==1.5.2",
     "keras==3.6.0",
     "tensorflow==2.18.0",
-    "loguru",
-    "skops",
-    "statsmodels"
+    "loguru==0.7.3",
+    "skops==0.13.0",
+    "statsmodels==0.14.5",
+    "tslearn==0.7.0",
+    "autokeras==3.0.0"
 ]
 
 test = [

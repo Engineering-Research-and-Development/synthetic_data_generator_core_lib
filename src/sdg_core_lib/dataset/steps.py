@@ -6,7 +6,7 @@ from sklearn.preprocessing import (
     MinMaxScaler,
     StandardScaler,
     OneHotEncoder,
-    LabelEncoder,
+    OrdinalEncoder,
 )
 import os
 import skops.io as sio
@@ -102,47 +102,16 @@ class ScalerWrapper(Step):
             raise ValueError("Invalid mode while setting the scaler")
 
 
-class LabelEncoderWrapper(Step):
-    def __init__(self, position: int, col_name: str, mode="label", type_name="encoder"):
+class OrdinalEncoderWrapper(Step):
+    def __init__(
+        self, position: int, col_name: str, mode="ordinal", type_name="encoder"
+    ):
         super().__init__(
             type_name=type_name, position=position, col_name=col_name, mode=mode
         )
 
     def _set_operator(self):
-        return LabelEncoder()
-
-    def fit_transform(self, data: np.ndarray) -> np.ndarray:
-        return (
-            super()
-            .fit_transform(
-                data.reshape(
-                    -1,
-                )
-            )
-            .reshape(*data.shape)
-        )
-
-    def transform(self, data: np.ndarray) -> np.ndarray:
-        return (
-            super()
-            .transform(
-                data.reshape(
-                    -1,
-                )
-            )
-            .reshape(*data.shape)
-        )
-
-    def inverse_transform(self, data: np.ndarray) -> np.ndarray:
-        return (
-            super()
-            .inverse_transform(
-                data.reshape(
-                    -1,
-                )
-            )
-            .reshape(*data.shape)
-        )
+        return OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=np.nan)
 
 
 class OneHotEncoderWrapper(Step):
@@ -154,10 +123,15 @@ class OneHotEncoderWrapper(Step):
         )
 
     def _set_operator(self):
-        return OneHotEncoder()
+        return OneHotEncoder(handle_unknown="error")
 
     def fit_transform(self, data: np.ndarray) -> np.ndarray:
         return super().fit_transform(data).toarray()
 
     def transform(self, data: np.ndarray) -> np.ndarray:
         return super().transform(data).toarray()
+
+    def inverse_transform(self, data: np.ndarray) -> np.ndarray:
+        # Numerical stability for all zeros
+        data = data + np.ones(data.shape) * 1e-9
+        return super().inverse_transform(data)

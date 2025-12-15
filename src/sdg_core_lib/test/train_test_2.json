@@ -51038,7 +51038,7 @@
         }
     ],
     "dataset_type": "time_series"},
-  	"functions_id" : [],
+  	"functions" : [],
 	"model": {
 		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TimeSeriesVAE.TimeSeriesVAE",
 		"model_name": "Test-BatteryVAE"
