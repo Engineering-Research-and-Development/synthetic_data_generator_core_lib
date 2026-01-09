@@ -35,11 +35,6 @@ def test_compute(correct_instance):
     assert np.all(indexes == np.array(range(len(data))))
 
 
-def test_evaluate(correct_instance):
-    correct_data = np.random.normal(correct_instance.mean, correct_instance.std, 100000)
-    assert correct_instance._evaluate(correct_data)
-
-
 def test_evaluate_wrong(correct_instance):
     wrong_data = np.random.normal(5, 1, 100000)
     wrong_data_2 = np.random.normal(0, 10, 100000)

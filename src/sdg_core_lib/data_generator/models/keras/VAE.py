@@ -59,3 +59,24 @@ class VAE(keras.Model):
             "reconstruction_loss": self.reconstruction_loss_tracker.result(),
             "kl_loss": self.kl_loss_tracker.result(),
         }
+
+    def test_step(self, data):
+        if isinstance(data, tuple):
+            data = data[0]
+
+        z_mean, z_log_var, z = self.encoder(data)
+        reconstruction = self.decoder(z)
+        ops.mean(
+            ops.sum(ops.abs(data - reconstruction), axis=-1)
+        )
+        reconstruction_loss = ops.mean(
+            ops.sum(ops.abs(data - reconstruction), axis=-1)
+        )
+        kl_loss = -0.5 * (1 + z_log_var - ops.square(z_mean) - ops.exp(z_log_var))
+        kl_loss = ops.mean(ops.sum(kl_loss, axis=1))
+        total_loss = reconstruction_loss + self._beta * kl_loss
+        return {
+            "loss": total_loss,
+            "reconstruction_loss": reconstruction_loss,
+            "kl_loss": kl_loss,
+        }

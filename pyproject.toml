@@ -20,7 +20,7 @@ dependencies = [
     "skops==0.13.0",
     "statsmodels==0.14.5",
     "tslearn==0.7.0",
-    "autokeras==3.0.0",
+    "keras-tuner==1.4.8",
 ]
 
 [dependency-groups]
@@ -35,7 +35,7 @@ dev = [
     "skops==0.13.0",
     "statsmodels==0.14.5",
     "tslearn==0.7.0",
-    "autokeras==3.0.0"
+    "keras-tuner==1.4.8"
 ]
 
 test = [

@@ -161,7 +161,7 @@
       },
   	"functions" : [],
 	"model": {
-		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE",
+		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.AutoTabularVAE.AutoTabularVAE",
 		"model_name": "Test-T_VAE"
 	},
     "n_rows": 1000
