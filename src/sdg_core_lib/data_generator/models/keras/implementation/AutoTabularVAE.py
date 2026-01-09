@@ -144,11 +144,11 @@ class AutoTabularVAE(KerasBaseVAE):
         )
         tuner.search(data, epochs=epochs, batch_size=batch_size)
         self._model = tuner.get_best_models(num_models=1)[0]
-        score = self._model.evaluate(data, data)
+        score = self._model.evaluate(data, data)[1].numpy().item()
         print(score)
         self.training_info = TrainingInfo(
             loss_fn="ELBO",
-            train_loss=tuner.get_best_models(num_models=1)[0].history["loss"][-1].numpy().item(),
+            train_loss=score,
             train_samples=data.shape[0],
             validation_loss=-1,
             validation_samples=0,
