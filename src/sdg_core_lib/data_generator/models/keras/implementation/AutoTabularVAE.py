@@ -10,7 +10,6 @@ from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
 from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
 
 
-
 class AutoTabularVAE(KerasBaseVAE):
     """
     TabularVAE is a class that implements a Variational Autoencoder (VAE) for tabular data generation.
@@ -75,21 +74,20 @@ class AutoTabularVAE(KerasBaseVAE):
         return vae
 
     def _build_automodel(self, input_shape: tuple[int, ...], hp: HyperParameters):
-        encoder_layers = hp.Int('encoder_layers', min_value=1, max_value=4)
-        decoder_layers = hp.Int('decoder_layers', min_value=1, max_value=4)
-        units_multiplier = hp.Choice('units_multiplier', values=[16, 32, 64, 128])
-        activation = hp.Choice(f'activation', values=['relu', 'elu', 'selu', 'gelu'])
-        beta = hp.Float('beta', min_value=0.0001, max_value=0.01, sampling="log")
-        learning_rate = hp.Float('learning_rate', min_value=1e-5, max_value=1e-2, sampling='log')
+        encoder_layers = hp.Int("encoder_layers", min_value=1, max_value=4)
+        decoder_layers = hp.Int("decoder_layers", min_value=1, max_value=4)
+        units_multiplier = hp.Choice("units_multiplier", values=[16, 32, 64, 128])
+        activation = hp.Choice(f"activation", values=["relu", "elu", "selu", "gelu"])
+        beta = hp.Float("beta", min_value=0.0001, max_value=0.01, sampling="log")
+        learning_rate = hp.Float(
+            "learning_rate", min_value=1e-5, max_value=1e-2, sampling="log"
+        )
 
         encoder_inputs = keras.Input(shape=input_shape)
         x = layers.Flatten()(encoder_inputs)
         for i in range(encoder_layers):
             units = units_multiplier * (2 ** (encoder_layers - i - 1))
-            x = layers.Dense(
-                units,
-                activation=activation
-            )(x)
+            x = layers.Dense(units, activation=activation)(x)
         z_mean = layers.Dense(self._latent_dim, name="z_mean")(x)
         z_log_var = layers.Dense(self._latent_dim, name="z_log_var")(x)
         z = Sampling()([z_mean, z_log_var])
@@ -99,19 +97,15 @@ class AutoTabularVAE(KerasBaseVAE):
         x = latent_inputs
 
         for i in range(decoder_layers):
-            units = units_multiplier * (2 ** i)
-            x = layers.Dense(
-                units,
-                activation=activation
-            )(x)
-        x = layers.Dense(np.prod(input_shape), activation='linear')(x)
+            units = units_multiplier * (2**i)
+            x = layers.Dense(units, activation=activation)(x)
+        x = layers.Dense(np.prod(input_shape), activation="linear")(x)
         decoder_outputs = layers.Reshape(input_shape)(x)
-        decoder = keras.Model(latent_inputs, decoder_outputs, name='decoder')
+        decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
         vae = VAE(encoder, decoder, beta=beta)
         vae.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate))
         vae.build((None,) + input_shape)
         return vae
-
 
     def train(
         self,
@@ -135,12 +129,14 @@ class AutoTabularVAE(KerasBaseVAE):
         batch_size = batch_size if batch_size is not None else self._batch_size
         epochs = epochs if epochs is not None else self._epochs
         tuner = kt.RandomSearch(
-            lambda hp: self._build_automodel(data.shape[1:], hp=hp),  # Pass the additional input here
+            lambda hp: self._build_automodel(
+                data.shape[1:], hp=hp
+            ),  # Pass the additional input here
             objective=kt.Objective("loss", direction="min"),
             max_trials=10,
             directory=".",
-            project_name='AutoTabularVAE_tuning',
-            overwrite=True
+            project_name="AutoTabularVAE_tuning",
+            overwrite=True,
         )
         tuner.search(data, epochs=epochs, batch_size=batch_size)
         self._model = tuner.get_best_models(num_models=1)[0]
@@ -153,7 +149,6 @@ class AutoTabularVAE(KerasBaseVAE):
             validation_loss=-1,
             validation_samples=0,
         )
-
 
     @classmethod
     def self_describe(cls):

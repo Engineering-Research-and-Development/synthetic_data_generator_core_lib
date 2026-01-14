@@ -1,6 +1,7 @@
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
-    UnspecializedFunction, Priority
+    UnspecializedFunction,
+    Priority,
 )
 
 import numpy as np
@@ -29,4 +30,3 @@ class MonoThreshold(UnspecializedFunction):
 
     def _evaluate(self, data: np.ndarray):
         pass
-

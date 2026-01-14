@@ -4,6 +4,7 @@ from enum import Enum
 
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 
+
 class Priority(Enum):
     MINIMAL = 5
     LOW = 4
@@ -12,8 +13,9 @@ class Priority(Enum):
     MAX = 1
     NONE = None
 
+
 class UnspecializedFunction(ABC):
-    parameters: list[Parameter] = None,
+    parameters: list[Parameter] = (None,)
     description: str = None
     priority: Priority = Priority.NONE
     is_generative: bool = None
@@ -56,7 +58,7 @@ class UnspecializedFunction(ABC):
                 "description": cls.description,
                 "function_reference": f"{cls.__module__}.{cls.__qualname__}",
                 "priority": cls.priority.value,
-                "is_generative": cls.is_generative
+                "is_generative": cls.is_generative,
             },
             "parameters": [param.to_json() for param in cls.parameters],
         }

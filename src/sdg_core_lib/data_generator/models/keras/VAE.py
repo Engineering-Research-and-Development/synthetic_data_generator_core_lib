@@ -66,12 +66,8 @@ class VAE(keras.Model):
 
         z_mean, z_log_var, z = self.encoder(data)
         reconstruction = self.decoder(z)
-        ops.mean(
-            ops.sum(ops.abs(data - reconstruction), axis=-1)
-        )
-        reconstruction_loss = ops.mean(
-            ops.sum(ops.abs(data - reconstruction), axis=-1)
-        )
+        ops.mean(ops.sum(ops.abs(data - reconstruction), axis=-1))
+        reconstruction_loss = ops.mean(ops.sum(ops.abs(data - reconstruction), axis=-1))
         kl_loss = -0.5 * (1 + z_log_var - ops.square(z_mean) - ops.exp(z_log_var))
         kl_loss = ops.mean(ops.sum(kl_loss, axis=1))
         total_loss = reconstruction_loss + self._beta * kl_loss

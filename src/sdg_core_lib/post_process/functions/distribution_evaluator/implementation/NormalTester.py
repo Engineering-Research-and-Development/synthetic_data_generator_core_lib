@@ -2,7 +2,8 @@ import numpy as np
 from scipy.stats import normaltest, ttest_1samp, kstest, norm
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
-    UnspecializedFunction, Priority
+    UnspecializedFunction,
+    Priority,
 )
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 
@@ -16,8 +17,7 @@ class NormalTester(UnspecializedFunction):
     priority = Priority.MINIMAL
     is_generative = False
 
-    def __init__(self, parameters: list[Parameter]
-    ):
+    def __init__(self, parameters: list[Parameter]):
         self.mean = None
         self.std = None
         super().__init__(parameters)

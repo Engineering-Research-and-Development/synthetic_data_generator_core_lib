@@ -5,7 +5,7 @@ from sdg_core_lib.post_process.functions.filter.MonoThreshold import MonoThresho
 
 
 class UpperThreshold(MonoThreshold):
-    description = "Mono-threshold function: picks value less than an upper threshold",
+    description = ("Mono-threshold function: picks value less than an upper threshold",)
 
     def __init__(self, parameters: list[Parameter]):
         super().__init__(parameters)

@@ -39,5 +39,3 @@ def function_factory(function_dict: dict) -> UnspecializedFunction:
     function_class = dynamic_import(function_name)
     function = function_class.from_json(json_params=parameter_list)
     return function
-
-

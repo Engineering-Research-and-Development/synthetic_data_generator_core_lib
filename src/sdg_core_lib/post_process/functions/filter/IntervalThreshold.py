@@ -1,8 +1,10 @@
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
-    UnspecializedFunction, Priority
+    UnspecializedFunction,
+    Priority,
 )
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 import numpy as np
+
 
 class IntervalThreshold(UnspecializedFunction):
     parameters = [

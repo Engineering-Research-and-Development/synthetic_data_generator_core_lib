@@ -40,4 +40,3 @@ def test_evaluate_wrong(correct_instance):
     wrong_data_2 = np.random.normal(0, 10, 100000)
     assert not correct_instance._evaluate(wrong_data)
     assert not correct_instance._evaluate(wrong_data_2)
-

@@ -19,4 +19,3 @@ class LowerThreshold(MonoThreshold):
 
     def _evaluate(self, data: np.ndarray):
         return True
-

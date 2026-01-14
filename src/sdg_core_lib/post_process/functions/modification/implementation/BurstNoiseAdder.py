@@ -1,9 +1,11 @@
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
-    UnspecializedFunction, Priority
+    UnspecializedFunction,
+    Priority,
 )
 
 import numpy as np
+
 
 class BurstNoiseAdder(UnspecializedFunction):
     parameters = [
@@ -14,7 +16,6 @@ class BurstNoiseAdder(UnspecializedFunction):
     description = "Adds n bursts of noise to the data with duration of burst_duration and value of magnitude"
     is_generative = False
     priority = Priority.LOW
-
 
     def __init__(self, parameters: list[Parameter]):
         self.magnitude = None
@@ -49,4 +50,3 @@ class BurstNoiseAdder(UnspecializedFunction):
 
     def _evaluate(self, data: np.ndarray) -> bool:
         return True
-
