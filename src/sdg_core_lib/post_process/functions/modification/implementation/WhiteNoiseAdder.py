@@ -1,17 +1,23 @@
-from sdg_core_lib.post_process.functions.FunctionInfo import FunctionInfo
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
-    UnspecializedFunction,
+    UnspecializedFunction, Priority
 )
 import numpy as np
 
 
 class WhiteNoiseAdder(UnspecializedFunction):
-    def __init__(self, parameters: list[dict]):
-        super().__init__(parameters)
+    parameters = [
+        Parameter("mean", "0.0", "float"),
+        Parameter("standard_deviation", "1.0", "float"),
+    ]
+    description = "Adds white noise to the data"
+    is_generative = False
+    priority = Priority.LOW
+
+    def __init__(self, parameters: list[Parameter]):
         self.mean = None
         self.std = None
-        self._check_parameters()
+        super().__init__(parameters)
 
     def _check_parameters(self):
         param_mapping = {param.name: param for param in self.parameters}
@@ -24,15 +30,3 @@ class WhiteNoiseAdder(UnspecializedFunction):
 
     def _evaluate(self, data: np.ndarray) -> bool:
         return True
-
-    @classmethod
-    def self_describe(cls):
-        return FunctionInfo(
-            name=f"{cls.__qualname__}",
-            function_reference=f"{cls.__module__}.{cls.__qualname__}",
-            parameters=[
-                Parameter("mean", 0.0, "float"),
-                Parameter("standard_deviation", 1.0, "float"),
-            ],
-            description="Adds white noise to the data",
-        ).get_function_info()

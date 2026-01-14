@@ -1,19 +1,26 @@
-from sdg_core_lib.post_process.functions.FunctionInfo import FunctionInfo
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
-    UnspecializedFunction,
+    UnspecializedFunction, Priority
 )
 
 import numpy as np
 
-
 class BurstNoiseAdder(UnspecializedFunction):
-    def __init__(self, parameters: list[dict]):
-        super().__init__(parameters)
+    parameters = [
+        Parameter("magnitude", "30.0", "float"),
+        Parameter("n_bursts", "1", "int"),
+        Parameter("burst_duration", "1", "int"),
+    ]
+    description = "Adds n bursts of noise to the data with duration of burst_duration and value of magnitude"
+    is_generative = False
+    priority = Priority.LOW
+
+
+    def __init__(self, parameters: list[Parameter]):
         self.magnitude = None
         self.n_bursts = None
         self.burst_duration = None
-        self._check_parameters()
+        super().__init__(parameters)
 
     def _check_parameters(self):
         param_mapping = {param.name: param for param in self.parameters}
@@ -43,15 +50,3 @@ class BurstNoiseAdder(UnspecializedFunction):
     def _evaluate(self, data: np.ndarray) -> bool:
         return True
 
-    @classmethod
-    def self_describe(cls):
-        return FunctionInfo(
-            name=f"{cls.__qualname__}",
-            function_reference=f"{cls.__module__}.{cls.__qualname__}",
-            parameters=[
-                Parameter("magnitude", 30.0, "float"),
-                Parameter("n_bursts", 1, "int"),
-                Parameter("burst_duration", 1, "int"),
-            ],
-            description="Adds n bursts of noise to the data with duration of burst_duration and value of magnitude",
-        ).get_function_info()

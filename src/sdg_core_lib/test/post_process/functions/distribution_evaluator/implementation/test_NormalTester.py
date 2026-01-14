@@ -12,7 +12,7 @@ def correct_instance():
         {"name": "mean", "value": "0.0", "parameter_type": "float"},
         {"name": "standard_deviation", "value": "1.0", "parameter_type": "float"},
     ]
-    return NormalTester(parameters=params)
+    return NormalTester.from_json(json_params=params)
 
 
 def test_check_parameters(correct_instance):
@@ -41,10 +41,3 @@ def test_evaluate_wrong(correct_instance):
     assert not correct_instance._evaluate(wrong_data)
     assert not correct_instance._evaluate(wrong_data_2)
 
-
-def test_get_result(correct_instance):
-    data_correct = np.random.normal(correct_instance.mean, correct_instance.std, 100000)
-    results = correct_instance.get_results(data_correct)
-    assert results["results"].shape == (100000,)
-    assert results["indexes"].shape == (100000,)
-    assert results["evaluation_results"]

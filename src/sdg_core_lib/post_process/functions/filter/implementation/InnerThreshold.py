@@ -1,6 +1,5 @@
 import numpy as np
 
-from sdg_core_lib.post_process.functions.FunctionInfo import FunctionInfo
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.filter.IntervalThreshold import (
     IntervalThreshold,
@@ -8,10 +7,12 @@ from sdg_core_lib.post_process.functions.filter.IntervalThreshold import (
 
 
 class InnerThreshold(IntervalThreshold):
-    def __init__(self, parameters: list[dict]):
+    description = "Filters data between a given interval",
+
+    def __init__(self, parameters: list[Parameter]):
         super().__init__(parameters)
 
-    def _compute(self, data: np.array):
+    def _compute(self, data: np.ndarray):
         if self.lower_strict:
             upper_indexes = np.greater_equal(data, self.lower_bound)
         else:
@@ -25,19 +26,5 @@ class InnerThreshold(IntervalThreshold):
         final_indexes = lower_indexes & upper_indexes
         return data[final_indexes], final_indexes
 
-    def _evaluate(self, data: np.array):
+    def _evaluate(self, data: np.ndarray):
         return True
-
-    @classmethod
-    def self_describe(cls):
-        return FunctionInfo(
-            name=f"{cls.__qualname__}",
-            function_reference=f"{cls.__module__}.{cls.__qualname__}",
-            parameters=[
-                Parameter("lower_bound", 0.0, "float"),
-                Parameter("upper_bound", 1.0, "float"),
-                Parameter("lower_strict", True, "bool"),
-                Parameter("upper_strict", True, "bool"),
-            ],
-            description="Filters data between a given interval",
-        ).get_function_info()
