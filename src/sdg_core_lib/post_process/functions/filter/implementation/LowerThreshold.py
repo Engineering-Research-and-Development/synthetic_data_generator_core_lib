@@ -10,12 +10,9 @@ class LowerThreshold(MonoThreshold):
     def __init__(self, parameters: list[Parameter]):
         super().__init__(parameters)
 
-    def _compute(self, data: np.ndarray):
+    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         if self.strict:
             indexes = np.greater_equal(data, self.value)
         else:
             indexes = np.greater(data, self.value)
         return data[indexes], indexes
-
-    def _evaluate(self, data: np.ndarray):
-        return True

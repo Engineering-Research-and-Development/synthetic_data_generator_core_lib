@@ -1,12 +1,13 @@
+from abc import ABC
+
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
     Priority,
 )
 from sdg_core_lib.post_process.functions.Parameter import Parameter
-import numpy as np
 
 
-class IntervalThreshold(UnspecializedFunction):
+class IntervalThreshold(UnspecializedFunction, ABC):
     parameters = [
         Parameter("lower_bound", "0.0", "float"),
         Parameter("upper_bound", "1.0", "float"),
@@ -29,9 +30,3 @@ class IntervalThreshold(UnspecializedFunction):
         self.lower_bound = param_mapping["lower_bound"].value
         self.upper_strict = param_mapping["upper_strict"].value
         self.lower_strict = param_mapping["lower_strict"].value
-
-    def _compute(self, data: np.ndarray):
-        pass
-
-    def _evaluate(self, data: np.ndarray):
-        pass

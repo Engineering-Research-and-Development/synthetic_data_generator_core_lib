@@ -25,9 +25,6 @@ class WhiteNoiseAdder(UnspecializedFunction):
         self.mean = param_mapping["mean"].value
         self.std = param_mapping["standard_deviation"].value
 
-    def _compute(self, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         noise = np.random.normal(self.mean, self.std, data.shape)
         return data + noise, np.array(range(len(data)))
-
-    def _evaluate(self, data: np.ndarray) -> bool:
-        return True

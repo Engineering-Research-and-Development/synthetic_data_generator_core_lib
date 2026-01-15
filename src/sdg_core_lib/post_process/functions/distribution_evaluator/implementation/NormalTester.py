@@ -27,15 +27,7 @@ class NormalTester(UnspecializedFunction):
         self.mean = param_mapping["mean"].value
         self.std = param_mapping["standard_deviation"].value
 
-    def _compute(self, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """
-        Currently returns same data
-        :param data:
-        :return:
-        """
-        return data, np.array(range(len(data)))
-
-    def _evaluate(self, data: np.ndarray) -> bool:
+    def apply(self, n_rows: int, data: np.ndarray) -> bool:
         """
         Checks if data is normally distributed.
         Consider the null hypotesis that data is normally distributed.
@@ -46,6 +38,7 @@ class NormalTester(UnspecializedFunction):
         3. Kolmogorov-Smirnov
 
         :param data:
+        :param n_rows:
         :return: False if null hypotesis is rejected (p < 0.05), True if it is failed to reject (p > 0.05)
         """
 

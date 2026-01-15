@@ -12,7 +12,9 @@ class OuterThreshold(IntervalThreshold):
     def __init__(self, parameters: list[Parameter]):
         super().__init__(parameters)
 
-    def _compute(self, data: np.ndarray):
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray] | np.ndarray | bool:
         if self.lower_strict:
             upper_indexes = np.greater_equal(data, self.upper_bound)
         else:
@@ -24,6 +26,3 @@ class OuterThreshold(IntervalThreshold):
             lower_indexes = np.less(data, self.lower_bound)
         final_indexes = lower_indexes | upper_indexes
         return data[final_indexes], final_indexes
-
-    def _evaluate(self, data: np.ndarray):
-        return True

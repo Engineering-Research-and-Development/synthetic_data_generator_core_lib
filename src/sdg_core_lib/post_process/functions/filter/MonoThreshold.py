@@ -4,10 +4,10 @@ from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     Priority,
 )
 
-import numpy as np
+from abc import ABC
 
 
-class MonoThreshold(UnspecializedFunction):
+class MonoThreshold(UnspecializedFunction, ABC):
     parameters = [
         Parameter("value", "0.0", "float"),
         Parameter("strict", "True", "bool"),
@@ -24,9 +24,3 @@ class MonoThreshold(UnspecializedFunction):
         param_mapping = {param.name: param for param in self.parameters}
         self.value = param_mapping["value"].value
         self.strict = param_mapping["strict"].value
-
-    def _compute(self, data: np.ndarray):
-        pass
-
-    def _evaluate(self, data: np.ndarray):
-        pass

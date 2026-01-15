@@ -33,7 +33,7 @@ class BurstNoiseAdder(UnspecializedFunction):
         if self.burst_duration < 1:
             raise ValueError("Burst duration must be at least 1")
 
-    def _compute(self, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         if self.burst_duration > len(data):
             return data + None
 
@@ -47,6 +47,3 @@ class BurstNoiseAdder(UnspecializedFunction):
             noise = np.ones_like(data[idx : idx + self.burst_duration]) * self.magnitude
             data_copy[idx : idx + self.burst_duration] += noise
         return data_copy, np.array(range(len(data)))
-
-    def _evaluate(self, data: np.ndarray) -> bool:
-        return True

@@ -33,21 +33,9 @@ class UnspecializedFunction(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _compute(self, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        """
-        Applies a data transformation function on a given set of generated data
-        :param data: a numpy array of data from a single feature
-        :return: transformed data and affected indexes
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def _evaluate(self, data: np.ndarray) -> bool:
-        """
-        Applies an evaluation function on a given set of generated data
-        :param data: a numpy array of data from a single feature
-        :return: a single boolean value evaluating id data meets evaluation criteria
-        """
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray] | np.ndarray | bool:
         raise NotImplementedError
 
     @classmethod

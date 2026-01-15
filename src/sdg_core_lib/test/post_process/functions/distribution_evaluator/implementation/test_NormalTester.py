@@ -26,17 +26,15 @@ def test_check_parameters(correct_instance):
     assert "standard_deviation" in param_names
 
 
-def test_compute(correct_instance):
+def test_apply(correct_instance):
     data = np.random.normal(correct_instance.mean, correct_instance.std, 100000)
-    compute_data, indexes = correct_instance._compute(data)
+    result = correct_instance.apply(n_rows=None, data=data)
     assert data.shape == (100000,)
-    assert indexes.shape == (100000,)
-    assert np.all(compute_data == data)
-    assert np.all(indexes == np.array(range(len(data))))
+    assert result
 
 
-def test_evaluate_wrong(correct_instance):
+def test_apply_wrong(correct_instance):
     wrong_data = np.random.normal(5, 1, 100000)
     wrong_data_2 = np.random.normal(0, 10, 100000)
-    assert not correct_instance._evaluate(wrong_data)
-    assert not correct_instance._evaluate(wrong_data_2)
+    assert not correct_instance.apply(n_rows=None, data=wrong_data)
+    assert not correct_instance.apply(n_rows=None, data=wrong_data_2)
