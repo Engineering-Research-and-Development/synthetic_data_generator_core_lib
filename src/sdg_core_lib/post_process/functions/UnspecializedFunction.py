@@ -33,9 +33,7 @@ class UnspecializedFunction(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def apply(
-        self, n_rows: int, data: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray] | np.ndarray | bool:
+    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray] | np.ndarray | bool:
         raise NotImplementedError
 
     @classmethod

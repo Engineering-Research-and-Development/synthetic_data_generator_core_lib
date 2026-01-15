@@ -4,6 +4,7 @@ from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
     Priority,
 )
+from sdg_core_lib.post_process.function_utils import check_min_max_boundary
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 
 
@@ -30,3 +31,4 @@ class IntervalThreshold(UnspecializedFunction, ABC):
         self.lower_bound = param_mapping["lower_bound"].value
         self.upper_strict = param_mapping["upper_strict"].value
         self.lower_strict = param_mapping["lower_strict"].value
+        check_min_max_boundary(self.lower_bound, self.upper_bound)
