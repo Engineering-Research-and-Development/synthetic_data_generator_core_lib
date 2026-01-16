@@ -13,7 +13,7 @@ class LinearFunction(UnspecializedFunction):
         Parameter("m", "1.0", "float"),
         Parameter("q", "0.0", "float"),
         Parameter("min_value", "0.0", "float"),
-        Parameter("max_value", "1.0", "float")
+        Parameter("max_value", "1.0", "float"),
     ]
     description = "Generates linear data in domain comprised between min_value and max_value following the y=mx+q equation"
     priority = Priority.MINIMAL

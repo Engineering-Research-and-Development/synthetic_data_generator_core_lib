@@ -88,9 +88,12 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         raise NotImplementedError
 
     def _set_hyperparams(self, learning_rate, batch_size, epochs):
-        self._learning_rate = learning_rate
-        self._batch_size = batch_size
-        self._epochs = epochs
+        if learning_rate is not None:
+            self._learning_rate = float(learning_rate)
+        if batch_size is not None:
+            self._batch_size = int(batch_size)
+        if epochs is not None:
+            self._epochs = int(epochs)
 
     def set_hyperparameters(self, **kwargs):
         learning_rate = kwargs.get("learning_rate", self._learning_rate)
