@@ -27,14 +27,17 @@ class LinearFunction(UnspecializedFunction):
         super().__init__(parameters)
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
-        self.m = param_mapping["m"].value
-        self.q = param_mapping["q"].value
-        self.min_value = param_mapping["min_value"].value
-        self.max_value = param_mapping["max_value"].value
+        allowed_parameters = [param.name for param in type(self).parameters]
+        param_mapping = {
+            param.name: param
+            for param in self.parameters
+            if param.name in allowed_parameters
+        }
+        for name, param in param_mapping.items():
+            setattr(self, name, param.value)
         check_min_max_boundary(self.min_value, self.max_value)
 
-    def apply(self, n_rows: int, data: np.ndarray) -> bool:
+    def apply(self, n_rows: int, data: np.ndarray) -> np.ndarray:
         """
         Creates a straight line, sampling n_rows data points from a line y=mx+q
 
@@ -44,4 +47,4 @@ class LinearFunction(UnspecializedFunction):
         data = np.linspace(self.min_value, self.max_value, n_rows)
         data = self.m * data + self.q
 
-        return data
+        return data.reshape(-1, 1)

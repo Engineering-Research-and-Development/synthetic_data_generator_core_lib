@@ -17,7 +17,10 @@ class Parameter:
 
     @staticmethod
     def _convert_type(stringed_value: str, parameter_type: str):
-        converted_value = ast.literal_eval(stringed_value)
+        try:
+            converted_value = ast.literal_eval(stringed_value)
+        except ValueError:
+            converted_value = stringed_value
         target_type = getattr(builtins, parameter_type)
         if not isinstance(converted_value, target_type):
             raise ValueError(

@@ -26,9 +26,12 @@ class IntervalThreshold(UnspecializedFunction, ABC):
         super().__init__(parameters)
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
-        self.upper_bound = param_mapping["upper_bound"].value
-        self.lower_bound = param_mapping["lower_bound"].value
-        self.upper_strict = param_mapping["upper_strict"].value
-        self.lower_strict = param_mapping["lower_strict"].value
+        allowed_parameters = [param.name for param in type(self).parameters]
+        param_mapping = {
+            param.name: param
+            for param in self.parameters
+            if param.name in allowed_parameters
+        }
+        for name, param in param_mapping.items():
+            setattr(self, name, param.value)
         check_min_max_boundary(self.lower_bound, self.upper_bound)

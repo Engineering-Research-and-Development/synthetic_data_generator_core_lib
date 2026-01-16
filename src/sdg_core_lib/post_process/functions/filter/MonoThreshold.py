@@ -21,6 +21,11 @@ class MonoThreshold(UnspecializedFunction, ABC):
         super().__init__(parameters)
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
-        self.value = param_mapping["value"].value
-        self.strict = param_mapping["strict"].value
+        allowed_parameters = [param.name for param in type(self).parameters]
+        param_mapping = {
+            param.name: param
+            for param in self.parameters
+            if param.name in allowed_parameters
+        }
+        for name, param in param_mapping.items():
+            setattr(self, name, param.value)

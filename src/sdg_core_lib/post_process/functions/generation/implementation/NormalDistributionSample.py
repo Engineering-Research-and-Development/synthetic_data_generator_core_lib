@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.stats import normaltest, ttest_1samp, kstest, norm
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -8,12 +7,12 @@ from sdg_core_lib.post_process.functions.UnspecializedFunction import (
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 
 
-class NormalTester(UnspecializedFunction):
+class NormalDistributionSample(UnspecializedFunction):
     parameters = [
         Parameter("mean", "0.0", "float"),
         Parameter("standard_deviation", "1.0", "float"),
     ]
-    description = "Checks if data is normally distributed given a desired mean and standard deviation"
+    description = "Generates random data from a gaussian distribution with custom mean and standard deviation"
     priority = Priority.MINIMAL
     is_generative = False
 
@@ -34,27 +33,14 @@ class NormalTester(UnspecializedFunction):
         if self.standard_deviation < 0:
             raise ValueError("Standard Deviation cannot be less than 0")
 
-    def apply(self, n_rows: int, data: np.ndarray) -> bool:
+    def apply(self, n_rows: int, data: np.ndarray) -> np.ndarray:
         """
-        Checks if data is normally distributed.
-        Consider the null hypotesis that data is normally distributed.
-        If null hypotesis is rejected (p < 0.05), it means that data is not normally distributed
-        Evaluation is based on 3 tests:
-        1. D’Agostino and Pearson’s test
-        2. Student's t-test
-        3. Kolmogorov-Smirnov
+        Creates a straight line, sampling n_rows data points from a line y=mx+q
 
         :param data:
         :param n_rows:
-        :return: False if null hypotesis is rejected (p < 0.05), True if it is failed to reject (p > 0.05)
         """
-
-        def cdf_function(x):
-            return norm.cdf(x, loc=self.mean, scale=self.standard_deviation)
-
-        _, p_normal = normaltest(data)
-        _, p_t = ttest_1samp(data, self.mean)
-        _, p_k = kstest(data, cdf_function)
-        p = min(p_normal, p_t, p_k)
-
-        return p > 0.05
+        data = np.random.normal(
+            loc=self.mean, scale=self.standard_deviation, size=n_rows
+        )
+        return data.reshape(-1, 1)
