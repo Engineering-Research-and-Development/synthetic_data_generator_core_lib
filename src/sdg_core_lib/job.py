@@ -88,3 +88,7 @@ def infer(
     results = synthetic_data.to_json()
 
     return results, report
+
+
+def generate_from_functions(functions: list[dict], n_rows: int):
+    pass
