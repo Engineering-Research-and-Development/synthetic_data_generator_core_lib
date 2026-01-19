@@ -1,38 +1,37 @@
-from sdg_core_lib.post_process.functions.FunctionInfo import FunctionInfo
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
+    Priority,
 )
 import numpy as np
 
 
 class WhiteNoiseAdder(UnspecializedFunction):
-    def __init__(self, parameters: list[dict]):
-        super().__init__(parameters)
+    parameters = [
+        Parameter("mean", "0.0", "float"),
+        Parameter("standard_deviation", "1.0", "float"),
+    ]
+    description = "Adds white noise to the data"
+    is_generative = False
+    priority = Priority.LOW
+
+    def __init__(self, parameters: list[Parameter]):
         self.mean = None
-        self.std = None
-        self._check_parameters()
+        self.standard_deviation = None
+        super().__init__(parameters)
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
-        self.mean = param_mapping["mean"].value
-        self.std = param_mapping["standard_deviation"].value
+        allowed_parameters = [param.name for param in type(self).parameters]
+        param_mapping = {
+            param.name: param
+            for param in self.parameters
+            if param.name in allowed_parameters
+        }
+        for name, param in param_mapping.items():
+            setattr(self, name, param.value)
+        if self.standard_deviation < 0:
+            raise ValueError("standard_deviation cannot be less than 0")
 
-    def _compute(self, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-        noise = np.random.normal(self.mean, self.std, data.shape)
+    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        noise = np.random.normal(self.mean, self.standard_deviation, data.shape)
         return data + noise, np.array(range(len(data)))
-
-    def _evaluate(self, data: np.ndarray) -> bool:
-        return True
-
-    @classmethod
-    def self_describe(cls):
-        return FunctionInfo(
-            name=f"{cls.__qualname__}",
-            function_reference=f"{cls.__module__}.{cls.__qualname__}",
-            parameters=[
-                Parameter("mean", 0.0, "float"),
-                Parameter("standard_deviation", 1.0, "float"),
-            ],
-            description="Adds white noise to the data",
-        ).get_function_info()

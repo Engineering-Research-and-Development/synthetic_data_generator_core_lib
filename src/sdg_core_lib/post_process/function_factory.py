@@ -5,7 +5,7 @@ from sdg_core_lib.post_process.functions.UnspecializedFunction import (
 )
 
 
-def dynamic_import(class_name: str):
+def dynamic_import(class_name: str) -> UnspecializedFunction:
     """
     Dynamically imports a class given its name.
 
@@ -15,6 +15,15 @@ def dynamic_import(class_name: str):
     module_name, class_name = class_name.rsplit(".", 1)
     module = importlib.import_module(module_name)
     return getattr(module, class_name)
+
+
+def parse_function_info(function_dict: dict):
+    """ """
+
+    function_name = function_dict["function_reference"]
+    parameter_list = function_dict["parameters"]
+
+    return function_name, parameter_list
 
 
 def function_factory(function_dict: dict) -> UnspecializedFunction:
@@ -28,14 +37,5 @@ def function_factory(function_dict: dict) -> UnspecializedFunction:
     """
     function_name, parameter_list = parse_function_info(function_dict)
     function_class = dynamic_import(function_name)
-    function = function_class(parameters=parameter_list)
+    function = function_class.from_json(json_params=parameter_list)
     return function
-
-
-def parse_function_info(function_dict: dict):
-    """ """
-
-    function_name = function_dict["function_reference"]
-    parameter_list = function_dict["parameters"]
-
-    return function_name, parameter_list

@@ -6,6 +6,7 @@ import os
 from loguru import logger
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
+current_folder = os.path.join(current_folder, "test_files")
 train_request = json.load(open(os.path.join(current_folder, "train_test.json")))
 train_request_2 = json.load(open(os.path.join(current_folder, "train_test_2.json")))
 

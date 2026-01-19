@@ -13,7 +13,7 @@ def correct_instance():
         {"name": "upper_strict", "value": "True", "parameter_type": "bool"},
         {"name": "lower_strict", "value": "False", "parameter_type": "bool"},
     ]
-    return InnerThreshold(parameters=params)
+    return InnerThreshold.from_json(json_params=params)
 
 
 def test_check_parameters(correct_instance):

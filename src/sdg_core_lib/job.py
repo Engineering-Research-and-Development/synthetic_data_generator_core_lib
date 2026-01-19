@@ -1,3 +1,4 @@
+from sdg_core_lib.config import get_hyperparameters
 from sdg_core_lib.dataset.datasets import Table, TimeSeries
 from sdg_core_lib.evaluate.tables import TabularComparisonEvaluator
 from sdg_core_lib.evaluate.time_series import TimeSeriesComparisonEvaluator
@@ -37,6 +38,7 @@ def train(
     preprocessed_data = data.preprocess()
     preprocess_schema = preprocessed_data.to_skeleton()
     model = model_factory(model_info, preprocessed_data.get_shape_for_model())
+    model.set_hyperparameters(**get_hyperparameters())
     model.train(data=preprocessed_data.get_computing_data())
     model.save(save_filepath)
 

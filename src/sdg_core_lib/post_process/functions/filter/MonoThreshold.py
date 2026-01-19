@@ -1,28 +1,31 @@
+from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
+    Priority,
 )
 
-import numpy as np
+from abc import ABC
 
 
-class MonoThreshold(UnspecializedFunction):
-    def __init__(self, parameters: list[dict]):
-        super().__init__(parameters)
+class MonoThreshold(UnspecializedFunction, ABC):
+    parameters = [
+        Parameter("value", "0.0", "float"),
+        Parameter("strict", "True", "bool"),
+    ]
+    priority = Priority.MINIMAL
+    is_generative = False
+
+    def __init__(self, parameters: list[Parameter]):
         self.value = None
         self.strict = None
-        self._check_parameters()
+        super().__init__(parameters)
 
     def _check_parameters(self):
-        param_mapping = {param.name: param for param in self.parameters}
-        self.value = param_mapping["value"].value
-        self.strict = param_mapping["strict"].value
-
-    def _compute(self, data: np.array):
-        pass
-
-    def _evaluate(self, data: np.array):
-        pass
-
-    @classmethod
-    def self_describe(cls):
-        raise NotImplementedError
+        allowed_parameters = [param.name for param in type(self).parameters]
+        param_mapping = {
+            param.name: param
+            for param in self.parameters
+            if param.name in allowed_parameters
+        }
+        for name, param in param_mapping.items():
+            setattr(self, name, param.value)
