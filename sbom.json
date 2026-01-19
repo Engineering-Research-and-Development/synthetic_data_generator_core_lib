@@ -2353,7 +2353,7 @@
       "version": "1.17.0"
     },
     {
-      "bom-ref": "sdg-core-lib==0.1.5",
+      "bom-ref": "sdg-core-lib==0.1.6.dev1",
       "description": "Add your description here",
       "externalReferences": [
         {
@@ -2364,7 +2364,7 @@
       ],
       "name": "sdg-core-lib",
       "type": "library",
-      "version": "0.1.5"
+      "version": "0.1.6.dev1"
     },
     {
       "bom-ref": "seaborn==0.13.2",
@@ -3437,7 +3437,7 @@
         "tensorflow==2.18.0",
         "tslearn==0.7.0"
       ],
-      "ref": "sdg-core-lib==0.1.5"
+      "ref": "sdg-core-lib==0.1.6.dev1"
     },
     {
       "dependsOn": [
@@ -3581,7 +3581,7 @@
     }
   ],
   "metadata": {
-    "timestamp": "2026-01-19T10:12:48.288069+00:00",
+    "timestamp": "2026-01-19T15:20:53.922121+00:00",
     "tools": {
       "components": [
         {
@@ -3685,7 +3685,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:adf5e071-0ad1-4e6d-85dd-fa327af0e811",
+  "serialNumber": "urn:uuid:82d63bfe-4f5f-4844-be70-f1c74a7c7244",
   "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
