@@ -70,7 +70,7 @@ def test_apply_edge_cases(instance_strict):
     low_data = np.array([1.0, 2.0, 3.0])
     filtered_data, indexes = instance_strict.apply(n_rows=len(low_data), data=low_data)
     assert filtered_data.shape == (0,)
-    assert np.all(indexes == False)
+    assert np.all(not indexes)
 
     # Test with all values above threshold
     high_data = np.array([6.0, 7.0, 8.0])
@@ -78,4 +78,4 @@ def test_apply_edge_cases(instance_strict):
         n_rows=len(high_data), data=high_data
     )
     np.testing.assert_array_equal(filtered_data, high_data)
-    assert np.all(indexes == True)
+    assert np.all(indexes)

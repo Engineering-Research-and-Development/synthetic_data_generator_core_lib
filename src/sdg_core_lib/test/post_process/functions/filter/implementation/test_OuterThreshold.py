@@ -80,7 +80,7 @@ def test_apply_edge_cases(instance_strict):
         n_rows=len(inside_data), data=inside_data
     )
     assert filtered_data.shape == (0,)
-    assert np.all(indexes == False)
+    assert np.all(not indexes)
 
     # Test with all values outside interval
     outside_data = np.array([1.0, 11.0])
@@ -88,7 +88,7 @@ def test_apply_edge_cases(instance_strict):
         n_rows=len(outside_data), data=outside_data
     )
     np.testing.assert_array_equal(filtered_data, outside_data)
-    assert np.all(indexes == True)
+    assert np.all(indexes)
 
 
 def test_check_parameters_invalid_boundary():

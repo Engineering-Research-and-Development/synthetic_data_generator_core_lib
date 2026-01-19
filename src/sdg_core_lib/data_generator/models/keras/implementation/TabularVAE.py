@@ -17,7 +17,6 @@ class TabularVAE(KerasBaseVAE):
         _learning_rate (float): Learning rate for the optimizer.
         _batch_size (int): Number of samples per batch during training.
         _epochs (int): Number of training epochs.
-        _scaler: Scaler used for standardizing input data.
 
     Methods:
         __init__: Initializes the TabularVAE with model parameters.

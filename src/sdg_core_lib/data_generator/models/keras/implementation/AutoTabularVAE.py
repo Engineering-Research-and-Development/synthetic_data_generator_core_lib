@@ -21,7 +21,6 @@ class AutoTabularVAE(KerasBaseVAE):
         _learning_rate (float): Learning rate for the optimizer.
         _batch_size (int): Number of samples per batch during training.
         _epochs (int): Number of training epochs.
-        _scaler: Scaler used for standardizing input data.
 
     Methods:
         __init__: Initializes the TabularVAE with model parameters.
@@ -77,7 +76,7 @@ class AutoTabularVAE(KerasBaseVAE):
         encoder_layers = hp.Int("encoder_layers", min_value=1, max_value=4)
         decoder_layers = hp.Int("decoder_layers", min_value=1, max_value=4)
         units_multiplier = hp.Choice("units_multiplier", values=[16, 32, 64, 128])
-        activation = hp.Choice(f"activation", values=["relu", "elu", "selu", "gelu"])
+        activation = hp.Choice("activation", values=["relu", "elu", "selu", "gelu"])
         beta = hp.Float("beta", min_value=0.0001, max_value=0.01, sampling="log")
         learning_rate = hp.Float(
             "learning_rate", min_value=1e-5, max_value=1e-2, sampling="log"
