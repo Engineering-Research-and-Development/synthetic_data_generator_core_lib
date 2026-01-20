@@ -61,11 +61,27 @@ jobs:
 
       - name: Generate dev version
         id: version
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
         run: |
+          # Get base version from pyproject.toml
           BASE_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
-          TIMESTAMP=$(date +%Y%m%d%H%M%S)
-          SHORT_SHA=$(git rev-parse --short HEAD)
-          DEV_VERSION="${BASE_VERSION}.dev${TIMESTAMP}+${SHORT_SHA}"
+          PACKAGE_NAME=$(grep '^name = ' pyproject.toml | sed 's/name = "\(.*\)"/\1/')
+          
+          # Get latest dev version from PyPI
+          LATEST_DEV=$(curl -s "https://pypi.org/pypi/${PACKAGE_NAME}/json" | \
+            python -c "import sys, json; versions = json.load(sys.stdin)['releases'].keys(); dev_versions = [v for v in versions if 'dev' in v and v.startswith('${BASE_VERSION}')]; print(max(dev_versions) if dev_versions else '')" 2>/dev/null || echo "")
+          
+          if [ -z "$LATEST_DEV" ]; then
+            # No dev version exists, start at dev0
+            DEV_NUMBER=0
+          else
+            # Extract dev number and increment
+            DEV_NUMBER=$(echo "$LATEST_DEV" | grep -oP '\.dev\K\d+' || echo "0")
+            DEV_NUMBER=$((DEV_NUMBER + 1))
+          fi
+          
+          DEV_VERSION="${BASE_VERSION}.dev${DEV_NUMBER}"
           
           echo "dev_version=${DEV_VERSION}" >> $GITHUB_OUTPUT
           echo "Publishing version: ${DEV_VERSION}"
