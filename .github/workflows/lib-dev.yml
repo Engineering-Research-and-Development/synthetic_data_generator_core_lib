@@ -14,11 +14,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v5
 
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.12'
-
     - name: Install uv
       uses: astral-sh/setup-uv@v5
       with:
@@ -55,9 +50,6 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-
-      - name: Install Python 3.12
-        run: uv python install 3.12
 
       - name: Generate dev version
         id: version
