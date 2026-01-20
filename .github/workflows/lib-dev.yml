@@ -1,0 +1,82 @@
+name: Test and Build Lib
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  test_genesis_dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv venv
+        uv sync --only-group test
+
+    - name: Run AI-LIB tests
+      env:
+        EPOCHS: 1
+      run: uv run pytest src/sdg_core_lib/test/
+
+
+  build_dev:
+    needs: test_genesis_dev
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Python 3.12
+        run: uv python install 3.12
+
+      - name: Generate dev version
+        id: version
+        run: |
+          BASE_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          DEV_VERSION="${BASE_VERSION}.dev${TIMESTAMP}+${SHORT_SHA}"
+          
+          echo "dev_version=${DEV_VERSION}" >> $GITHUB_OUTPUT
+          echo "Publishing version: ${DEV_VERSION}"
+
+      - name: Update version in pyproject.toml
+        run: |
+          # Update version temporarily for this build
+          sed -i "s/^version = .*/version = \"${{ steps.version.outputs.dev_version }}\"/" pyproject.toml
+
+      - name: Build AI-LIB
+        run: uv build
+
+      - name: Publish AI-LIB
+        run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}

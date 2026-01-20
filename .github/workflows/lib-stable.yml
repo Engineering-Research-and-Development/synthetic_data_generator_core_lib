@@ -2,12 +2,7 @@ name: Test and Build Lib
 
 on:
   push:
-    branches: [ "*" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
-  pull_request:
     branches: [ "master" ]
-
 
 jobs:
   test_sdg_core_lib:
@@ -35,6 +30,8 @@ jobs:
         uv sync --only-group test
 
     - name: Run AI-LIB tests
+      env:
+        EPOCHS: 1
       run: uv run pytest src/sdg_core_lib/test/
 
 
