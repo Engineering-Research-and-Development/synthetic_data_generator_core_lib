@@ -27,7 +27,7 @@ jobs:
     - name: Run AI-LIB tests
       env:
         EPOCHS: 1
-      run: uv run pytest src/sdg_core_lib/test/
+      run: uv run pytest src/test/
 
 
   build_dev:

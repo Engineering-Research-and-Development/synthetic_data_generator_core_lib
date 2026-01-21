@@ -25,7 +25,7 @@ def correct_dataset():
             "column_data": [1.0, 2.0, 3.0, 4.0, 5.0],
         }
     ]
-    return Table.from_json(data, "./")
+    return Table.from_json(data, "/")
 
 
 def test_instantiate(model):
