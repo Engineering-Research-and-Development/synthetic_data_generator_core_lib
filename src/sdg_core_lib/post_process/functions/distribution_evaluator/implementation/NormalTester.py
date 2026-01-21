@@ -34,7 +34,9 @@ class NormalTester(UnspecializedFunction):
         if self.standard_deviation < 0:
             raise ValueError("Standard Deviation cannot be less than 0")
 
-    def apply(self, n_rows: int, data: np.ndarray) -> bool:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         """
         Checks if data is normally distributed.
         Consider the null hypotesis that data is normally distributed.
@@ -57,4 +59,4 @@ class NormalTester(UnspecializedFunction):
         _, p_k = kstest(data, cdf_function)
         p = min(p_normal, p_t, p_k)
 
-        return p > 0.05
+        return np.empty((n_rows, 1)), np.empty((n_rows, 1)), p > 0.05

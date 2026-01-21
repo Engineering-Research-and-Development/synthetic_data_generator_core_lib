@@ -16,7 +16,7 @@ class LinearFunction(UnspecializedFunction):
         Parameter("max_value", "1.0", "float"),
     ]
     description = "Generates linear data in domain comprised between min_value and max_value following the y=mx+q equation"
-    priority = Priority.MINIMAL
+    priority = Priority.MAX
     is_generative = False
 
     def __init__(self, parameters: list[Parameter]):
@@ -37,7 +37,9 @@ class LinearFunction(UnspecializedFunction):
             setattr(self, name, param.value)
         check_min_max_boundary(self.min_value, self.max_value)
 
-    def apply(self, n_rows: int, data: np.ndarray) -> np.ndarray:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         """
         Creates a straight line, sampling n_rows data points from a line y=mx+q
 
@@ -47,4 +49,4 @@ class LinearFunction(UnspecializedFunction):
         data = np.linspace(self.min_value, self.max_value, n_rows)
         data = self.m * data + self.q
 
-        return data.reshape(-1, 1)
+        return data.reshape(-1, 1), np.empty((n_rows, 1)), True

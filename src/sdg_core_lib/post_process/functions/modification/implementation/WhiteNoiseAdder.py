@@ -32,6 +32,8 @@ class WhiteNoiseAdder(UnspecializedFunction):
         if self.standard_deviation < 0:
             raise ValueError("standard_deviation cannot be less than 0")
 
-    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         noise = np.random.normal(self.mean, self.standard_deviation, data.shape)
-        return data + noise, np.array(range(len(data)))
+        return data + noise, np.array(range(len(data))), True

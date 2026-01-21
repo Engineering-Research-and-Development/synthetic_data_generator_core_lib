@@ -35,15 +35,16 @@ def test_check_parameters(instance):
 
 def test_apply(instance):
     n_rows = 100
-    result = instance.apply(n_rows=n_rows, data=np.array([]))
+    result_data, indexes, success = instance.apply(n_rows=n_rows, data=np.array([]))
 
     # Check shape
-    assert result.shape == (n_rows, 1)
+    assert result_data.shape == (n_rows, 1)
 
     # Check that the function follows y = ax^2 + bx + c
     expected_x = np.linspace(instance.min_value, instance.max_value, n_rows)
     expected_y = instance.a * expected_x**2 + instance.b * expected_x + instance.c
-    np.testing.assert_array_almost_equal(result.flatten(), expected_y)
+    np.testing.assert_array_almost_equal(result_data.flatten(), expected_y)
+    assert success is True
 
 
 def test_apply_edge_cases(instance):
@@ -56,10 +57,11 @@ def test_apply_edge_cases(instance):
         {"name": "max_value", "value": "1.0", "parameter_type": "float"},
     ]
     instance = QuadraticFunction.from_json(json_params=params)
-    result = instance.apply(n_rows=10, data=np.array([]))
+    result_data, indexes, success = instance.apply(n_rows=10, data=np.array([]))
     expected_x = np.linspace(0.0, 1.0, 10)
     expected_y = 2.0 * expected_x + 1.0
-    np.testing.assert_array_almost_equal(result.flatten(), expected_y)
+    np.testing.assert_array_almost_equal(result_data.flatten(), expected_y)
+    assert success is True
 
 
 def test_check_parameters_invalid_boundary():

@@ -12,7 +12,9 @@ class InnerThreshold(IntervalThreshold):
     def __init__(self, parameters: list[Parameter]):
         super().__init__(parameters)
 
-    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         if self.lower_strict:
             upper_indexes = np.greater_equal(data, self.lower_bound)
         else:
@@ -21,7 +23,8 @@ class InnerThreshold(IntervalThreshold):
         if self.upper_strict:
             lower_indexes = np.less_equal(data, self.upper_bound)
         else:
-            lower_indexes = np.less(self.upper_bound)
+            lower_indexes = np.less(data, self.upper_bound)
 
         final_indexes = lower_indexes & upper_indexes
-        return data[final_indexes], final_indexes
+        data[final_indexes] = np.nan
+        return data, final_indexes, True
