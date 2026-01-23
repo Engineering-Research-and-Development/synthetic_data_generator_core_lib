@@ -411,3 +411,161 @@ class TestFunctionApplier:
             mock_logger.info.assert_any_call(
                 "Skipping generative function NormalDistributionSample on existing dataset"
             )
+
+    def test_remove_nan_rows_no_nan(self):
+        """Test _remove_nan_rows with no NaN values."""
+        arrays = [
+            np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]]),
+            np.array([[7.0], [8.0], [9.0]]),
+        ]
+
+        cleaned_arrays, removed_rows = FunctionApplier._remove_nan_rows(arrays)
+
+        assert removed_rows == 0
+        assert len(cleaned_arrays) == 2
+        np.testing.assert_array_equal(cleaned_arrays[0], arrays[0])
+        np.testing.assert_array_equal(cleaned_arrays[1], arrays[1])
+
+    def test_remove_nan_rows_with_nan(self):
+        """Test _remove_nan_rows with NaN values in different columns."""
+        arrays = [
+            np.array([[1.0, 2.0], [np.nan, 4.0], [5.0, 6.0]]),
+            np.array([[7.0], [8.0], [np.nan]]),
+        ]
+
+        cleaned_arrays, removed_rows = FunctionApplier._remove_nan_rows(arrays)
+
+        assert (
+            removed_rows == 2
+        )  # Row 1 (nan in first array) and row 2 (nan in second array)
+        assert len(cleaned_arrays) == 2
+
+        # Only first row should remain (no NaN in any column)
+        expected_first = np.array([[1.0, 2.0]])
+        expected_second = np.array([[7.0]])
+
+        np.testing.assert_array_equal(cleaned_arrays[0], expected_first)
+        np.testing.assert_array_equal(cleaned_arrays[1], expected_second)
+
+    def test_remove_nan_rows_all_nan(self):
+        """Test _remove_nan_rows when all rows contain NaN."""
+        arrays = [
+            np.array([[np.nan, 2.0], [np.nan, 4.0]]),
+            np.array([[7.0], [8.0]]),
+        ]
+
+        cleaned_arrays, removed_rows = FunctionApplier._remove_nan_rows(arrays)
+
+        assert removed_rows == 2
+        assert len(cleaned_arrays) == 2
+        assert cleaned_arrays[0].shape[0] == 0
+        assert cleaned_arrays[1].shape[0] == 0
+
+    def test_remove_nan_rows_1d_arrays(self):
+        """Test _remove_nan_rows with 1D arrays."""
+        arrays = [
+            np.array([1.0, np.nan, 3.0, 4.0]),
+            np.array([5.0, 6.0, np.nan, 8.0]),
+        ]
+
+        cleaned_arrays, removed_rows = FunctionApplier._remove_nan_rows(arrays)
+
+        assert (
+            removed_rows == 2
+        )  # Row 1 (nan in first array) and row 2 (nan in second array)
+        assert len(cleaned_arrays) == 2
+
+        # Only rows 0 and 3 should remain
+        expected_first = np.array([[1.0], [4.0]])
+        expected_second = np.array([[5.0], [8.0]])
+
+        np.testing.assert_array_equal(cleaned_arrays[0], expected_first)
+        np.testing.assert_array_equal(cleaned_arrays[1], expected_second)
+
+    def test_remove_nan_rows_empty_list(self):
+        """Test _remove_nan_rows with empty list."""
+        cleaned_arrays, removed_rows = FunctionApplier._remove_nan_rows([])
+
+        assert cleaned_arrays == []
+        assert removed_rows == 0
+
+    def test_remove_nan_rows_mixed_shapes(self):
+        """Test _remove_nan_rows with mixed 1D and 2D arrays."""
+        arrays = [
+            np.array([1.0, np.nan, 3.0]),  # 1D
+            np.array([[4.0], [5.0], [6.0]]),  # 2D
+        ]
+
+        cleaned_arrays, removed_rows = FunctionApplier._remove_nan_rows(arrays)
+
+        assert removed_rows == 1
+        assert len(cleaned_arrays) == 2
+        assert cleaned_arrays[0].shape == (2, 1)  # Converted to 2D
+        assert cleaned_arrays[1].shape == (2, 1)
+
+    @patch("sdg_core_lib.post_process.FunctionApplier.logger")
+    def test_generate_from_scratch_with_nan_removal(
+        self, mock_logger, generative_function_dict
+    ):
+        """Test that NaN rows are removed during generation from scratch."""
+        # Mock the function to return data with NaN values
+        mock_data_with_nan = np.array([[1.0], [np.nan], [3.0], [4.0], [5.0]])
+
+        applier = FunctionApplier(
+            function_feature_dict=[generative_function_dict],
+            n_rows=5,
+            from_scratch=True,
+        )
+
+        with patch.object(
+            applier.function_feature_mapping["test_feature"][0],
+            "apply",
+            return_value=(mock_data_with_nan, None, True),
+        ):
+            result = applier.apply_all()
+
+            # Should have 4 rows after removing the NaN row
+            assert result.columns[0].values.shape == (4, 1)
+
+            # Check that warning was logged
+            mock_logger.warning.assert_any_call(
+                "Removed 1 rows containing NaN values during generation"
+            )
+
+    def test_modify_existing_dataset_with_nan_removal(self, modification_function_dict):
+        """Test that NaN rows are removed during dataset modification."""
+        # Create a dataset with NaN values
+        json_data_with_nan = [
+            {
+                "column_name": "feature1",
+                "column_data": [1.0, np.nan, 3.0, 4.0, 5.0],
+                "column_datatype": "float32",
+                "column_type": "continuous",
+            },
+            {
+                "column_name": "feature2",
+                "column_data": [10.0, 20.0, 30.0, np.nan, 50.0],
+                "column_datatype": "float32",
+                "column_type": "continuous",
+            },
+        ]
+        dataset_with_nan = Table.from_json(json_data_with_nan, "")
+
+        # Use modification function that doesn't change the data
+        mod_dict = modification_function_dict.copy()
+        mod_dict["feature"] = "feature1"
+        mod_dict["parameters"][1]["value"] = "0.0"  # No actual modification
+
+        applier = FunctionApplier(
+            function_feature_dict=[mod_dict],
+            n_rows=5,
+            from_scratch=False,
+        )
+
+        result = applier.apply_all(dataset=dataset_with_nan)
+
+        print(result.to_json())
+
+        # Should have 3 rows after removing rows with NaN (row 1 and row 3)
+        assert result.columns[0].values.shape == (3, 1)
+        assert result.columns[1].values.shape == (3, 1)

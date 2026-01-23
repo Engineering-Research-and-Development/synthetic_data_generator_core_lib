@@ -1,6 +1,6 @@
 import shutil
 import pytest
-from sdg_core_lib.job import train, infer
+from sdg_core_lib.job import train, infer, generate_from_functions
 import json
 import os
 from loguru import logger
@@ -135,3 +135,27 @@ def test_infer_nodata(setup, teardown):
     print(results)
     assert metrics is not None
     print(metrics)
+
+
+def test_generate_from_function():
+    functions = [
+        {
+            "feature": "test_feature",
+            "function_reference": "sdg_core_lib.post_process.functions.generation.implementation.NormalDistributionSample.NormalDistributionSample",
+            "parameters": [
+                {"name": "mean", "value": "0.0", "parameter_type": "float"},
+                {
+                    "name": "standard_deviation",
+                    "value": "1.0",
+                    "parameter_type": "float",
+                },
+            ],
+        }
+    ]
+    n_rows = 100
+    dataset = generate_from_functions(functions, n_rows)
+    assert len(dataset) == 1
+    dataset_data = dataset[0]
+    assert len(dataset_data.get("column_data")) == n_rows
+    assert dataset_data.get("column_name") == "test_feature"
+

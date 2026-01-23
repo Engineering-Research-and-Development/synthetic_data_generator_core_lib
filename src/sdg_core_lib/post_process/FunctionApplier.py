@@ -90,6 +90,20 @@ class FunctionApplier:
             )
 
         try:
+            # Remove rows with NaN values before creating dataset
+            data_arrays = [
+                np.array(item["column_data"]).reshape(-1, 1) for item in new_data_json
+            ]
+            cleaned_arrays, removed_rows = self._remove_nan_rows(data_arrays)
+
+            if removed_rows > 0:
+                logger.warning(
+                    f"Removed {removed_rows} rows containing NaN values during generation"
+                )
+                # Update the JSON with cleaned data
+                for i, item in enumerate(new_data_json):
+                    item["column_data"] = cleaned_arrays[i].flatten().tolist()
+
             new_dataset = Table.from_json(new_data_json, "")
             logger.info(
                 f"Successfully generated dataset with {len(new_data_json)} features"
@@ -170,8 +184,14 @@ class FunctionApplier:
             )
 
         try:
+            # Remove rows with NaN values before concatenation
+            cleaned_data_array, removed_rows = self._remove_nan_rows(data_array)
+
+            if removed_rows > 0:
+                logger.warning(f"Removed {removed_rows} rows containing NaN values")
+
             # Safe concatenation with shape validation
-            final_array = self._safe_concatenate(data_array)
+            final_array = self._safe_concatenate(cleaned_data_array)
             new_dataset = dataset.clone(final_array)
 
             logger.info(
@@ -284,3 +304,47 @@ class FunctionApplier:
             return np.hstack(data_array)
         except Exception as e:
             raise ValueError(f"Failed to concatenate arrays: {e}")
+
+    @staticmethod
+    def _remove_nan_rows(data_array: list[np.ndarray]) -> tuple[list[np.ndarray], int]:
+        """
+        Remove rows containing NaN values from all arrays in the list.
+
+        Args:
+            data_array: list of arrays to clean
+
+        Returns:
+            Tuple of (cleaned_data_array, number_of_removed_rows)
+
+        Raises:
+            ValueError: If arrays cannot be safely processed
+        """
+        if not data_array:
+            return [], 0
+
+        # Ensure all arrays are 2D for consistent processing
+        processed_arrays = []
+        for i, arr in enumerate(data_array):
+            if len(arr.shape) == 1:
+                processed_arrays.append(arr.reshape(-1, 1))
+            else:
+                processed_arrays.append(arr)
+
+        # Find rows with NaN values across all columns
+        nan_mask = np.zeros(processed_arrays[0].shape[0], dtype=bool)
+
+        for arr in processed_arrays:
+            nan_mask |= np.isnan(arr).any(axis=1)
+
+        # Remove rows with NaN values
+        rows_to_keep = ~nan_mask
+        removed_rows = np.sum(nan_mask)
+
+        if removed_rows == 0:
+            return data_array, 0
+
+        cleaned_arrays = []
+        for arr in processed_arrays:
+            cleaned_arrays.append(arr[rows_to_keep])
+
+        return cleaned_arrays, removed_rows
