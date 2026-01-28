@@ -1,7 +1,8 @@
 from enum import Enum
 
+
 class AllowedData:
-    def __init__(self, dtype: 'DataType', is_categorical: bool):
+    def __init__(self, dtype: "DataType", is_categorical: bool):
         self.dtype = dtype
         self.is_categorical = is_categorical
 
@@ -16,4 +17,3 @@ class DataType(Enum):
     float64 = "float64"
     string = "str"
     bool = "bool"
-

@@ -19,7 +19,7 @@ class NormalTester(UnspecializedFunction):
     is_generative = False
     allowed_data = [
         AllowedData(DataType.float32, False),
-        AllowedData(DataType.int32, False)
+        AllowedData(DataType.int32, False),
     ]
 
     def __init__(self, parameters: list[Parameter]):

@@ -158,4 +158,3 @@ def test_generate_from_function():
     dataset_data = dataset[0]
     assert len(dataset_data.get("column_data")) == n_rows
     assert dataset_data.get("column_name") == "test_feature"
-

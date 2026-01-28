@@ -9,7 +9,10 @@ def model_info():
     return ModelInfo(
         default_loss_function="Test Loss Function",
         description="This is a test model",
-        allowed_data=[AllowedData(DataType.int64, False), AllowedData(DataType.float32, False)],
+        allowed_data=[
+            AllowedData(DataType.int64, False),
+            AllowedData(DataType.float32, False),
+        ],
         name="Test",
     )
 

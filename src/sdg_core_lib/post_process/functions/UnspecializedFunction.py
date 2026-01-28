@@ -61,5 +61,5 @@ class UnspecializedFunction(ABC):
                 "is_generative": cls.is_generative,
             },
             "parameters": [param.to_json() for param in cls.parameters],
-            "datatypes": [ad.to_json() for ad in cls.allowed_data]
+            "datatypes": [ad.to_json() for ad in cls.allowed_data],
         }
