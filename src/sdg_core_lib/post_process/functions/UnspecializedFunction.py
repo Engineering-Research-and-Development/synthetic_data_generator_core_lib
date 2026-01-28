@@ -2,6 +2,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from enum import Enum
 
+from sdg_core_lib.commons import AllowedData
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 
 
@@ -15,10 +16,11 @@ class Priority(Enum):
 
 
 class UnspecializedFunction(ABC):
-    parameters: list[Parameter] = (None,)
+    parameters: list[Parameter] = None
     description: str = None
     priority: Priority = Priority.NONE
     is_generative: bool = None
+    allowed_data: list[AllowedData] = None
 
     def __init__(self, parameters: list[Parameter]):
         self.parameters = parameters
@@ -59,4 +61,5 @@ class UnspecializedFunction(ABC):
                 "is_generative": cls.is_generative,
             },
             "parameters": [param.to_json() for param in cls.parameters],
+            "datatypes": [ad.to_json() for ad in cls.allowed_data]
         }

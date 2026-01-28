@@ -1,3 +1,4 @@
+from sdg_core_lib.commons import AllowedData, DataType
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -16,6 +17,10 @@ class BurstNoiseAdder(UnspecializedFunction):
     description = "Adds n bursts of noise to the data with duration of burst_duration and value of magnitude"
     is_generative = False
     priority = Priority.LOW
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+        AllowedData(DataType.int32, False)
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.magnitude = None

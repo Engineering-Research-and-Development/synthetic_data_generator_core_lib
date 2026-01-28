@@ -1,3 +1,4 @@
+from sdg_core_lib.commons import AllowedData, DataType
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -14,6 +15,10 @@ class WhiteNoiseAdder(UnspecializedFunction):
     description = "Adds white noise to the data"
     is_generative = False
     priority = Priority.LOW
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+        AllowedData(DataType.int32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.mean = None

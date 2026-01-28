@@ -1,4 +1,5 @@
 import numpy as np
+from sdg_core_lib.commons import AllowedData, DataType
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -18,6 +19,9 @@ class LinearFunction(UnspecializedFunction):
     description = "Generates linear data in domain comprised between min_value and max_value following the y=mx+q equation"
     priority = Priority.MAX
     is_generative = False
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.m = None

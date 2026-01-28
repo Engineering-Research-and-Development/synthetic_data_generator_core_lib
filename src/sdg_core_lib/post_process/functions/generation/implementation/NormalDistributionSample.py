@@ -1,4 +1,5 @@
 import numpy as np
+from sdg_core_lib.commons import AllowedData, DataType
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -15,6 +16,9 @@ class NormalDistributionSample(UnspecializedFunction):
     description = "Generates random data from a gaussian distribution with custom mean and standard deviation"
     priority = Priority.MAX
     is_generative = True
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.mean = None

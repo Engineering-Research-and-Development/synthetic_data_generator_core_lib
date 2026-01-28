@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import normaltest, ttest_1samp, kstest, norm
+from sdg_core_lib.commons import AllowedData, DataType
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -16,6 +17,10 @@ class NormalTester(UnspecializedFunction):
     description = "Checks if data is normally distributed given a desired mean and standard deviation"
     priority = Priority.MINIMAL
     is_generative = False
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+        AllowedData(DataType.int32, False)
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.mean = None
