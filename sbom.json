@@ -1,7 +1,7 @@
 {
   "components": [
     {
-      "bom-ref": "Markdown==3.10",
+      "bom-ref": "Markdown==3.10.1",
       "description": "Python implementation of John Gruber's Markdown.",
       "externalReferences": [
         {
@@ -39,9 +39,9 @@
         }
       ],
       "name": "Markdown",
-      "purl": "pkg:pypi/markdown@3.10",
+      "purl": "pkg:pypi/markdown@3.10.1",
       "type": "library",
-      "version": "3.10"
+      "version": "3.10.1"
     },
     {
       "bom-ref": "MarkupSafe==3.0.3",
@@ -179,7 +179,7 @@
       "version": "3.1.5"
     },
     {
-      "bom-ref": "absl-py==2.3.1",
+      "bom-ref": "absl-py==2.4.0",
       "description": "Abseil Python Common Libraries, see https://github.com/abseil/abseil-py.",
       "externalReferences": [
         {
@@ -212,9 +212,9 @@
         }
       ],
       "name": "absl-py",
-      "purl": "pkg:pypi/absl-py@2.3.1",
+      "purl": "pkg:pypi/absl-py@2.4.0",
       "type": "library",
-      "version": "2.3.1"
+      "version": "2.4.0"
     },
     {
       "bom-ref": "arrow==1.4.0",
@@ -1648,7 +1648,7 @@
       "version": "0.17.6"
     },
     {
-      "bom-ref": "packaging==25.0",
+      "bom-ref": "packaging==26.0",
       "description": "Core utilities for Python packages",
       "externalReferences": [
         {
@@ -1664,22 +1664,14 @@
       ],
       "licenses": [
         {
-          "license": {
-            "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: Apache Software License"
-          }
-        },
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: BSD License"
-          }
+          "acknowledgement": "declared",
+          "expression": "Apache-2.0 OR BSD-2-Clause"
         }
       ],
       "name": "packaging",
-      "purl": "pkg:pypi/packaging@25.0",
+      "purl": "pkg:pypi/packaging@26.0",
       "type": "library",
-      "version": "25.0"
+      "version": "26.0"
     },
     {
       "bom-ref": "pandas==2.2.3",
@@ -1915,9 +1907,19 @@
       "version": "2.1.0"
     },
     {
-      "bom-ref": "pyparsing==3.3.1",
+      "bom-ref": "pyparsing==3.3.2",
       "description": "pyparsing - Classes and methods to define and execute parsing grammars",
       "externalReferences": [
+        {
+          "comment": "from packaging metadata Project-URL: Documentation",
+          "type": "documentation",
+          "url": "https://pyparsing-docs.readthedocs.io/en/latest/"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Source",
+          "type": "other",
+          "url": "https://github.com/pyparsing/pyparsing.git"
+        },
         {
           "comment": "from packaging metadata Project-URL: Homepage",
           "type": "website",
@@ -1933,9 +1935,9 @@
         }
       ],
       "name": "pyparsing",
-      "purl": "pkg:pypi/pyparsing@3.3.1",
+      "purl": "pkg:pypi/pyparsing@3.3.2",
       "type": "library",
-      "version": "3.3.1"
+      "version": "3.3.2"
     },
     {
       "bom-ref": "python-dateutil==2.9.0.post0",
@@ -2181,7 +2183,7 @@
       "version": "1.1.0"
     },
     {
-      "bom-ref": "rich==14.2.0",
+      "bom-ref": "rich==14.3.1",
       "description": "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal",
       "externalReferences": [
         {
@@ -2204,9 +2206,9 @@
         }
       ],
       "name": "rich",
-      "purl": "pkg:pypi/rich@14.2.0",
+      "purl": "pkg:pypi/rich@14.3.1",
       "type": "library",
-      "version": "14.2.0"
+      "version": "14.3.1"
     },
     {
       "bom-ref": "rpds-py==0.30.0",
@@ -2353,7 +2355,7 @@
       "version": "1.17.0"
     },
     {
-      "bom-ref": "sdg-core-lib==0.1.6.dev1",
+      "bom-ref": "sdg-core-lib==0.1.6",
       "description": "Add your description here",
       "externalReferences": [
         {
@@ -2364,7 +2366,7 @@
       ],
       "name": "sdg-core-lib",
       "type": "library",
-      "version": "0.1.6.dev1"
+      "version": "0.1.6"
     },
     {
       "bom-ref": "seaborn==0.13.2",
@@ -2395,7 +2397,7 @@
       "version": "0.13.2"
     },
     {
-      "bom-ref": "setuptools==80.9.0",
+      "bom-ref": "setuptools==80.10.2",
       "description": "Easily download, build, install, upgrade, and uninstall Python packages",
       "externalReferences": [
         {
@@ -2423,9 +2425,9 @@
         }
       ],
       "name": "setuptools",
-      "purl": "pkg:pypi/setuptools@80.9.0",
+      "purl": "pkg:pypi/setuptools@80.10.2",
       "type": "library",
-      "version": "80.9.0"
+      "version": "80.10.2"
     },
     {
       "bom-ref": "six==1.17.0",
@@ -2881,11 +2883,11 @@
       "version": "2.6.3"
     },
     {
-      "bom-ref": "wcwidth==0.2.14",
+      "bom-ref": "wcwidth==0.5.2",
       "description": "Measures the displayed width of unicode strings in a terminal",
       "externalReferences": [
         {
-          "comment": "from packaging metadata: Home-page",
+          "comment": "from packaging metadata Project-URL: Homepage",
           "type": "website",
           "url": "https://github.com/jquast/wcwidth"
         }
@@ -2899,9 +2901,9 @@
         }
       ],
       "name": "wcwidth",
-      "purl": "pkg:pypi/wcwidth@0.2.14",
+      "purl": "pkg:pypi/wcwidth@0.5.2",
       "type": "library",
-      "version": "0.2.14"
+      "version": "0.5.2"
     },
     {
       "bom-ref": "webcolors==25.10.0",
@@ -2938,8 +2940,8 @@
       "version": "25.10.0"
     },
     {
-      "bom-ref": "wheel==0.45.1",
-      "description": "A built-package format for Python",
+      "bom-ref": "wheel==0.46.3",
+      "description": "Command line tool for manipulating wheel files",
       "externalReferences": [
         {
           "comment": "from packaging metadata Project-URL: Documentation",
@@ -2971,9 +2973,9 @@
         }
       ],
       "name": "wheel",
-      "purl": "pkg:pypi/wheel@0.45.1",
+      "purl": "pkg:pypi/wheel@0.46.3",
       "type": "library",
-      "version": "0.45.1"
+      "version": "0.46.3"
     },
     {
       "bom-ref": "wrapt==2.0.1",
@@ -3013,7 +3015,7 @@
   ],
   "dependencies": [
     {
-      "ref": "Markdown==3.10"
+      "ref": "Markdown==3.10.1"
     },
     {
       "ref": "MarkupSafe==3.0.3"
@@ -3028,7 +3030,7 @@
       "ref": "Werkzeug==3.1.5"
     },
     {
-      "ref": "absl-py==2.3.1"
+      "ref": "absl-py==2.4.0"
     },
     {
       "dependsOn": [
@@ -3041,7 +3043,7 @@
     {
       "dependsOn": [
         "six==1.17.0",
-        "wheel==0.45.1"
+        "wheel==0.46.3"
       ],
       "ref": "astunparse==1.6.3"
     },
@@ -3079,7 +3081,7 @@
         "chardet==5.2.0",
         "cyclonedx-python-lib==11.6.0",
         "packageurl-python==0.17.6",
-        "packaging==25.0",
+        "packaging==26.0",
         "pip-requirements-parser==32.0.1"
       ],
       "ref": "cyclonedx-bom==7.2.1"
@@ -3180,7 +3182,7 @@
         "keras==3.6.0",
         "kt-legacy==1.0.5",
         "namex==0.1.0",
-        "packaging==25.0",
+        "packaging==26.0",
         "pandas==2.2.3",
         "protobuf==5.29.5",
         "requests==2.32.5",
@@ -3192,14 +3194,14 @@
     },
     {
       "dependsOn": [
-        "absl-py==2.3.1",
+        "absl-py==2.4.0",
         "h5py==3.15.1",
         "ml-dtypes==0.4.1",
         "namex==0.1.0",
         "numpy==2.0.2",
         "optree==0.18.0",
-        "packaging==25.0",
-        "rich==14.2.0"
+        "packaging==26.0",
+        "rich==14.3.1"
       ],
       "ref": "keras==3.6.0"
     },
@@ -3232,7 +3234,7 @@
     },
     {
       "dependsOn": [
-        "Markdown==3.10",
+        "Markdown==3.10.1",
         "mdurl==0.1.2",
         "requests==2.32.5"
       ],
@@ -3245,11 +3247,11 @@
         "fonttools==4.61.1",
         "kiwisolver==1.4.9",
         "numpy==2.0.2",
-        "packaging==25.0",
+        "packaging==26.0",
         "pillow==12.1.0",
-        "pyparsing==3.3.1",
+        "pyparsing==3.3.2",
         "python-dateutil==2.9.0.post0",
-        "setuptools==80.9.0"
+        "setuptools==80.10.2"
       ],
       "ref": "matplotlib==3.10.8"
     },
@@ -3258,7 +3260,7 @@
     },
     {
       "dependsOn": [
-        "absl-py==2.3.1",
+        "absl-py==2.4.0",
         "numpy==2.0.2"
       ],
       "ref": "ml-dtypes==0.4.1"
@@ -3282,20 +3284,20 @@
     {
       "dependsOn": [
         "numpy==2.0.2",
-        "rich==14.2.0",
+        "rich==14.3.1",
         "typing_extensions==4.15.0"
       ],
       "ref": "optree==0.18.0"
     },
     {
       "dependsOn": [
-        "setuptools==80.9.0",
-        "wheel==0.45.1"
+        "setuptools==80.10.2",
+        "wheel==0.46.3"
       ],
       "ref": "packageurl-python==0.17.6"
     },
     {
-      "ref": "packaging==25.0"
+      "ref": "packaging==26.0"
     },
     {
       "dependsOn": [
@@ -3320,20 +3322,20 @@
     {
       "dependsOn": [
         "defusedxml==0.7.1",
-        "packaging==25.0"
+        "packaging==26.0"
       ],
       "ref": "pillow==12.1.0"
     },
     {
       "dependsOn": [
-        "packaging==25.0",
-        "pyparsing==3.3.1"
+        "packaging==26.0",
+        "pyparsing==3.3.2"
       ],
       "ref": "pip-requirements-parser==32.0.1"
     },
     {
       "dependsOn": [
-        "wcwidth==0.2.14"
+        "wcwidth==0.5.2"
       ],
       "ref": "prettytable==3.17.0"
     },
@@ -3347,7 +3349,7 @@
       "ref": "py-serializable==2.1.0"
     },
     {
-      "ref": "pyparsing==3.3.1"
+      "ref": "pyparsing==3.3.2"
     },
     {
       "dependsOn": [
@@ -3396,7 +3398,7 @@
         "Pygments==2.19.2",
         "markdown-it-py==4.0.0"
       ],
-      "ref": "rich==14.2.0"
+      "ref": "rich==14.3.1"
     },
     {
       "ref": "rpds-py==0.30.0"
@@ -3437,7 +3439,7 @@
         "tensorflow==2.18.0",
         "tslearn==0.7.0"
       ],
-      "ref": "sdg-core-lib==0.1.6.dev1"
+      "ref": "sdg-core-lib==0.1.6"
     },
     {
       "dependsOn": [
@@ -3451,10 +3453,10 @@
     },
     {
       "dependsOn": [
-        "packaging==25.0",
-        "wheel==0.45.1"
+        "packaging==26.0",
+        "wheel==0.46.3"
       ],
-      "ref": "setuptools==80.9.0"
+      "ref": "setuptools==80.10.2"
     },
     {
       "ref": "six==1.17.0"
@@ -3462,9 +3464,9 @@
     {
       "dependsOn": [
         "numpy==2.0.2",
-        "packaging==25.0",
+        "packaging==26.0",
         "prettytable==3.17.0",
-        "rich==14.2.0",
+        "rich==14.3.1",
         "scikit-learn==1.5.2",
         "scipy==1.17.0"
       ],
@@ -3478,7 +3480,7 @@
         "joblib==1.5.3",
         "matplotlib==3.10.8",
         "numpy==2.0.2",
-        "packaging==25.0",
+        "packaging==26.0",
         "pandas==2.2.3",
         "patsy==1.0.2",
         "scipy==1.17.0"
@@ -3490,14 +3492,14 @@
     },
     {
       "dependsOn": [
-        "Markdown==3.10",
+        "Markdown==3.10.1",
         "Werkzeug==3.1.5",
-        "absl-py==2.3.1",
+        "absl-py==2.4.0",
         "grpcio==1.76.0",
         "numpy==2.0.2",
-        "packaging==25.0",
+        "packaging==26.0",
         "protobuf==5.29.5",
-        "setuptools==80.9.0",
+        "setuptools==80.10.2",
         "six==1.17.0",
         "tensorboard-data-server==0.7.2"
       ],
@@ -3505,7 +3507,7 @@
     },
     {
       "dependsOn": [
-        "absl-py==2.3.1",
+        "absl-py==2.4.0",
         "astunparse==1.6.3",
         "flatbuffers==25.12.19",
         "gast==0.7.0",
@@ -3517,10 +3519,10 @@
         "ml-dtypes==0.4.1",
         "numpy==2.0.2",
         "opt_einsum==3.4.0",
-        "packaging==25.0",
+        "packaging==26.0",
         "protobuf==5.29.5",
         "requests==2.32.5",
-        "setuptools==80.9.0",
+        "setuptools==80.10.2",
         "six==1.17.0",
         "tensorboard==2.18.0",
         "termcolor==3.3.0",
@@ -3562,26 +3564,27 @@
       "ref": "urllib3==2.6.3"
     },
     {
-      "ref": "wcwidth==0.2.14"
+      "ref": "wcwidth==0.5.2"
     },
     {
       "ref": "webcolors==25.10.0"
     },
     {
       "dependsOn": [
-        "setuptools==80.9.0"
+        "packaging==26.0",
+        "setuptools==80.10.2"
       ],
-      "ref": "wheel==0.45.1"
+      "ref": "wheel==0.46.3"
     },
     {
       "dependsOn": [
-        "setuptools==80.9.0"
+        "setuptools==80.10.2"
       ],
       "ref": "wrapt==2.0.1"
     }
   ],
   "metadata": {
-    "timestamp": "2026-01-19T15:20:53.922121+00:00",
+    "timestamp": "2026-01-30T10:30:48.942862+00:00",
     "tools": {
       "components": [
         {
@@ -3685,7 +3688,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:82d63bfe-4f5f-4844-be70-f1c74a7c7244",
+  "serialNumber": "urn:uuid:6dbabbed-526c-469c-b273-bb9affbf7bd1",
   "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
