@@ -1,7 +1,8 @@
 import numpy as np
 import keras
 
-from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo, AllowedData
+from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo
+from sdg_core_lib.commons import AllowedData, DataType
 from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
 from keras import layers
 
@@ -118,10 +119,10 @@ class TimeSeriesVAE(KerasBaseVAE):
             default_loss_function="ELBO LOSS",
             description="A Beta-Variational Autoencoder for time series generation",
             allowed_data=[
-                AllowedData("float32", False),
-                AllowedData("int32", False),
-                AllowedData("int64", False),
-                AllowedData("int32", True),
-                AllowedData("str", True),
+                AllowedData(DataType.float32, False),
+                AllowedData(DataType.int32, False),
+                AllowedData(DataType.int64, False),
+                AllowedData(DataType.int32, True),
+                AllowedData(DataType.string, True),
             ],
         ).get_model_info()

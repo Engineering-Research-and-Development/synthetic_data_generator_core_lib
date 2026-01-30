@@ -30,12 +30,13 @@ def test_check_parameters(instance):
 def test_apply(instance):
     # Create test data
     original_data = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
-    modified_data, affected_indices = instance.apply(
+    modified_data, affected_indices, success = instance.apply(
         n_rows=len(original_data), data=original_data
     )
 
     # Check that data shape is preserved
     assert modified_data.shape == original_data.shape
+    assert success is True
 
     # Check that affected_indices correspond to modified values
     differences = np.abs(modified_data - original_data)
@@ -51,16 +52,22 @@ def test_apply(instance):
 def test_apply_edge_cases(instance):
     # Test with burst_duration > data length
     short_data = np.array([1.0, 2.0])
-    result, affected_indices = instance.apply(n_rows=len(short_data), data=short_data)
+    result, affected_indices, success = instance.apply(
+        n_rows=len(short_data), data=short_data
+    )
     # Should return original data unchanged
     np.testing.assert_array_equal(result, short_data)
+    assert success is False
 
     # Test with n_bursts > len(data) // 2
     instance.n_bursts = 10
     medium_data = np.array([1.0, 2.0, 3.0, 4.0])
-    result, affected_indices = instance.apply(n_rows=len(medium_data), data=medium_data)
+    result, affected_indices, success = instance.apply(
+        n_rows=len(medium_data), data=medium_data
+    )
     # Should return original data unchanged
     np.testing.assert_array_equal(result, medium_data)
+    assert success is False
 
 
 def test_check_parameters_invalid():

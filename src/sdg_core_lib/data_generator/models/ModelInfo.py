@@ -1,10 +1,4 @@
-class AllowedData:
-    def __init__(self, dtype: str, is_categorical: bool):
-        self.dtype = dtype
-        self.is_categorical = is_categorical
-
-    def to_json(self):
-        return {"type": self.dtype, "is_categorical": self.is_categorical}
+from sdg_core_lib.commons import AllowedData
 
 
 class ModelInfo:

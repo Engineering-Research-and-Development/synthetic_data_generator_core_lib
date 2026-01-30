@@ -1,0 +1,90 @@
+name: Test and Build Lib
+
+on:
+  push:
+    branches: [ "dev" ]
+
+jobs:
+  test_genesis_dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v5
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
+      run: |
+        uv venv
+        uv sync --only-group test
+
+    - name: Run AI-LIB tests
+      env:
+        EPOCHS: 1
+      run: uv run pytest src/test/
+
+
+  build_dev:
+    needs: test_genesis_dev
+    runs-on: ubuntu-latest
+
+    environment:
+      name: pypi
+
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Generate dev version
+        id: version
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          # Get base version from pyproject.toml
+          BASE_VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+          PACKAGE_NAME=$(grep '^name = ' pyproject.toml | sed 's/name = "\(.*\)"/\1/')
+          
+          # Get latest dev version from PyPI
+          LATEST_DEV=$(curl -s "https://pypi.org/pypi/${PACKAGE_NAME}/json" | \
+            python -c "import sys, json; versions = json.load(sys.stdin)['releases'].keys(); dev_versions = [v for v in versions if 'dev' in v and v.startswith('${BASE_VERSION}')]; print(max(dev_versions) if dev_versions else '')" 2>/dev/null || echo "")
+          
+          if [ -z "$LATEST_DEV" ]; then
+            # No dev version exists, start at dev0
+            DEV_NUMBER=0
+          else
+            # Extract dev number and increment
+            DEV_NUMBER=$(echo "$LATEST_DEV" | grep -oP '\.dev\K\d+' || echo "0")
+            DEV_NUMBER=$((DEV_NUMBER + 1))
+          fi
+          
+          DEV_VERSION="${BASE_VERSION}.dev${DEV_NUMBER}"
+          
+          echo "dev_version=${DEV_VERSION}" >> $GITHUB_OUTPUT
+          echo "Publishing version: ${DEV_VERSION}"
+
+      - name: Update version in pyproject.toml
+        run: |
+          # Update version temporarily for this build
+          sed -i "s/^version = .*/version = \"${{ steps.version.outputs.dev_version }}\"/" pyproject.toml
+
+      - name: Build AI-LIB
+        run: uv build
+
+      - name: Publish AI-LIB
+        run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}

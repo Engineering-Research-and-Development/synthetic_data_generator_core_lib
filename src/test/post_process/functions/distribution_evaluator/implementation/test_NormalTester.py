@@ -26,13 +26,15 @@ def test_check_parameters(instance):
 
 def test_apply(instance):
     data = np.random.normal(instance.mean, instance.standard_deviation, 100000)
-    result = instance.apply(n_rows=None, data=data)
+    result_data, indexes, success = instance.apply(n_rows=len(data), data=data)
     assert data.shape == (100000,)
-    assert result
+    assert success
 
 
 def test_apply_wrong(instance):
     wrong_data = np.random.normal(5, 1, 100000)
     wrong_data_2 = np.random.normal(0, 10, 100000)
-    assert not instance.apply(n_rows=None, data=wrong_data)
-    assert not instance.apply(n_rows=None, data=wrong_data_2)
+    _, _, success1 = instance.apply(n_rows=len(wrong_data), data=wrong_data)
+    _, _, success2 = instance.apply(n_rows=len(wrong_data_2), data=wrong_data_2)
+    assert not success1
+    assert not success2

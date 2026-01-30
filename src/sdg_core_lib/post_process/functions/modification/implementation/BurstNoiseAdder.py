@@ -1,3 +1,4 @@
+from sdg_core_lib.commons import AllowedData, DataType
 from sdg_core_lib.post_process.functions.Parameter import Parameter
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -16,6 +17,10 @@ class BurstNoiseAdder(UnspecializedFunction):
     description = "Adds n bursts of noise to the data with duration of burst_duration and value of magnitude"
     is_generative = False
     priority = Priority.LOW
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+        AllowedData(DataType.int32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.magnitude = None
@@ -37,12 +42,14 @@ class BurstNoiseAdder(UnspecializedFunction):
         if self.burst_duration < 1:
             raise ValueError("Burst duration must be at least 1")
 
-    def apply(self, n_rows: int, data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         if self.burst_duration > len(data):
-            return data, np.array([])
+            return data, np.array([]), False
 
         if self.n_bursts > len(data) // 2:
-            return data, np.array([])
+            return data, np.array([]), False
 
         data_copy = np.copy(data)
         affected_indices = set()
@@ -72,4 +79,4 @@ class BurstNoiseAdder(UnspecializedFunction):
             for burst_idx in range(idx, idx + self.burst_duration):
                 affected_indices.add(burst_idx)
 
-        return data_copy, np.array(sorted(affected_indices))
+        return data_copy, np.array(sorted(affected_indices)), True

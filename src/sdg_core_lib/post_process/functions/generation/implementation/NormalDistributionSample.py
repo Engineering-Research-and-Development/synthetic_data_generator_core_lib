@@ -1,4 +1,5 @@
 import numpy as np
+from sdg_core_lib.commons import AllowedData, DataType
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -13,8 +14,11 @@ class NormalDistributionSample(UnspecializedFunction):
         Parameter("standard_deviation", "1.0", "float"),
     ]
     description = "Generates random data from a gaussian distribution with custom mean and standard deviation"
-    priority = Priority.MINIMAL
-    is_generative = False
+    priority = Priority.MAX
+    is_generative = True
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.mean = None
@@ -33,7 +37,9 @@ class NormalDistributionSample(UnspecializedFunction):
         if self.standard_deviation < 0:
             raise ValueError("Standard Deviation cannot be less than 0")
 
-    def apply(self, n_rows: int, data: np.ndarray) -> np.ndarray:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         """
         Creates a straight line, sampling n_rows data points from a line y=mx+q
 
@@ -43,4 +49,4 @@ class NormalDistributionSample(UnspecializedFunction):
         data = np.random.normal(
             loc=self.mean, scale=self.standard_deviation, size=n_rows
         )
-        return data.reshape(-1, 1)
+        return data.reshape(-1, 1), np.empty((n_rows, 1)), True

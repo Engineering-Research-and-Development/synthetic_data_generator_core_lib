@@ -1,4 +1,5 @@
 import numpy as np
+from sdg_core_lib.commons import AllowedData, DataType
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -18,8 +19,11 @@ class SinusoidalFunction(UnspecializedFunction):
         Parameter("max_value", "1.0", "float"),
     ]
     description = "Generates sinusoidal data in domain comprised between min_value and max_value following the y = a*sin(2*pi*f*x + 2*pi*phi) + v equation"
-    priority = Priority.MINIMAL
+    priority = Priority.MAX
     is_generative = False
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.a = None
@@ -41,7 +45,9 @@ class SinusoidalFunction(UnspecializedFunction):
             setattr(self, name, param.value)
         check_min_max_boundary(self.min_value, self.max_value)
 
-    def apply(self, n_rows: int, data: np.ndarray) -> np.ndarray:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         """
         Generates the curve in the defined interval
 
@@ -53,4 +59,4 @@ class SinusoidalFunction(UnspecializedFunction):
             self.a * np.sin(2 * np.pi * self.f * data + 2 * np.pi * self.phi) + self.v
         )
 
-        return data.reshape(-1, 1)
+        return data.reshape(-1, 1), np.empty((n_rows, 1)), True

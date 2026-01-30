@@ -1,5 +1,6 @@
 from abc import ABC
 
+from sdg_core_lib.commons import AllowedData, DataType
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
     Priority,
@@ -17,6 +18,10 @@ class IntervalThreshold(UnspecializedFunction, ABC):
     ]
     priority = Priority.MINIMAL
     is_generative = False
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+        AllowedData(DataType.int32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.upper_bound = None

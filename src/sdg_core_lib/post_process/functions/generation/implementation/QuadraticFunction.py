@@ -1,4 +1,5 @@
 import numpy as np
+from sdg_core_lib.commons import AllowedData, DataType
 
 from sdg_core_lib.post_process.functions.UnspecializedFunction import (
     UnspecializedFunction,
@@ -17,8 +18,11 @@ class QuadraticFunction(UnspecializedFunction):
         Parameter("max_value", "1.0", "float"),
     ]
     description = "Generates parabolic data in domain comprised between min_value and max_value following the y=a^2+bx+c equation"
-    priority = Priority.MINIMAL
+    priority = Priority.MAX
     is_generative = False
+    allowed_data = [
+        AllowedData(DataType.float32, False),
+    ]
 
     def __init__(self, parameters: list[Parameter]):
         self.a = None
@@ -39,7 +43,9 @@ class QuadraticFunction(UnspecializedFunction):
             setattr(self, name, param.value)
         check_min_max_boundary(self.min_value, self.max_value)
 
-    def apply(self, n_rows: int, data: np.ndarray) -> np.ndarray:
+    def apply(
+        self, n_rows: int, data: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray, bool]:
         """
         Creates a parabola, sampling n_rows data points from a line y=ax^2 + bx + c
 
@@ -49,4 +55,4 @@ class QuadraticFunction(UnspecializedFunction):
         data = np.linspace(self.min_value, self.max_value, n_rows)
         data = self.a * data**2 + self.b * data + self.c
 
-        return data.reshape(-1, 1)
+        return data.reshape(-1, 1), np.empty((n_rows, 1)), True

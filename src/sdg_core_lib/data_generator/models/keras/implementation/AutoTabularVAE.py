@@ -5,7 +5,8 @@ from keras import layers
 from keras_tuner import HyperParameters
 
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
-from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo, AllowedData
+from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo
+from sdg_core_lib.commons import AllowedData, DataType
 from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
 from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
 
@@ -75,9 +76,9 @@ class AutoTabularVAE(KerasBaseVAE):
     def _build_automodel(self, input_shape: tuple[int, ...], hp: HyperParameters):
         encoder_layers = hp.Int("encoder_layers", min_value=1, max_value=4)
         decoder_layers = hp.Int("decoder_layers", min_value=1, max_value=4)
-        units_multiplier = hp.Choice("units_multiplier", values=[16, 32, 64, 128])
+        units_multiplier = hp.Choice("units_multiplier", values=[4, 6, 16, 32])
         activation = hp.Choice("activation", values=["relu", "elu", "selu", "gelu"])
-        beta = hp.Float("beta", min_value=0.0001, max_value=0.01, sampling="log")
+        beta = hp.Float("beta", min_value=0.05, max_value=0.25, sampling="linear")
         learning_rate = hp.Float(
             "learning_rate", min_value=1e-5, max_value=1e-2, sampling="log"
         )
@@ -156,10 +157,9 @@ class AutoTabularVAE(KerasBaseVAE):
             default_loss_function="ELBO LOSS",
             description="A Variational Autoencoder for data generation with automatic architecture selection",
             allowed_data=[
-                AllowedData("float32", False),
-                AllowedData("int32", False),
-                AllowedData("int64", False),
-                AllowedData("int32", True),
-                AllowedData("str", True),
+                AllowedData(DataType.float32, False),
+                AllowedData(DataType.int32, False),
+                AllowedData(DataType.int32, True),
+                AllowedData(DataType.string, True),
             ],
         ).get_model_info()

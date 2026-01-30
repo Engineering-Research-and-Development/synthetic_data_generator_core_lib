@@ -26,18 +26,19 @@ def test_check_parameters(instance):
 
 def test_apply(instance):
     n_rows = 1000
-    result = instance.apply(n_rows=n_rows, data=np.array([]))
+    result_data, indexes, success = instance.apply(n_rows=n_rows, data=np.array([]))
 
     # Check shape
-    assert result.shape == (n_rows, 1)
+    assert result_data.shape == (n_rows, 1)
 
     # Check statistical properties (within reasonable tolerance)
-    sample_mean = np.mean(result)
-    sample_std = np.std(result)
+    sample_mean = np.mean(result_data)
+    sample_std = np.std(result_data)
 
     # Mean should be close to target (within 3 standard errors)
     standard_error = instance.standard_deviation / np.sqrt(n_rows)
     assert abs(sample_mean - instance.mean) < 3 * standard_error
+    assert success is True
 
     # Standard deviation should be close to target (within 10%)
     assert (
@@ -53,8 +54,9 @@ def test_apply_edge_cases(instance):
         {"name": "standard_deviation", "value": "1.0", "parameter_type": "float"},
     ]
     instance = NormalDistributionSample.from_json(json_params=params)
-    result = instance.apply(n_rows=100, data=np.array([]))
-    assert result.shape == (100, 1)
+    result_data, indexes, success = instance.apply(n_rows=100, data=np.array([]))
+    assert result_data.shape == (100, 1)
+    assert success is True
 
 
 def test_check_parameters_invalid_std():

@@ -4,6 +4,7 @@ from sdg_core_lib.evaluate.tables import TabularComparisonEvaluator
 from sdg_core_lib.evaluate.time_series import TimeSeriesComparisonEvaluator
 from sdg_core_lib.data_generator.model_factory import model_factory
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
+from sdg_core_lib.post_process.FunctionApplier import FunctionApplier
 
 dataset_mapping = {
     "table": {"dataset": Table, "evaluator": TabularComparisonEvaluator},
@@ -91,4 +92,20 @@ def infer(
 
 
 def generate_from_functions(functions: list[dict], n_rows: int):
-    pass
+    """
+    Generate a dataset from a list of functions.
+    :param functions: list of feature-function mapping, like the following example
+        {
+            "feature": "test_feature",
+            "function_reference": "sdg_core_lib.post_process.functions.generation.implementation.NormalDistributionSample.NormalDistributionSample",
+            "parameters": [
+                {"name": "mean", "value": "0.0", "parameter_type": "float"},
+                {"name": "standard_deviation", "value": "1.0", "parameter_type": "float"},
+            ]
+        }
+    :param n_rows: number of rows to generate
+    :return: a dataset in json format
+    """
+    function_generator = FunctionApplier(functions, n_rows, from_scratch=True)
+    dataset = function_generator.apply_all()
+    return dataset.to_json()
