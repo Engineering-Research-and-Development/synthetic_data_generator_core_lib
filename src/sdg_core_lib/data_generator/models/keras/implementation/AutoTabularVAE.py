@@ -7,11 +7,13 @@ from keras_tuner import HyperParameters
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
 from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo
 from sdg_core_lib.commons import AllowedData, DataType
-from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
 from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
+from sdg_core_lib.data_generator.models.keras.implementation.TabularVAE import (
+    TabularVAE,
+)
 
 
-class AutoTabularVAE(KerasBaseVAE):
+class AutoTabularVAE(TabularVAE):
     """
     TabularVAE is a class that implements a Variational Autoencoder (VAE) for tabular data generation.
     It inherits from the KerasBaseVAE class and provides functionality specific to handling tabular data.
@@ -42,36 +44,16 @@ class AutoTabularVAE(KerasBaseVAE):
         batch_size: int = 8,
         epochs: int = 200,
     ):
-        super().__init__(metadata, model_name, input_shape, load_path, latent_dim)
-        self._beta = 0.15
-        self._learning_rate = learning_rate
-        self._epochs = epochs
-        self._batch_size = batch_size
-        self._instantiate()
-
-    def _load_model(self, encoder, decoder):
-        self._model = VAE(encoder, decoder, self._beta)
-
-    def _build(self, input_shape: tuple[int, ...]):
-        encoder_inputs = keras.Input(shape=input_shape)
-        x = layers.Dense(64, activation="relu")(encoder_inputs)
-        x = layers.Dense(128, activation="relu")(x)
-        x = layers.Dense(16, activation="relu")(x)
-        z_mean = layers.Dense(self._latent_dim, name="z_mean")(x)
-        z_log_var = layers.Dense(self._latent_dim, name="z_log_var")(x)
-        z = Sampling()([z_mean, z_log_var])
-        encoder = keras.Model(encoder_inputs, [z_mean, z_log_var, z], name="encoder")
-
-        latent_inputs = keras.Input(shape=(self._latent_dim,))
-        y = layers.Dense(16, activation="relu")(latent_inputs)
-        y = layers.Dense(128, activation="relu")(y)
-        y = layers.Dense(64, activation="relu")(y)
-        decoder_outputs = layers.Dense(input_shape[0], activation="linear")(y)
-        decoder = keras.Model(latent_inputs, decoder_outputs, name="decoder")
-
-        vae = VAE(encoder, decoder, self._beta, name="TabularVAE")
-        vae.summary()
-        return vae
+        super().__init__(
+            metadata,
+            model_name,
+            input_shape,
+            load_path,
+            latent_dim,
+            learning_rate,
+            batch_size,
+            epochs,
+        )
 
     def _build_automodel(self, input_shape: tuple[int, ...], hp: HyperParameters):
         encoder_layers = hp.Int("encoder_layers", min_value=1, max_value=4)
@@ -141,7 +123,6 @@ class AutoTabularVAE(KerasBaseVAE):
         tuner.search(data, epochs=epochs, batch_size=batch_size)
         self._model = tuner.get_best_models(num_models=1)[0]
         score = self._model.evaluate(data, data)[1].numpy().item()
-        print(score)
         self.training_info = TrainingInfo(
             loss_fn="ELBO",
             train_loss=score,

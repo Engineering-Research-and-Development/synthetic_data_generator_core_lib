@@ -33,7 +33,7 @@ class UnspecializedModel(ABC):
         self._model_misc = None  # Placeholder for model miscellaneous info
 
     @abstractmethod
-    def _build(self, input_shape: str):
+    def _build(self, input_shape: tuple[int, ...]):
         raise NotImplementedError
 
     @abstractmethod
@@ -41,9 +41,17 @@ class UnspecializedModel(ABC):
         """Load trained_models weights."""
         raise NotImplementedError
 
-    @abstractmethod
     def _instantiate(self):
-        raise NotImplementedError
+        """
+        Instantiates the model and loads the saved model if the load_path is given.
+
+        :return: None
+        """
+        if self._load_path is not None:
+            self._load(self._load_path)
+            return
+        if not self._model and self.input_shape:
+            self._model = self._build(self.input_shape)
 
     @abstractmethod
     def train(self, data: np.ndarray):

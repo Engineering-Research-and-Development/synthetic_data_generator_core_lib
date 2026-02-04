@@ -37,7 +37,6 @@ def train(
     data = dataset_class.from_json(data_payload, save_filepath)
 
     preprocessed_data = data.preprocess()
-    preprocess_schema = preprocessed_data.to_skeleton()
     model = model_factory(model_info, preprocessed_data.get_shape_for_model())
     model.set_hyperparameters(**get_hyperparameters())
     model.train(data=preprocessed_data.get_computing_data())
@@ -54,6 +53,7 @@ def train(
     report = evaluator.compute()
     results = synthetic_data.to_json()
 
+    preprocess_schema = preprocessed_data.to_skeleton()
     return results, report, model, preprocess_schema
 
 

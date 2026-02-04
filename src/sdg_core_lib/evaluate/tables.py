@@ -118,7 +118,7 @@ class TabularComparisonEvaluator:
                 synth_data = synt_col.get_data().reshape(
                     -1,
                 )
-                distance = np.abs(np.max(real_data) - np.min(real_data))
+                distance = np.abs(np.max(real_data) - np.min(real_data)) or np.finfo(float).eps
                 wass_dist = ss.wasserstein_distance(real_data, synth_data)
                 wass_dist = np.clip(wass_dist, 0, distance) / distance
                 result_dict[col.name] = np.round(wass_dist * 100, 2).item()

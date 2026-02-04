@@ -55,18 +55,6 @@ class KerasBaseVAE(UnspecializedModel, ABC):
         encoder, decoder = self._load_files(folder_path)
         self._load_model(encoder, decoder)
 
-    def _instantiate(self):
-        """
-        Instantiates the model and loads the saved model if the load_path is given.
-
-        :return: None
-        """
-        if self._load_path is not None:
-            self._load(self._load_path)
-            return
-        if not self._model and self.input_shape:
-            self._model = self._build(self.input_shape)
-
     def save(self, folder_path: str):
         """
         Saves the model and scaler to the given folder path.
@@ -84,22 +72,19 @@ class KerasBaseVAE(UnspecializedModel, ABC):
     def fine_tune(self, data: np.ndarray, **kwargs):
         raise NotImplementedError
 
-    def _build(self, input_shape: str):
+    def _build(self, input_shape: tuple[int, ...]):
         raise NotImplementedError
 
-    def _set_hyperparams(self, learning_rate, batch_size, epochs):
+    def set_hyperparameters(self, **kwargs):
+        learning_rate = kwargs.get("learning_rate", self._learning_rate)
+        batch_size = kwargs.get("batch_size", self._batch_size)
+        epochs = kwargs.get("epochs", self._epochs)
         if learning_rate is not None:
             self._learning_rate = float(learning_rate)
         if batch_size is not None:
             self._batch_size = int(batch_size)
         if epochs is not None:
             self._epochs = int(epochs)
-
-    def set_hyperparameters(self, **kwargs):
-        learning_rate = kwargs.get("learning_rate", self._learning_rate)
-        batch_size = kwargs.get("batch_size", self._batch_size)
-        epochs = kwargs.get("epochs", self._epochs)
-        self._set_hyperparams(learning_rate, batch_size, epochs)
 
     def train(
         self,
