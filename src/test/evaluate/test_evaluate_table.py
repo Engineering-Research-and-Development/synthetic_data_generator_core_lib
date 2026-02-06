@@ -69,27 +69,27 @@ nan_data_json = [
 # Fixtures
 @pytest.fixture()
 def real_data():
-    return Table.from_json(dummy_json, None)
+    return Table.from_json(dummy_json)
 
 
 @pytest.fixture()
 def synthetic_data():
-    return Table.from_json(dummy_json, None)
+    return Table.from_json(dummy_json)
 
 
 @pytest.fixture()
 def single_numeric_table():
-    return Table.from_json(single_numeric_json, None)
+    return Table.from_json(single_numeric_json)
 
 
 @pytest.fixture()
 def single_categorical_table():
-    return Table.from_json(single_categorical_json, None)
+    return Table.from_json(single_categorical_json)
 
 
 @pytest.fixture()
 def nan_data_table():
-    return Table.from_json(nan_data_json, None)
+    return Table.from_json(nan_data_json)
 
 
 @pytest.fixture()
@@ -112,10 +112,10 @@ def test_init(evaluator_correct, real_data, synthetic_data):
 def test_init_with_invalid_inputs():
     # Test initialization with invalid inputs
     with pytest.raises(TypeError, match="real_data must be a Table"):
-        TabularComparisonEvaluator("not a table", Table.from_json(dummy_json, None))
+        TabularComparisonEvaluator("not a table", Table.from_json(dummy_json))
 
     with pytest.raises(TypeError, match="synthetic_data must be a Table"):
-        TabularComparisonEvaluator(Table.from_json(dummy_json, None), "not a table")
+        TabularComparisonEvaluator(Table.from_json(dummy_json), "not a table")
 
 
 def test_evaluate(evaluator_correct):

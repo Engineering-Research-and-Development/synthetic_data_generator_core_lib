@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from sdg_core_lib.dataset.steps import (
+from sdg_core_lib.preprocess.strategies.steps import (
     ScalerWrapper,
     NoneStep,
     OrdinalEncoderWrapper,
@@ -63,7 +63,7 @@ class TestScalerWrapper:
         step = ScalerWrapper(position=0, col_name="test_col", mode="standard")
         step.fit_transform(sample_data)
         save_path = temp_dir / "test_scaler"
-        step.save(str(save_path))
+        step.save_if_not_exist(str(save_path))
         assert (save_path / f"{step.filename}").exists()
         loaded_step = ScalerWrapper(position=0, col_name="test_col", mode="standard")
         loaded_step.load(str(save_path))

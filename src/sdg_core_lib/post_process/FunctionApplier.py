@@ -104,7 +104,7 @@ class FunctionApplier:
                 for i, item in enumerate(new_data_json):
                     item["column_data"] = cleaned_arrays[i].flatten().tolist()
 
-            new_dataset = Table.from_json(new_data_json, "")
+            new_dataset = Table.from_json(new_data_json)
             logger.info(
                 f"Successfully generated dataset with {len(new_data_json)} features"
             )

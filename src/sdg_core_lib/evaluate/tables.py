@@ -3,15 +3,15 @@ import pandas as pd
 import scipy.stats as ss
 
 from sdg_core_lib.dataset.datasets import Table
+from sdg_core_lib.evaluate.base_evaluator import BaseEvaluator
 from sdg_core_lib.evaluate.metrics import (
-    MetricReport,
     StatisticalMetric,
     AdherenceMetric,
     NoveltyMetric,
 )
 
 
-class TabularComparisonEvaluator:
+class TabularComparisonEvaluator(BaseEvaluator):
     """
     Evaluates the quality of a synthetic dataset with respect to a real one.
 
@@ -28,13 +28,11 @@ class TabularComparisonEvaluator:
         real_data: Table,
         synthetic_data: Table,
     ):
-        if type(real_data) is not Table:
+        if not isinstance(real_data, Table):
             raise TypeError("real_data must be a Table")
-        if type(synthetic_data) is not Table:
+        if not isinstance(synthetic_data, Table):
             raise TypeError("synthetic_data must be a Table")
-        self._real_data = real_data
-        self._synth_data = synthetic_data
-        self.report = MetricReport()
+        super().__init__(real_data, synthetic_data)
 
     def compute(self):
         numerical_columns = self._real_data.get_numeric_columns()
@@ -118,7 +116,9 @@ class TabularComparisonEvaluator:
                 synth_data = synt_col.get_data().reshape(
                     -1,
                 )
-                distance = np.abs(np.max(real_data) - np.min(real_data)) or np.finfo(float).eps
+                distance = (
+                    np.abs(np.max(real_data) - np.min(real_data)) or np.finfo(float).eps
+                )
                 wass_dist = ss.wasserstein_distance(real_data, synth_data)
                 wass_dist = np.clip(wass_dist, 0, distance) / distance
                 result_dict[col.name] = np.round(wass_dist * 100, 2).item()

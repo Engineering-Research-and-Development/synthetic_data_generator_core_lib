@@ -29,7 +29,7 @@ class Step(ABC):
     def _set_operator(self):
         raise NotImplementedError
 
-    def save(self, directory_path: str):
+    def save_if_not_exist(self, directory_path: str):
         if self.operator is None:
             raise ValueError("Operator is not created")
         os.makedirs(directory_path, exist_ok=True)
@@ -62,7 +62,7 @@ class NoneStep(Step):
     def __init__(self, position: int, mode="", type_name="none"):
         super().__init__(type_name=type_name, position=position, col_name="", mode=mode)
 
-    def save(self, directory_path: str):
+    def save_if_not_exist(self, directory_path: str):
         pass
 
     def load(self, directory_path: str):

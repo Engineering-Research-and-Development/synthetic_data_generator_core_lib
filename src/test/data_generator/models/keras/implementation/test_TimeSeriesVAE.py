@@ -46,8 +46,7 @@ def data():
                 "column_datatype": "float64",
                 "column_data": np.linspace(-10, 10, 1020).tolist(),
             },
-        ],
-        None,
+        ]
     )
 
 
