@@ -51040,7 +51040,7 @@
     "dataset_type": "time_series"},
   	"functions" : [],
 	"model": {
-		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TimeSeriesVAE.TimeSeriesVAE",
+		"algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TimeSeriesVAE.TimeSeriesVAE",
 		"model_name": "Test-BatteryVAE"
 	},
     "n_rows": 100

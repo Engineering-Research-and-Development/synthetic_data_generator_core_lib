@@ -1,10 +1,11 @@
 from typing import Optional
 
+from sdg_core_lib.data_generator.models.GANs.implementation.CTGAN import CTGAN
 from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
-from sdg_core_lib.data_generator.models.keras.implementation.TabularVAE import (
+from sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE import (
     TabularVAE,
 )
-from sdg_core_lib.data_generator.models.keras.implementation.TimeSeriesVAE import (
+from sdg_core_lib.data_generator.models.VAEs.implementation.TimeSeriesVAE import (
     TimeSeriesVAE,
 )
 from sdg_core_lib.dataset.datasets import Dataset, Table, TimeSeries
@@ -16,6 +17,7 @@ from sdg_core_lib.preprocess.strategies.vae_strategy import (
     TabularVAEPreprocessingStrategy,
     TimeSeriesVAEPreprocessingStrategy,
 )
+from sdg_core_lib.preprocess.strategies.ctgan_strategy import CTGANPreprocessingStrategy
 from sdg_core_lib.evaluate.tables import TabularComparisonEvaluator
 from sdg_core_lib.evaluate.time_series import TimeSeriesComparisonEvaluator
 import importlib
@@ -23,12 +25,12 @@ import os
 
 
 def get_hyperparameters() -> dict:
+    hyperparams_name = ["EPOCHS", "LEARNING_RATE", "BATCH_SIZE"]
     return {
-        "epochs": os.environ.get("EPOCHS"),
-        "learning_rate": os.environ.get("LEARNING_RATE"),
-        "batch_size": os.environ.get("BATCH_SIZE"),
+        hp.lower(): os.environ.get(hp)
+        for hp in hyperparams_name
+        if os.environ.get(hp) is not None
     }
-
 
 class Job:
     dataset_mapping = {
@@ -47,6 +49,7 @@ class Job:
     model_strategy_mapping: dict[type, BasePreprocessingStrategy] = {
         TabularVAE: TabularVAEPreprocessingStrategy,
         TimeSeriesVAE: TimeSeriesVAEPreprocessingStrategy,
+        CTGAN: CTGANPreprocessingStrategy,
     }
 
     def __init__(

@@ -2,10 +2,10 @@ import shutil
 import pytest
 from unittest.mock import Mock, patch
 from sdg_core_lib.job import Job
-from sdg_core_lib.data_generator.models.keras.implementation.TabularVAE import (
+from sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE import (
     TabularVAE,
 )
-from sdg_core_lib.data_generator.models.keras.implementation.TimeSeriesVAE import (
+from sdg_core_lib.data_generator.models.VAEs.implementation.TimeSeriesVAE import (
     TimeSeriesVAE,
 )
 from sdg_core_lib.preprocess.table_processor import TableProcessor
@@ -22,6 +22,7 @@ current_folder = os.path.dirname(os.path.abspath(__file__))
 current_folder = os.path.join(current_folder, "test_files")
 train_request = json.load(open(os.path.join(current_folder, "train_test.json")))
 train_request_2 = json.load(open(os.path.join(current_folder, "train_test_2.json")))
+train_request_3 = json.load(open(os.path.join(current_folder, "train_test_3.json")))
 
 infer_request = json.load(open(os.path.join(current_folder, "infer_test.json")))
 infer_nodata_request = json.load(
@@ -65,9 +66,9 @@ def test_train_timeseries(setup):
 
 
 def test_train(setup):
-    model_info = train_request["model"]
-    dataset = train_request["dataset"]
-    n_rows = train_request["n_rows"]
+    model_info = train_request_3["model"]
+    dataset = train_request_3["dataset"]
+    n_rows = train_request_3["n_rows"]
     save_filepath = output_folder
 
     results, metrics, model, data = Job(

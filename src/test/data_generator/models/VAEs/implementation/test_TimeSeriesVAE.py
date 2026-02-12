@@ -5,8 +5,8 @@ import shutil
 
 from sdg_core_lib.dataset.datasets import TimeSeries
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
-from sdg_core_lib.data_generator.models.keras.VAE import VAE
-from sdg_core_lib.data_generator.models.keras.implementation.TimeSeriesVAE import (
+from sdg_core_lib.data_generator.models.VAEs.VAE import VAE
+from sdg_core_lib.data_generator.models.VAEs.implementation.TimeSeriesVAE import (
     TimeSeriesVAE,
 )
 

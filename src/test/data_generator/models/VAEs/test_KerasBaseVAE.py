@@ -1,7 +1,7 @@
 import pytest
 
 from sdg_core_lib.dataset.datasets import Table
-from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
+from sdg_core_lib.data_generator.models.VAEs.KerasBaseVAE import KerasBaseVAE
 
 
 @pytest.fixture()

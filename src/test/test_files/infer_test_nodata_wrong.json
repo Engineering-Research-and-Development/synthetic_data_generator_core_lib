@@ -1,7 +1,7 @@
 {
   	"functions" : [],
 	"model": {
-		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE",
+		"algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE",
 		"model_name": "Test-T_VAE",
         "image": "./sdg_core_lib/test/outputs/",
         "input_shape": "(13,)",
