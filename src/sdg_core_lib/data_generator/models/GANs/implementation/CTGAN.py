@@ -25,21 +25,21 @@ class CTGAN(UnspecializedModel):
         gen_hidden=256,
         critic_hidden=256,
         pac_size=10,
-        lr=2e-4,
+        learning_rate=1e-3,
         batch_size=100,
         epochs=10,
         gen_steps=4,
         critic_dropout=0.2,
     ):
         super().__init__(metadata, model_name, input_shape, load_path)
-        self.batch_size = batch_size
+        self._batch_size = batch_size
         self._epochs = epochs
-        self.gen_steps = gen_steps
-        self.pac_size = pac_size
-        self.gen_hidden = gen_hidden
-        self.critic_hidden = critic_hidden
-        self.learning_rate = lr
-        self.critic_dropout = critic_dropout
+        self._gen_steps = gen_steps
+        self._pac_size = pac_size
+        self._gen_hidden = gen_hidden
+        self._critic_hidden = critic_hidden
+        self._learning_rate = learning_rate
+        self._critic_dropout = critic_dropout
         self._instantiate()
 
     @staticmethod
@@ -95,17 +95,17 @@ class CTGAN(UnspecializedModel):
             self._metadata,
             modes_per_continuous_column,
             categories_per_discrete_column,
-            self.gen_hidden,
+            self._gen_hidden,
         )
         self.critic = CTGANCritic(
-            self.pac_size, self.critic_hidden, self.critic_dropout
+            self._pac_size, self._critic_hidden, self._critic_dropout
         )
         return CTGANModel(self.generator, self.critic, onehot_discrete_indexes)
 
     def _load(self, folder_path: str):
         # Should set the _model variable CTGAN Model complete with Generator and Critic
         # Does NOT return the model
-        # self._metadata is avialabe
+        # self._metadata is available
         _, _, onehot_discrete_indexes = CTGAN.infer_data_structure(self._metadata)
         critic = keras.saving.load_model(os.path.join(folder_path, "critic.keras"))
         generator = keras.saving.load_model(
@@ -133,18 +133,16 @@ class CTGAN(UnspecializedModel):
         IMPORTANT: Here TrainingInfo should be defined. See KerasBaseVAE train method
         """
         self._model.compile(
-            g_optimizer=keras.optimizers.Adam(
-                self.learning_rate, beta_1=0.5, beta_2=0.9
-            ),
-            d_optimizer=keras.optimizers.Adam(
-                self.learning_rate, beta_1=0.5, beta_2=0.9
-            ),
+            g_optimizer=keras.optimizers.Adam(self._learning_rate, beta_1=0.5, beta_2=0.9),
+            d_optimizer=keras.optimizers.Adam(self._learning_rate, beta_1=0.5, beta_2=0.9),
         )
         self._model._train_data = data
-        history = self._model.fit(data, batch_size=2)
+        probability_mass_function_list = self._model.get_pmfs(data)
+        self._model.probability_mass_function_list = keras.ops.convert_to_numpy(probability_mass_function_list)
+        history = self._model.fit(data, batch_size=self._batch_size, epochs=self._epochs, verbose=1)
         self.training_info = TrainingInfo(
-            loss_fn="Mean",
-            train_loss=history.history["loss"][-1].numpy().item(),
+            loss_fn="Generator Adversary Loss + Log-frequency weighted cross-entropy",
+            train_loss= history.history["g_loss"][-1].numpy().item(),
             train_samples=data.shape[0],
             validation_loss=-1,
             validation_samples=0,
@@ -162,13 +160,13 @@ class CTGAN(UnspecializedModel):
         :param kwargs:
         :return:
         """
-        self.batch_size = int(kwargs.get("batch_size", self.batch_size))
+        self._batch_size = int(kwargs.get("batch_size", self._batch_size))
         self._epochs = int(kwargs.get("epochs", self._epochs))
-        self.pac_size = kwargs.get("pac_size", self.pac_size)
-        self.gen_hidden = kwargs.get("gen_hidden", self.gen_hidden)
-        self.critic_hidden = kwargs.get("critic_hidden", self.critic_hidden)
-        self.learning_rate = float(kwargs.get("learning_rate", self.learning_rate))
-        self.critic_dropout = kwargs.get("critic_dropout", self.critic_dropout)
+        self._pac_size = kwargs.get("pac_size", self._pac_size)
+        self._gen_hidden = kwargs.get("gen_hidden", self._gen_hidden)
+        self._critic_hidden = kwargs.get("critic_hidden", self._critic_hidden)
+        self._learning_rate = float(kwargs.get("learning_rate", self._learning_rate))
+        self._critic_dropout = kwargs.get("critic_dropout", self._critic_dropout)
 
     @classmethod
     def self_describe(cls):

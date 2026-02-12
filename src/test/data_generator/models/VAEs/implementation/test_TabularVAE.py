@@ -61,7 +61,7 @@ def test_self_description(model_data_no_load):
     assert self_description is not None
     assert (
         self_description["algorithm"]["name"]
-        == "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE"
+        == "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE"
     ), print(self_description["algorithm"]["name"])
     assert self_description["algorithm"]["default_loss_function"] == "ELBO LOSS"
     assert (

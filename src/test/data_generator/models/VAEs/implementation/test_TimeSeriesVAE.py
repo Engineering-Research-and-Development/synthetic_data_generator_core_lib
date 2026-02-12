@@ -82,7 +82,7 @@ def test_self_description(model_data_correct_train):
     assert self_description is not None
     assert (
         self_description["algorithm"]["name"]
-        == "sdg_core_lib.data_generator.models.keras.implementation.TimeSeriesVAE.TimeSeriesVAE"
+        == "sdg_core_lib.data_generator.models.VAEs.implementation.TimeSeriesVAE.TimeSeriesVAE"
     )
     assert self_description["algorithm"]["default_loss_function"] == "ELBO LOSS"
     assert (

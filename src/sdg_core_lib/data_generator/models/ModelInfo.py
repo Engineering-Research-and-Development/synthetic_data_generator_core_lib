@@ -14,7 +14,7 @@ class ModelInfo:
         self.description = description
         self.allowed_data = allowed_data
 
-    def get_model_info(self):
+    def get_model_info(self) -> dict:
         """
         Returns a dictionary containing the model information.
 

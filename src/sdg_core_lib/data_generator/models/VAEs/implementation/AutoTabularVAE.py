@@ -7,8 +7,8 @@ from keras_tuner import HyperParameters
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
 from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo
 from sdg_core_lib.commons import AllowedData, DataType
-from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
-from sdg_core_lib.data_generator.models.keras.implementation.TabularVAE import (
+from sdg_core_lib.data_generator.models.VAEs.VAE import Sampling, VAE
+from sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE import (
     TabularVAE,
 )
 
