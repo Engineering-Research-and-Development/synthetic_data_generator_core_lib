@@ -218,15 +218,8 @@ class PerModeNormalization(Step):
 
         # Handle both 1D and 2D input data
         if data.ndim == 1:
-            # Data is 1D, reshape to 2D for processing
             data = data.reshape(1, -1)
-            was_1d = True
-        else:
-            was_1d = False
 
-        rows = data.shape[0]
-
-        # Find the active mode for each row (argmax of one-hot encoded modes)
         active_modes = np.argmax(data[:, 1:], axis=1)
 
         # Get the means and stds for the active modes

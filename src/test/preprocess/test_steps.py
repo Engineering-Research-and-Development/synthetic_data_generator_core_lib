@@ -283,7 +283,9 @@ class TestPerModeNormalization:
         # Test with single row
         single_row = transformed[0]
         result = step.inverse_transform(single_row)
+        inverse_transformed = step.inverse_transform(transformed)
         assert result.shape == (1, 1)
+        assert np.allclose(multimodal_data, inverse_transformed)
 
     def test_save_and_load(self, multimodal_data, temp_dir):
         """Test save and load functionality."""
