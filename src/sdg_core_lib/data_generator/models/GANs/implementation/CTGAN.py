@@ -164,7 +164,7 @@ class CTGAN(UnspecializedModel):
             data, batch_size=self._batch_size, epochs=self._epochs, verbose=1
         )
         self.training_info = TrainingInfo(
-            loss_fn="Generator Adversary Loss + Log-frequency weighted cross-entropy",
+            loss_fn="GeneratorLossWBCE",
             train_loss=history.history["g_loss"][-1].numpy().item(),
             train_samples=data.shape[0],
             validation_loss=-1,
@@ -195,7 +195,7 @@ class CTGAN(UnspecializedModel):
     def self_describe(cls):
         return ModelInfo(
             name=f"{cls.__module__}.{cls.__qualname__}",
-            default_loss_function="Mean",
+            default_loss_function="Generator Adversary Loss with Log frequency weighted cross entropy",
             description="A Conditional Tabular Generative Adversarial Network for data generation",
             allowed_data=[
                 AllowedData(DataType.float32, False),
