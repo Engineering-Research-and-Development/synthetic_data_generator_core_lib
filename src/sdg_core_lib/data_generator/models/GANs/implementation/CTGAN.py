@@ -112,11 +112,13 @@ class CTGAN(UnspecializedModel):
             os.path.join(folder_path, "generator.keras")
         )
         self._model = CTGANModel(generator, critic, onehot_discrete_indexes)
-        
+
         # Load probability_mass_function_list if it exists
         pmf_path = os.path.join(folder_path, "probability_mass_function_list.npy")
         if os.path.exists(pmf_path):
-            self._model.probability_mass_function_list = np.load(pmf_path, allow_pickle=True)
+            self._model.probability_mass_function_list = np.load(
+                pmf_path, allow_pickle=True
+            )
 
     def save(self, folder_path: str):
         keras.saving.save_model(
@@ -125,11 +127,14 @@ class CTGAN(UnspecializedModel):
         keras.saving.save_model(
             self._model.critic, os.path.join(folder_path, "critic.keras")
         )
-        
-        if hasattr(self._model, 'probability_mass_function_list') and self._model.probability_mass_function_list is not None:
+
+        if (
+            hasattr(self._model, "probability_mass_function_list")
+            and self._model.probability_mass_function_list is not None
+        ):
             np.save(
                 os.path.join(folder_path, "probability_mass_function_list.npy"),
-                self._model.probability_mass_function_list
+                self._model.probability_mass_function_list,
             )
 
     def train(self, data: np.ndarray):
@@ -143,16 +148,24 @@ class CTGAN(UnspecializedModel):
         IMPORTANT: Here TrainingInfo should be defined. See KerasBaseVAE train method
         """
         self._model.compile(
-            g_optimizer=keras.optimizers.Adam(self._learning_rate, beta_1=0.5, beta_2=0.9),
-            d_optimizer=keras.optimizers.Adam(self._learning_rate, beta_1=0.5, beta_2=0.9),
+            g_optimizer=keras.optimizers.Adam(
+                self._learning_rate, beta_1=0.5, beta_2=0.9
+            ),
+            d_optimizer=keras.optimizers.Adam(
+                self._learning_rate, beta_1=0.5, beta_2=0.9
+            ),
         )
         self._model._train_data = data
         probability_mass_function_list = self._model.get_pmfs(data)
-        self._model.probability_mass_function_list = keras.ops.convert_to_numpy(probability_mass_function_list)
-        history = self._model.fit(data, batch_size=self._batch_size, epochs=self._epochs, verbose=1)
+        self._model.probability_mass_function_list = keras.ops.convert_to_numpy(
+            probability_mass_function_list
+        )
+        history = self._model.fit(
+            data, batch_size=self._batch_size, epochs=self._epochs, verbose=1
+        )
         self.training_info = TrainingInfo(
             loss_fn="Generator Adversary Loss + Log-frequency weighted cross-entropy",
-            train_loss= history.history["g_loss"][-1].numpy().item(),
+            train_loss=history.history["g_loss"][-1].numpy().item(),
             train_samples=data.shape[0],
             validation_loss=-1,
             validation_samples=0,

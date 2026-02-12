@@ -215,7 +215,7 @@ class PerModeNormalization(Step):
         active_weights_indx = np.where(self.operator.weights_ > 0.01)
         means = self.operator.means_[active_weights_indx].flatten()
         stds = np.sqrt(self.operator.covariances_[active_weights_indx].flatten())
-        
+
         # Handle both 1D and 2D input data
         if data.ndim == 1:
             # Data is 1D, reshape to 2D for processing
@@ -223,22 +223,22 @@ class PerModeNormalization(Step):
             was_1d = True
         else:
             was_1d = False
-            
+
         rows = data.shape[0]
-        
+
         # Find the active mode for each row (argmax of one-hot encoded modes)
         active_modes = np.argmax(data[:, 1:], axis=1)
-        
+
         # Get the means and stds for the active modes
         selected_mus = means[active_modes]
         selected_devs = stds[active_modes]
-        
+
         # Get the normalized values (first column)
         normalized_values = data[:, 0]
-        
+
         # Denormalize the values
         values = (normalized_values * 4 * selected_devs) + selected_mus
-        
+
         # Always return 2D array with shape (n_samples, 1) for consistency
         return values.reshape(-1, 1)
 

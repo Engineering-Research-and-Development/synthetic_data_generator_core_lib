@@ -176,7 +176,7 @@ class TestPerModeNormalization:
         # Create data with multiple modes (clusters)
         np.random.seed(42)
         mode1 = np.random.normal(0, 1, 50)  # First mode
-        mode2 = np.random.normal(5, 1.5, 30)  # Second mode  
+        mode2 = np.random.normal(5, 1.5, 30)  # Second mode
         mode3 = np.random.normal(-3, 0.8, 20)  # Third mode
         return np.concatenate([mode1, mode2, mode3]).reshape(-1, 1)
 
@@ -200,11 +200,11 @@ class TestPerModeNormalization:
     def test_initialization_with_custom_params(self):
         """Test initialization with custom parameters."""
         step = PerModeNormalization(
-            position=1, 
-            col_name="custom_col", 
-            n_components=5, 
-            max_iter=500, 
-            random_state=123
+            position=1,
+            col_name="custom_col",
+            n_components=5,
+            max_iter=500,
+            random_state=123,
         )
         assert step.n_components == 5
         assert step.max_iter == 500
@@ -214,15 +214,21 @@ class TestPerModeNormalization:
         """Test fit_transform with multimodal data."""
         step = PerModeNormalization(position=0, col_name="test_col")
         transformed = step.fit_transform(multimodal_data)
-        
+
         # Output should have normalized values + one-hot encoded modes
-        assert transformed.shape[0] == multimodal_data.shape[0]  # Same number of samples
-        assert transformed.shape[1] > 1  # Should have multiple columns (normalized + modes)
-        
+        assert (
+            transformed.shape[0] == multimodal_data.shape[0]
+        )  # Same number of samples
+        assert (
+            transformed.shape[1] > 1
+        )  # Should have multiple columns (normalized + modes)
+
         # First column should be normalized values (roughly between -3 and 3)
         normalized_values = transformed[:, 0]
-        assert np.all(np.abs(normalized_values) < 10)  # Reasonable range for normalized data
-        
+        assert np.all(
+            np.abs(normalized_values) < 10
+        )  # Reasonable range for normalized data
+
         # Mode columns should be one-hot encoded (each row should sum to 1 for mode columns)
         mode_columns = transformed[:, 1:]
         assert np.allclose(mode_columns.sum(axis=1), 1.0)  # Each row sums to 1
@@ -231,10 +237,10 @@ class TestPerModeNormalization:
         """Test fit_transform with simple unimodal data."""
         step = PerModeNormalization(position=0, col_name="test_col")
         transformed = step.fit_transform(simple_data)
-        
+
         assert transformed.shape[0] == simple_data.shape[0]
         assert transformed.shape[1] > 1
-        
+
         # Should still work with unimodal data
         mode_columns = transformed[:, 1:]
         assert np.allclose(mode_columns.sum(axis=1), 1.0)
@@ -243,11 +249,11 @@ class TestPerModeNormalization:
         """Test transform method after fitting."""
         step = PerModeNormalization(position=0, col_name="test_col")
         step.fit_transform(multimodal_data)  # Fit the model
-        
+
         # Test transform on new data
         new_data = np.array([[1.0], [2.0], [-1.0]])
         transformed = step.transform(new_data)
-        
+
         assert transformed.shape[0] == new_data.shape[0]
         assert transformed.shape[1] > 1
         assert np.allclose(transformed[:, 1:].sum(axis=1), 1.0)
@@ -257,23 +263,23 @@ class TestPerModeNormalization:
         step = PerModeNormalization(position=0, col_name="test_col")
         transformed = step.fit_transform(multimodal_data)
         inverse_transformed = step.inverse_transform(transformed)
-        
+
         # Should recover original shape
         assert inverse_transformed.shape == multimodal_data.shape
-        
+
         # Values should be reasonably close (allowing for some approximation error)
         np.testing.assert_allclose(
-            inverse_transformed.flatten(), 
-            multimodal_data.flatten(), 
+            inverse_transformed.flatten(),
+            multimodal_data.flatten(),
             rtol=0.1,  # Allow 10% relative tolerance due to mode assignment randomness
-            atol=0.5    # Allow 0.5 absolute tolerance
+            atol=0.5,  # Allow 0.5 absolute tolerance
         )
 
     def test_inverse_transform_1d_input(self, multimodal_data):
         """Test inverse_transform with 1D input data."""
         step = PerModeNormalization(position=0, col_name="test_col")
         transformed = step.fit_transform(multimodal_data)
-        
+
         # Test with single row
         single_row = transformed[0]
         result = step.inverse_transform(single_row)
@@ -283,20 +289,20 @@ class TestPerModeNormalization:
         """Test save and load functionality."""
         step = PerModeNormalization(position=0, col_name="test_col")
         step.fit_transform(multimodal_data)
-        
+
         # Save the step
         save_path = temp_dir / "test_per_mode"
         step.save_if_not_exist(str(save_path))
         assert (save_path / step.filename).exists()
-        
+
         # Load the step
         loaded_step = PerModeNormalization(position=0, col_name="test_col")
         loaded_step.load(str(save_path))
-        
+
         assert loaded_step.operator is not None
         assert loaded_step.position == 0
         assert loaded_step.col_name == "test_col"
-        
+
         # Test that loaded step produces similar results
         original_transformed = step.transform(multimodal_data[:10])
         loaded_transformed = loaded_step.transform(multimodal_data[:10])
@@ -319,9 +325,9 @@ class TestPerModeNormalization:
         x = np.array([[0.0], [1.0], [-1.0]])
         mean = np.array([0.0])
         std = np.array([1.0])
-        
+
         pdf = PerModeNormalization._gaussian_probability_density_function(x, mean, std)
-        
+
         # PDF should be positive
         assert np.all(pdf > 0)
         # PDF at mean should be highest
@@ -330,17 +336,17 @@ class TestPerModeNormalization:
     def test_static_compute_responsibilities(self):
         """Test the static responsibilities computation."""
         # Create sample PDF values for 2 modes
-        pdf_values = np.array([
-            [0.8, 0.2],  # Sample 1: higher probability for mode 0
-            [0.3, 0.7],  # Sample 2: higher probability for mode 1
-            [0.5, 0.5],  # Sample 3: equal probabilities
-        ])
-        
+        pdf_values = np.array(
+            [
+                [0.8, 0.2],  # Sample 1: higher probability for mode 0
+                [0.3, 0.7],  # Sample 2: higher probability for mode 1
+                [0.5, 0.5],  # Sample 3: equal probabilities
+            ]
+        )
+
         responsibilities = PerModeNormalization._compute_responsibilities(pdf_values)
-        
+
         # Each row should sum to 1
         assert np.allclose(responsibilities.sum(axis=1), 1.0)
         # Values should be between 0 and 1
         assert np.all(responsibilities >= 0) and np.all(responsibilities <= 1)
-
-

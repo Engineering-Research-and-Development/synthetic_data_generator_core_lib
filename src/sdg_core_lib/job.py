@@ -32,6 +32,7 @@ def get_hyperparameters() -> dict:
         if os.environ.get(hp) is not None
     }
 
+
 class Job:
     dataset_mapping = {
         "table": {

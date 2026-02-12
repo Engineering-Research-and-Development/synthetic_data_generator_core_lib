@@ -11,6 +11,7 @@ from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
 import os
 import shutil
 
+
 @pytest.fixture()
 def metadata_builder():
     return [
@@ -223,12 +224,12 @@ def test_infer(single_metadata_with_cat, data_cat):
     # First session: Train and save model
     model1 = CTGAN(**single_metadata_with_cat)
     model1.train(data_cat.get_computing_data())
-    
+
     # Save model using temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
         model_path = temp_dir
         model1.save(model_path)
-        
+
         # For now, test that the model can be loaded (even if generation fails)
         # This tests the save/load functionality which is the main goal
         model2 = CTGAN(
@@ -237,20 +238,20 @@ def test_infer(single_metadata_with_cat, data_cat):
             input_shape="(13,)",
             load_path=model_path,
         )
-        
+
         # Test that model was loaded successfully
         assert model2._model is not None
         assert model2._model.generator is not None
         assert model2._model.critic is not None
-        
+
         # Verify basic model structure
-        assert hasattr(model2._model, 'generator')
-        assert hasattr(model2._model, 'critic')
-        
+        assert hasattr(model2._model, "generator")
+        assert hasattr(model2._model, "critic")
+
         # Test inference with loaded model
         sample_size = 5
         generated_data = model2.infer(sample_size)
-        
+
         # Verify generated data
         assert generated_data is not None
         assert generated_data.shape[0] == sample_size

@@ -6,7 +6,9 @@ import keras
 
 
 class CTGANCritic(keras.Model):
-    def __init__(self, pac_size: int = 10, hidden: int = 256, dropout: float = 0.2, **kwargs):
+    def __init__(
+        self, pac_size: int = 10, hidden: int = 256, dropout: float = 0.2, **kwargs
+    ):
         super(CTGANCritic, self).__init__(**kwargs)
         self.pac_size = pac_size
         self.fc1 = layers.Dense(hidden)
@@ -14,23 +16,25 @@ class CTGANCritic(keras.Model):
         self.out = layers.Dense(1)
         self.leaky = layers.LeakyReLU(negative_slope=0.2)
         self.drop = layers.Dropout(dropout)
-    
+
     def get_config(self):
         config = super().get_config()
-        config.update({
-            'pac_size': self.pac_size,
-            'hidden': self.fc1.units,
-            'dropout': self.drop.rate,
-        })
+        config.update(
+            {
+                "pac_size": self.pac_size,
+                "hidden": self.fc1.units,
+                "dropout": self.drop.rate,
+            }
+        )
         return config
-    
+
     @classmethod
     def from_config(cls, config):
         # Filter out only the parameters our constructor expects
         constructor_params = {
-            'pac_size': config.get('pac_size', 10),
-            'hidden': config.get('hidden', 256),
-            'dropout': config.get('dropout', 0.2),
+            "pac_size": config.get("pac_size", 10),
+            "hidden": config.get("hidden", 256),
+            "dropout": config.get("dropout", 0.2),
         }
         return cls(**constructor_params)
 
@@ -38,22 +42,18 @@ class CTGANCritic(keras.Model):
         batch_size = tf.shape(x)[0]
         feature_dim = tf.shape(x)[1]
         remainder = batch_size % self.pac_size
-        
+
         def pad_batch():
             padding_size = self.pac_size - remainder
             last_sample = tf.expand_dims(x[-1], axis=0)
             padding = tf.tile(last_sample, [padding_size, 1])
             return tf.concat([x, padding], axis=0), padding_size
-        
+
         def no_padding():
             return x, 0
-        
-        x_padded, pad_size = tf.cond(
-            remainder > 0,
-            pad_batch,
-            no_padding
-        )
-        
+
+        x_padded, pad_size = tf.cond(remainder > 0, pad_batch, no_padding)
+
         x_reshaped = tf.reshape(x_padded, [-1, self.pac_size * feature_dim])
 
         h = self.fc1(x_reshaped)
@@ -67,15 +67,11 @@ class CTGANCritic(keras.Model):
         def remove_padding():
             valid_groups = (batch_size + self.pac_size - 1) // self.pac_size
             return score[:valid_groups]
-        
+
         def keep_all():
             return score
-        
-        final_score = tf.cond(
-            remainder > 0,
-            remove_padding,
-            keep_all
-        )
+
+        final_score = tf.cond(remainder > 0, remove_padding, keep_all)
 
         return tf.cast(final_score, tf.float64)
 
@@ -91,7 +87,13 @@ def gumbel_softmax(logits, tau=0.2, hard=True):
 
 
 class CTGANGenerator(keras.Model):
-    def __init__(self, skeleton, modes_per_continuous_column, categories_per_discrete_column, hidden=256):
+    def __init__(
+        self,
+        skeleton,
+        modes_per_continuous_column,
+        categories_per_discrete_column,
+        hidden=256,
+    ):
         super().__init__()
         self.skeleton = skeleton
         self.tau = 0.2
@@ -104,25 +106,29 @@ class CTGANGenerator(keras.Model):
         self.alpha_heads = [layers.Dense(1) for _ in self.modes_cont]
         self.beta_heads = [layers.Dense(m) for m in self.modes_cont]
         self.d_heads = [layers.Dense(d) for d in self.cats_disc]
-    
+
     def get_config(self):
         config = super().get_config()
-        config.update({
-            'skeleton': self.skeleton,
-            'modes_per_continuous_column': self.modes_cont,
-            'categories_per_discrete_column': self.cats_disc,
-            'hidden': self.fc1.units,
-        })
+        config.update(
+            {
+                "skeleton": self.skeleton,
+                "modes_per_continuous_column": self.modes_cont,
+                "categories_per_discrete_column": self.cats_disc,
+                "hidden": self.fc1.units,
+            }
+        )
         return config
-    
+
     @classmethod
     def from_config(cls, config):
         # Filter out only the parameters our constructor expects
         constructor_params = {
-            'skeleton': config.get('skeleton'),
-            'modes_per_continuous_column': config.get('modes_per_continuous_column'),
-            'categories_per_discrete_column': config.get('categories_per_discrete_column'),
-            'hidden': config.get('hidden', 256),
+            "skeleton": config.get("skeleton"),
+            "modes_per_continuous_column": config.get("modes_per_continuous_column"),
+            "categories_per_discrete_column": config.get(
+                "categories_per_discrete_column"
+            ),
+            "hidden": config.get("hidden", 256),
         }
         return cls(**constructor_params)
 
@@ -155,7 +161,12 @@ class CTGANGenerator(keras.Model):
 
 
 class CTGANModel(keras.Model):
-    def __init__(self, generator: CTGANGenerator, critic: CTGANCritic, onehot_discrete_indexes: list[int] | None = None):
+    def __init__(
+        self,
+        generator: CTGANGenerator,
+        critic: CTGANCritic,
+        onehot_discrete_indexes: list[int] | None = None,
+    ):
         super().__init__()
         self.generator = generator
         self.critic = critic
@@ -164,7 +175,11 @@ class CTGANModel(keras.Model):
         self.critic_loss_tracker = keras.metrics.Mean(name="discriminator_loss")
         self._train_data = None
         self.probability_mass_function_list = None
-        self.row_dim = sum(generator.modes_cont) + sum(generator.cats_disc) + len(generator.modes_cont)
+        self.row_dim = (
+            sum(generator.modes_cont)
+            + sum(generator.cats_disc)
+            + len(generator.modes_cont)
+        )
 
     @property
     def metrics(self):
@@ -234,14 +249,14 @@ class CTGANModel(keras.Model):
             real_data = tf.cast(real_data, tf.float64)
             fake_data = tf.cast(fake_data, tf.float64)
             interpolated = alpha * real_data + (1 - alpha) * fake_data
-            
+
             with tf.GradientTape() as gp_tape:
                 gp_tape.watch(interpolated)
                 pred = self.critic(interpolated, training=True)
             grads = gp_tape.gradient(pred, [interpolated])[0]
             norm = tf.sqrt(tf.reduce_sum(tf.square(grads), axis=1) + 1e-12)
             gp = tf.cast(tf.reduce_mean((norm - 1.0) ** 2) * 10.0, tf.float64)
-            
+
             real_score = self.critic(real_data, training=True)
             fake_score = self.critic(fake_data, training=True)
             c_loss = tf.reduce_mean(fake_score) - tf.reduce_mean(real_score) + gp
@@ -276,7 +291,7 @@ class CTGANModel(keras.Model):
         pmfs = []
         curr = 0
         for sz in self.generator.cats_disc:
-            chunk = onehot_all[:, curr:curr + sz]
+            chunk = onehot_all[:, curr : curr + sz]
             log_freqs = tf.math.log(tf.reduce_sum(chunk, axis=0) + 1.0)
             pmfs.append(log_freqs / tf.reduce_sum(log_freqs))
             curr += sz
@@ -292,7 +307,7 @@ class CTGANModel(keras.Model):
         )
         c_loss = self.train_critic(real_batch, z, cond)
         g_loss = self.train_gen(z, cond)
-        
+
         self.gen_loss_tracker.update_state(g_loss)
         self.critic_loss_tracker.update_state(c_loss)
         return {
@@ -307,9 +322,13 @@ class CTGANModel(keras.Model):
 
     def generate(self, batch_size: int = 100) -> np.ndarray:
         if self.generator is None or self.probability_mass_function_list is None:
-            raise RuntimeError("In order to generate some data you need to fit a dataset first!")
+            raise RuntimeError(
+                "In order to generate some data you need to fit a dataset first!"
+            )
 
-        z = keras.random.normal(shape=(batch_size, self.row_dim - sum(self.generator.cats_disc)), seed=42)
+        z = keras.random.normal(
+            shape=(batch_size, self.row_dim - sum(self.generator.cats_disc)), seed=42
+        )
         cond = self.generate_batch_cond(batch_size)
         gen_x, _, _, _ = self.generator([z, cond], training=False)
         return ops.convert_to_numpy(gen_x)
