@@ -147,7 +147,10 @@ def test_self_description(single_metadata_with_cat):
         self_description["algorithm"]["name"]
         == "sdg_core_lib.data_generator.models.GANs.implementation.CTGAN.CTGAN"
     ), print(self_description["algorithm"]["name"])
-    assert self_description["algorithm"]["default_loss_function"] == "Mean"
+    assert (
+        self_description["algorithm"]["default_loss_function"]
+        == "Generator Adversary Loss with Log frequency weighted cross entropy"
+    )
     assert (
         self_description["algorithm"]["description"]
         == "A Conditional Tabular Generative Adversarial Network for data generation"
