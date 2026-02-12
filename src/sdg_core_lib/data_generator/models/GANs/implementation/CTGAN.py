@@ -112,15 +112,25 @@ class CTGAN(UnspecializedModel):
             os.path.join(folder_path, "generator.keras")
         )
         self._model = CTGANModel(generator, critic, onehot_discrete_indexes)
+        
+        # Load probability_mass_function_list if it exists
+        pmf_path = os.path.join(folder_path, "probability_mass_function_list.npy")
+        if os.path.exists(pmf_path):
+            self._model.probability_mass_function_list = np.load(pmf_path, allow_pickle=True)
 
     def save(self, folder_path: str):
-        # See save method in KerasBaseVAE
         keras.saving.save_model(
             self._model.generator, os.path.join(folder_path, "generator.keras")
         )
         keras.saving.save_model(
             self._model.critic, os.path.join(folder_path, "critic.keras")
         )
+        
+        if hasattr(self._model, 'probability_mass_function_list') and self._model.probability_mass_function_list is not None:
+            np.save(
+                os.path.join(folder_path, "probability_mass_function_list.npy"),
+                self._model.probability_mass_function_list
+            )
 
     def train(self, data: np.ndarray):
         """

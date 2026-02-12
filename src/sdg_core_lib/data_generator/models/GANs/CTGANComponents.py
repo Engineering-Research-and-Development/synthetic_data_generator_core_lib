@@ -14,6 +14,25 @@ class CTGANCritic(keras.Model):
         self.out = layers.Dense(1)
         self.leaky = layers.LeakyReLU(negative_slope=0.2)
         self.drop = layers.Dropout(dropout)
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'pac_size': self.pac_size,
+            'hidden': self.fc1.units,
+            'dropout': self.drop.rate,
+        })
+        return config
+    
+    @classmethod
+    def from_config(cls, config):
+        # Filter out only the parameters our constructor expects
+        constructor_params = {
+            'pac_size': config.get('pac_size', 10),
+            'hidden': config.get('hidden', 256),
+            'dropout': config.get('dropout', 0.2),
+        }
+        return cls(**constructor_params)
 
     def call(self, x, training=False):
         batch_size = tf.shape(x)[0]
@@ -85,6 +104,27 @@ class CTGANGenerator(keras.Model):
         self.alpha_heads = [layers.Dense(1) for _ in self.modes_cont]
         self.beta_heads = [layers.Dense(m) for m in self.modes_cont]
         self.d_heads = [layers.Dense(d) for d in self.cats_disc]
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            'skeleton': self.skeleton,
+            'modes_per_continuous_column': self.modes_cont,
+            'categories_per_discrete_column': self.cats_disc,
+            'hidden': self.fc1.units,
+        })
+        return config
+    
+    @classmethod
+    def from_config(cls, config):
+        # Filter out only the parameters our constructor expects
+        constructor_params = {
+            'skeleton': config.get('skeleton'),
+            'modes_per_continuous_column': config.get('modes_per_continuous_column'),
+            'categories_per_discrete_column': config.get('categories_per_discrete_column'),
+            'hidden': config.get('hidden', 256),
+        }
+        return cls(**constructor_params)
 
     def call(self, inputs, training=False):
         z, cond = inputs
@@ -124,6 +164,7 @@ class CTGANModel(keras.Model):
         self.critic_loss_tracker = keras.metrics.Mean(name="discriminator_loss")
         self._train_data = None
         self.probability_mass_function_list = None
+        self.row_dim = sum(generator.modes_cont) + sum(generator.cats_disc) + len(generator.modes_cont)
 
     @property
     def metrics(self):

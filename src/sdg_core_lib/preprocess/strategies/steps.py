@@ -12,8 +12,6 @@ import os
 import skops.io as sio
 from sklearn.mixture import BayesianGaussianMixture
 
-# TODO: What if steps change data types? Should I implement some "old_type / new_type" mechanics?
-
 
 class Step(ABC):
     def __init__(self, type_name: str, position: int, col_name: str, mode: str):
@@ -179,6 +177,8 @@ class PerModeNormalization(Step):
         return self.transform(data)
 
     def transform(self, data: np.ndarray) -> np.ndarray:
+        if self.operator is None:
+            raise ValueError("Operator not initialized")
         column = data.reshape(-1, 1)
         active_weights_indx = np.where(self.operator.weights_ > 0.01)
         weights = self.operator.weights_[active_weights_indx]
@@ -210,6 +210,8 @@ class PerModeNormalization(Step):
         return to_return
 
     def inverse_transform(self, data: np.ndarray) -> np.ndarray:
+        if self.operator is None:
+            raise ValueError("Operator not initialized")
         active_weights_indx = np.where(self.operator.weights_ > 0.01)
         means = self.operator.means_[active_weights_indx].flatten()
         stds = np.sqrt(self.operator.covariances_[active_weights_indx].flatten())

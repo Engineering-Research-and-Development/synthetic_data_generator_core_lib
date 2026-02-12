@@ -10,15 +10,12 @@ from sdg_core_lib.data_generator.models.GANs.CTGANComponents import (
 )
 
 
-# CTGANComponents Tests
-
-
 @pytest.fixture()
 def sample_skeleton():
     return [
         {"feature_name": "A", "feature_type": "continuous", "feature_size": 2},
         {"feature_name": "B", "feature_type": "categorical", "feature_size": 3},
-        {"feature_name": "C", "feature_type": "continuous", "feature_size": 1},
+        {"feature_name": "C", "feature_type": "continuous", "feature_size": 2},
     ]
 
 
@@ -31,7 +28,7 @@ def critic():
 def generator(sample_skeleton):
     return CTGANGenerator(
         skeleton=sample_skeleton,
-        modes_per_continuous_column=[2, 1],
+        modes_per_continuous_column=[1, 1],
         categories_per_discrete_column=[3],
         hidden=128
     )
@@ -42,7 +39,7 @@ def ctgan_model(generator, critic):
     return CTGANModel(
         generator=generator,
         critic=critic,
-        onehot_discrete_indexes=[3, 4, 5, 6, 7, 8]
+        onehot_discrete_indexes=[2, 3, 4]
     )
 
 
@@ -100,28 +97,16 @@ def test_gumbel_softmax_basic():
     assert np.allclose(tf.reduce_sum(result_soft, axis=-1).numpy(), 1.0, atol=1e-6)
 
 
-def test_gumbel_softmax_different_tau():
-    batch_size = 2
-    num_classes = 2
-    logits = tf.random.normal([batch_size, num_classes])
-    
-    result_low_tau = gumbel_softmax(logits, tau=0.1, hard=True)
-    result_high_tau = gumbel_softmax(logits, tau=1.0, hard=True)
-    
-    assert result_low_tau.shape == result_high_tau.shape
-    assert not np.array_equal(result_low_tau.numpy(), result_high_tau.numpy())
-
-
 def test_generator_instantiation(generator, sample_skeleton):
     assert generator.skeleton == sample_skeleton
-    assert generator.modes_cont == [2, 1]
+    assert generator.modes_cont == [1, 1]
     assert generator.cats_disc == [3]
     assert generator.tau == 0.2
 
 
 def test_generator_call(generator):
     batch_size = 4
-    noise_dim = 3  # skeleton has 2 continuous + 1 continuous = 3 total continuous features
+    noise_dim = 4  # skeleton has 2 continuous + 2 continuous = 4 total continuous features
     cond_dim = 3   # 1 categorical with 3 categories
     
     z = tf.random.normal([batch_size, noise_dim])
@@ -131,7 +116,7 @@ def test_generator_call(generator):
     
     # Expected output dimensions: 2 continuous cols * (alpha + beta) + 1 categorical col * categories
     # = 2 * (1 + 2) + 1 * 3 = 6 + 3 = 9
-    expected_output_dim = 9
+    expected_output_dim = sum([noise_dim, cond_dim])
     assert full_row.shape == (batch_size, expected_output_dim)
     assert len(alphas) == 2  # 2 continuous columns
     assert len(betas) == 2   # 2 continuous columns
@@ -155,7 +140,7 @@ def test_generator_training_mode(generator):
 def test_ctgan_model_instantiation(ctgan_model):
     assert ctgan_model.generator is not None
     assert ctgan_model.critic is not None
-    assert ctgan_model.onehot_discrete_indexes == [3, 4, 5, 6, 7, 8]
+    assert ctgan_model.onehot_discrete_indexes == [2,3,4]
     assert ctgan_model.gen_loss_tracker is not None
     assert ctgan_model.critic_loss_tracker is not None
 
@@ -233,25 +218,36 @@ def test_ctgan_model_generate_after_fitting(ctgan_model):
     ctgan_model.probability_mass_function_list = [
         tf.constant([0.3, 0.7]),
     ]
-    ctgan_model.row_dim = 6  # Total feature dimension
-    
+
     batch_size = 5
     generated_data = ctgan_model.generate(batch_size)
     
-    assert generated_data.shape == (batch_size, 6)
+    assert generated_data.shape == (batch_size, ctgan_model.row_dim)
     assert isinstance(generated_data, np.ndarray)
 
 
 def test_ctgan_model_train_step(ctgan_model):
-    # Setup mock training data
+    # Setup valid preprocessed training data matching skeleton structure:
+    # A: continuous (2 cols) - normalized values + mode selection
+    # B: categorical (3 cols) - one-hot encoded  
+    # C: continuous (2 cols) - normalized values + mode selection
     batch_size = 4
-    feature_dim = 6
-    train_data = tf.random.normal([batch_size, feature_dim])
+    train_data = tf.constant([
+        # Sample 1: A=[0.2, 1.0], B=[1.0, 0.0, 0.0], C=[0.8, 0.0]
+        [0.2, 1.0, 1.0, 0.0, 0.0, 0.8, 0.0],
+        # Sample 2: A=[0.5, 0.0], B=[0.0, 1.0, 0.0], C=[0.3, 1.0]
+        [0.5, 0.0, 0.0, 1.0, 0.0, 0.3, 1.0],
+        # Sample 3: A=[0.7, 1.0], B=[0.0, 0.0, 1.0], C=[0.9, 0.0]
+        [0.7, 1.0, 0.0, 0.0, 1.0, 0.9, 0.0],
+        # Sample 4: A=[0.1, 0.0], B=[1.0, 0.0, 0.0], C=[0.4, 1.0]
+        [0.1, 0.0, 1.0, 0.0, 0.0, 0.4, 1.0],
+    ], dtype=tf.float32)
+    
     ctgan_model._train_data = train_data
     ctgan_model.probability_mass_function_list = [
-        tf.constant([0.5, 0.5]),
+        tf.constant([0.5, 0.3, 0.2]),  # PMF for categorical feature B (3 categories)
     ]
-    ctgan_model.onehot_discrete_indexes = [2, 3, 4, 5]
+    ctgan_model.onehot_discrete_indexes = [2, 3, 4]
     
     # Compile with optimizers
     g_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)

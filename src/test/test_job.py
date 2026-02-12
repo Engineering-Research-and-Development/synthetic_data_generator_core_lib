@@ -66,9 +66,9 @@ def test_train_timeseries(setup):
 
 
 def test_train(setup):
-    model_info = train_request_3["model"]
-    dataset = train_request_3["dataset"]
-    n_rows = train_request_3["n_rows"]
+    model_info = train_request["model"]
+    dataset = train_request["dataset"]
+    n_rows = train_request["n_rows"]
     save_filepath = output_folder
 
     results, metrics, model, data = Job(
@@ -277,7 +277,7 @@ def test_get_model_class_dynamic_import():
     job = Job(
         n_rows=100,
         model_info={
-            "algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE"
+            "algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE"
         },
     )
 
