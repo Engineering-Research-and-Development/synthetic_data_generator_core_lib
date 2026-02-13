@@ -18,7 +18,7 @@ class LinearFunction(UnspecializedFunction):
     ]
     description = "Generates linear data in domain comprised between min_value and max_value following the y=mx+q equation"
     priority = Priority.MAX
-    is_generative = False
+    is_generative = True
     allowed_data = [
         AllowedData(DataType.float32, False),
     ]
