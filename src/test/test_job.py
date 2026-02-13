@@ -151,7 +151,7 @@ def test_infer_nodata(setup, teardown):
     print(metrics)
 
 
-def test_generate_from_function():
+def test_generate_from_functions():
     functions = [
         {
             "feature": "test_feature",
@@ -167,7 +167,9 @@ def test_generate_from_function():
         }
     ]
     n_rows = 100
-    dataset = Job(n_rows, functions=functions).generate_from_functions()
+    dataset = Job(
+        n_rows, functions=functions, dataset={"dataset_type": "", "data": []}
+    ).generate_from_functions()
     assert len(dataset) == 1
     dataset_data = dataset[0]
     assert len(dataset_data.get("column_data")) == n_rows
@@ -199,6 +201,11 @@ def test_model_factory_with_tabular_vae():
         assert model.input_shape == (10,)
         assert model._metadata == {"metadata": "test"}
 
+    # Verify that the correct mapping is used
+    from sdg_core_lib.mappings import TableMapping
+
+    assert job._Job__dataset_mapping == TableMapping
+
 
 def test_model_factory_with_timeseries_vae():
     """Test model factory creates TimeSeriesVAE with correct parameters"""
@@ -224,6 +231,11 @@ def test_model_factory_with_timeseries_vae():
         assert model.input_shape == (20, 30)
         assert model._metadata == {"timeseries": "metadata"}
 
+    # Verify that the correct mapping is used
+    from sdg_core_lib.mappings import TimeSeriesMapping
+
+    assert job._Job__dataset_mapping == TimeSeriesMapping
+
 
 def test_model_factory_without_preprocess_data():
     """Test model factory when no preprocess data is provided"""
@@ -234,17 +246,26 @@ def test_model_factory_without_preprocess_data():
             "model_name": "test_model",
             "input_shape": "(5,)",
         },
-        dataset=None,
+        dataset={"dataset_type": "", "data": []},
         save_filepath="/tmp/test",
     )
 
+    # Create a mock preprocess_data that returns None for to_skeleton
+    mock_preprocess_data = Mock()
+    mock_preprocess_data.to_skeleton.return_value = None
+
     with patch.object(job, "_get_model_class", return_value=TabularVAE):
-        model = job._model_factory()
+        model = job._model_factory(mock_preprocess_data)
 
         assert isinstance(model, TabularVAE)
         assert model.model_name == "test_model"
         assert model.input_shape == (5,)
         assert model._metadata is None
+
+    # Verify that the default mapping is used when dataset_type is empty
+    from sdg_core_lib.mappings import DatasetMapping
+
+    assert job._Job__dataset_mapping == DatasetMapping
 
 
 def test_model_factory_input_shape_from_data():
@@ -271,6 +292,11 @@ def test_model_factory_input_shape_from_data():
         assert model.input_shape == (15,)  # Should come from preprocess data
         assert model._metadata == {"shape": "from_data"}
 
+    # Verify that the table mapping is used
+    from sdg_core_lib.mappings import TableMapping
+
+    assert job._Job__dataset_mapping == TableMapping
+
 
 def test_get_model_class_dynamic_import():
     """Test that _get_model_class dynamically imports the correct class"""
@@ -279,25 +305,62 @@ def test_get_model_class_dynamic_import():
         model_info={
             "algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE"
         },
+        dataset={"dataset_type": "", "data": []},
     )
 
     model_class = job._get_model_class()
     assert model_class == TabularVAE
 
+    # Verify that default mapping is used when no dataset_type provided
+    from sdg_core_lib.mappings import DatasetMapping
+
+    assert job._Job__dataset_mapping == DatasetMapping
+
 
 def test_get_model_class_invalid_module():
     """Test _get_model_class with invalid module name"""
-    job = Job(n_rows=100, model_info={"algorithm_name": "invalid.module.InvalidClass"})
+    job = Job(
+        n_rows=100,
+        model_info={"algorithm_name": "invalid.module.InvalidClass"},
+        dataset={"dataset_type": "", "data": []},
+    )
 
     with pytest.raises(ModuleNotFoundError):
         job._get_model_class()
 
 
+def test_dataset_mapping_selection():
+    """Test that correct dataset mapping is selected based on dataset_type"""
+    from sdg_core_lib.mappings import TableMapping, TimeSeriesMapping, DatasetMapping
+
+    # Test table mapping
+    job_table = Job(n_rows=100, dataset={"dataset_type": "table", "data": []})
+    assert job_table._Job__dataset_mapping == TableMapping
+
+    # Test time_series mapping
+    job_timeseries = Job(
+        n_rows=100, dataset={"dataset_type": "time_series", "data": []}
+    )
+    assert job_timeseries._Job__dataset_mapping == TimeSeriesMapping
+
+    # Test default mapping for unknown dataset_type
+    job_unknown = Job(n_rows=100, dataset={"dataset_type": "unknown", "data": []})
+    assert job_unknown._Job__dataset_mapping == DatasetMapping
+
+    # Test default mapping for empty dataset_type
+    job_empty = Job(n_rows=100, dataset={"dataset_type": "", "data": []})
+    assert job_empty._Job__dataset_mapping == DatasetMapping
+
+
 def test_get_processor_tabular_vae():
     """Test processor creation for TabularVAE with correct strategy"""
-    job = Job(n_rows=100, save_filepath="/tmp/test")
+    job = Job(
+        n_rows=100,
+        save_filepath="/tmp/test",
+        dataset={"dataset_type": "table", "data": []},
+    )
 
-    processor = job._get_processor("table", TabularVAE)
+    processor = job._get_processor(TabularVAE)
 
     assert isinstance(processor, TableProcessor)
     assert hasattr(processor, "strategy")
@@ -306,9 +369,13 @@ def test_get_processor_tabular_vae():
 
 def test_get_processor_timeseries_vae():
     """Test processor creation for TimeSeriesVAE with correct strategy"""
-    job = Job(n_rows=100, save_filepath="/tmp/test")
+    job = Job(
+        n_rows=100,
+        save_filepath="/tmp/test",
+        dataset={"dataset_type": "time_series", "data": []},
+    )
 
-    processor = job._get_processor("time_series", TimeSeriesVAE)
+    processor = job._get_processor(TimeSeriesVAE)
 
     assert isinstance(processor, TableProcessor)
     assert hasattr(processor, "strategy")
@@ -317,12 +384,16 @@ def test_get_processor_timeseries_vae():
 
 def test_get_processor_unknown_model():
     """Test processor creation with unknown model class"""
-    job = Job(n_rows=100, save_filepath="/tmp/test")
+    job = Job(
+        n_rows=100,
+        save_filepath="/tmp/test",
+        dataset={"dataset_type": "table", "data": []},
+    )
 
     class UnknownModel:
         pass
 
-    processor = job._get_processor("table", UnknownModel)
+    processor = job._get_processor(UnknownModel)
 
     assert isinstance(processor, TableProcessor)
     assert hasattr(processor, "strategy")
@@ -332,46 +403,60 @@ def test_get_processor_unknown_model():
 
 def test_get_processor_invalid_dataset_type():
     """Test processor creation with invalid dataset type"""
-    job = Job(n_rows=100, save_filepath="/tmp/test")
+    job = Job(
+        n_rows=100,
+        save_filepath="/tmp/test",
+        dataset={"dataset_type": "table", "data": []},
+    )
 
-    with pytest.raises(KeyError):
-        job._get_processor("invalid_dataset", TabularVAE)
+    # This should work fine since _get_processor only takes model_class now
+    processor = job._get_processor(TabularVAE)
+    assert isinstance(processor, TableProcessor)
 
 
 def test_processor_strategy_mapping_completeness():
     """Test that all model classes have corresponding strategies"""
-    job = Job(n_rows=100)
+    from sdg_core_lib.mappings import ModelStrategyMapping
 
     # Check that TabularVAE has a strategy
-    assert TabularVAE in job.model_strategy_mapping
-    assert job.model_strategy_mapping[TabularVAE] == TabularVAEPreprocessingStrategy
+    assert TabularVAE in ModelStrategyMapping.mapping
+    assert ModelStrategyMapping.mapping[TabularVAE] == TabularVAEPreprocessingStrategy
 
     # Check that TimeSeriesVAE has a strategy
-    assert TimeSeriesVAE in job.model_strategy_mapping
+    assert TimeSeriesVAE in ModelStrategyMapping.mapping
     assert (
-        job.model_strategy_mapping[TimeSeriesVAE] == TimeSeriesVAEPreprocessingStrategy
+        ModelStrategyMapping.mapping[TimeSeriesVAE]
+        == TimeSeriesVAEPreprocessingStrategy
     )
 
 
 def test_processor_filepath_setting():
     """Test that processor receives correct filepath"""
     test_filepath = "/tmp/custom_test_path"
-    job = Job(n_rows=100, save_filepath=test_filepath)
+    job = Job(
+        n_rows=100,
+        save_filepath=test_filepath,
+        dataset={"dataset_type": "table", "data": []},
+    )
 
-    processor = job._get_processor("table", TabularVAE)
+    processor = job._get_processor(TabularVAE)
 
     assert processor.dir_path == test_filepath
 
 
-@patch("sdg_core_lib.job.TableProcessor")
+@patch("sdg_core_lib.preprocess.table_processor.TableProcessor")
 def test_processor_initialization_called_correctly(mock_table_processor):
     """Test that TableProcessor is initialized with correct parameters"""
     mock_processor_instance = Mock()
     mock_table_processor.return_value = mock_processor_instance
 
-    job = Job(n_rows=100, save_filepath="/tmp/test")
+    job = Job(
+        n_rows=100,
+        save_filepath="/tmp/test",
+        dataset={"dataset_type": "table", "data": []},
+    )
 
-    processor = job._get_processor("table", TabularVAE)
+    processor = job._get_processor(TabularVAE)
     assert isinstance(processor, TableProcessor)
     assert isinstance(processor.strategy, TabularVAEPreprocessingStrategy)
 
@@ -389,7 +474,7 @@ def test_full_model_and_processor_creation_flow():
     )
 
     # Test processor creation
-    processor = job._get_processor("table", TabularVAE)
+    processor = job._get_processor(TabularVAE)
     assert isinstance(processor, TableProcessor)
     assert isinstance(processor.strategy, TabularVAEPreprocessingStrategy)
 
@@ -406,11 +491,20 @@ def test_full_model_and_processor_creation_flow():
 
 def test_different_dataset_types_same_model():
     """Test that the same model works with different dataset types"""
-    job = Job(n_rows=100, save_filepath="/tmp/test")
+    job_table = Job(
+        n_rows=100,
+        save_filepath="/tmp/test",
+        dataset={"dataset_type": "table", "data": []},
+    )
+    job_ts = Job(
+        n_rows=100,
+        save_filepath="/tmp/test",
+        dataset={"dataset_type": "time_series", "data": []},
+    )
 
     # TabularVAE should work with both table and time_series processors
-    table_processor = job._get_processor("table", TabularVAE)
-    ts_processor = job._get_processor("time_series", TabularVAE)
+    table_processor = job_table._get_processor(TabularVAE)
+    ts_processor = job_ts._get_processor(TabularVAE)
 
     assert isinstance(table_processor, TableProcessor)
     assert isinstance(ts_processor, TableProcessor)
