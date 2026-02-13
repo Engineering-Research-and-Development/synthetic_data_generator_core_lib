@@ -33,7 +33,7 @@ class Job:
         functions: Optional[list[dict]] = None,
     ):
         self.__model_info = model_info
-        self.__dataset = dataset
+        self.__dataset = dataset if dataset is not None else {}
         self.__n_rows = n_rows
         self.__save_filepath = save_filepath
         self.__functions = functions
