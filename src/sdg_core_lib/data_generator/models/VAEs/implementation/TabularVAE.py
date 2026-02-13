@@ -3,8 +3,8 @@ from keras import layers
 
 from sdg_core_lib.data_generator.models.ModelInfo import ModelInfo
 from sdg_core_lib.commons import AllowedData, DataType
-from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
-from sdg_core_lib.data_generator.models.keras.VAE import Sampling, VAE
+from sdg_core_lib.data_generator.models.VAEs.KerasBaseVAE import KerasBaseVAE
+from sdg_core_lib.data_generator.models.VAEs.VAE import Sampling, VAE
 
 
 class TabularVAE(KerasBaseVAE):

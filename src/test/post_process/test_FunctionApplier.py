@@ -53,7 +53,7 @@ def sample_dataset():
             "column_type": "continuous",
         },
     ]
-    return Table.from_json(json_data, "")
+    return Table.from_json(json_data)
 
 
 class TestFunctionApplier:
@@ -349,7 +349,7 @@ class TestFunctionApplier:
             def postprocess(self):
                 pass
 
-        mock_dataset = MockDataset(processor=None)
+        mock_dataset = MockDataset()
         applier = FunctionApplier([], 100, False)
 
         with pytest.raises(
@@ -549,7 +549,7 @@ class TestFunctionApplier:
                 "column_type": "continuous",
             },
         ]
-        dataset_with_nan = Table.from_json(json_data_with_nan, "")
+        dataset_with_nan = Table.from_json(json_data_with_nan)
 
         # Use modification function that doesn't change the data
         mod_dict = modification_function_dict.copy()

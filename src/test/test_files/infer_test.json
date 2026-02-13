@@ -161,7 +161,7 @@
     },
   	"functions" : [],
 	"model": {
-		"algorithm_name": "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE",
+		"algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE",
 		"model_name": "Test-T_VAE",
         "image": "C:\\Users\\giumartine\\PycharmProjects\\SyntheticGenerator\\synthetic-data-generator\\src\\generator\\server\\saved_models\\trained_models\\Test-T_VAETabularVAE20250319.150458",
         "input_shape": "(13,)"

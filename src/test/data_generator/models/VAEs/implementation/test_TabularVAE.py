@@ -4,8 +4,8 @@ import shutil
 
 from sdg_core_lib.dataset.datasets import Table
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
-from sdg_core_lib.data_generator.models.keras.VAE import VAE
-from sdg_core_lib.data_generator.models.keras.implementation.TabularVAE import (
+from sdg_core_lib.data_generator.models.VAEs.VAE import VAE
+from sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE import (
     TabularVAE,
 )
 
@@ -20,8 +20,7 @@ def data():
                 "column_datatype": "float64",
                 "column_data": [1.0, 2.0, 3.0, 4.0, 5.0],
             }
-        ],
-        None,
+        ]
     )
 
 
@@ -62,13 +61,13 @@ def test_self_description(model_data_no_load):
     assert self_description is not None
     assert (
         self_description["algorithm"]["name"]
-        == "sdg_core_lib.data_generator.models.keras.implementation.TabularVAE.TabularVAE"
-    )
+        == "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE"
+    ), print(self_description["algorithm"]["name"])
     assert self_description["algorithm"]["default_loss_function"] == "ELBO LOSS"
     assert (
         self_description["algorithm"]["description"]
         == "A Variational Autoencoder for data generation"
-    )
+    ), print(self_description["algorithm"]["description"])
     assert self_description["datatypes"] == [
         {"type": "float32", "is_categorical": False},
         {"type": "int32", "is_categorical": False},

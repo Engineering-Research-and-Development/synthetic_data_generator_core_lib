@@ -1,7 +1,7 @@
 import pytest
 
 from sdg_core_lib.dataset.datasets import Table
-from sdg_core_lib.data_generator.models.keras.KerasBaseVAE import KerasBaseVAE
+from sdg_core_lib.data_generator.models.VAEs.KerasBaseVAE import KerasBaseVAE
 
 
 @pytest.fixture()
@@ -25,7 +25,7 @@ def correct_dataset():
             "column_data": [1.0, 2.0, 3.0, 4.0, 5.0],
         }
     ]
-    return Table.from_json(data, "/")
+    return Table.from_json(data)
 
 
 def test_instantiate(model):

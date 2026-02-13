@@ -8,18 +8,17 @@ class UnspecializedModel(ABC):
     by all subclasses.
 
     Attributes:
-        _metadata (dict): A dictionary containing miscellaneous information about the model.
+        _metadata (dict): A dictionary containing miscellaneous information about the data structure used by a model.
         model_name (str): The model name, used to identify the model itself.
         input_shape (tuple): A tuple containing the input shape of the model.
         _load_path (str): A string containing the path where to load the model from.
         _model (keras.Model): The model instance.
-        _scaler (Scaler): The scaler instance.
         training_info (TrainingInfo): The training info instance.
     """
 
     def __init__(
         self,
-        metadata: dict,
+        metadata: list[dict],
         model_name: str,
         input_shape: str = None,
         load_path: str = None,
@@ -30,10 +29,9 @@ class UnspecializedModel(ABC):
         self._load_path = load_path
         self._model = None  # Placeholder for the model instance
         self.training_info = None  # Placeholder for training info
-        self._model_misc = None  # Placeholder for model miscellaneous info
 
     @abstractmethod
-    def _build(self, input_shape: str):
+    def _build(self, input_shape: tuple[int, ...]):
         raise NotImplementedError
 
     @abstractmethod
@@ -41,9 +39,17 @@ class UnspecializedModel(ABC):
         """Load trained_models weights."""
         raise NotImplementedError
 
-    @abstractmethod
     def _instantiate(self):
-        raise NotImplementedError
+        """
+        Instantiates the model and loads the saved model if the load_path is given.
+
+        :return: None
+        """
+        if self._load_path is not None:
+            self._load(self._load_path)
+            return
+        if not self._model and self.input_shape:
+            self._model = self._build(self.input_shape)
 
     @abstractmethod
     def train(self, data: np.ndarray):

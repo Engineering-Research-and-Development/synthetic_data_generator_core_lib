@@ -2,21 +2,19 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from sdg_core_lib.dataset.columns import Numeric, Categorical, Column
-from sdg_core_lib.dataset.processor import Processor, TableProcessor
+from sdg_core_lib.preprocess.base_processor import Processor
+from sdg_core_lib.preprocess.table_processor import TableProcessor
 
 
 class Dataset(ABC):
-    def __init__(self, processor: Processor):
-        self.processor = processor
-
     @classmethod
     @abstractmethod
-    def from_json(cls, json_data: list[dict], save_path: str) -> "Dataset":
+    def from_json(cls, json_data: list[dict]) -> "Dataset":
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def from_skeleton(cls, skeleton: list[dict], save_path: str):
+    def from_skeleton(cls, skeleton: list[dict]):
         raise NotImplementedError
 
     @abstractmethod
@@ -43,11 +41,11 @@ class Dataset(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def preprocess(self) -> "Dataset":
+    def preprocess(self, processor: Processor) -> "Dataset":
         raise NotImplementedError
 
     @abstractmethod
-    def postprocess(self) -> "Dataset":
+    def postprocess(self, processor: Processor) -> "Dataset":
         raise NotImplementedError
 
 
@@ -58,20 +56,18 @@ class Table(Dataset):
         "primary_key": Column,
         "group_index": Column,
     }
-    processor: TableProcessor
 
     def __init__(
         self,
         columns: list[Column],
-        processor: TableProcessor,
         pk_indexes: list[int] = None,
     ):
-        super().__init__(processor)
+        super().__init__()
         self.columns = columns
         self.pk_col_indexes = pk_indexes
 
     @classmethod
-    def from_json(cls, json_data: list[dict], save_path: str) -> "Table":
+    def from_json(cls, json_data: list[dict]) -> "Table":
         pk_indexes = []
         columns = []
         group_index = None
@@ -107,11 +103,10 @@ class Table(Dataset):
             )
             columns.append(col)
 
-        processor = TableProcessor(save_path)
-        return Table(columns, processor, pk_indexes)
+        return Table(columns, pk_indexes)
 
     @classmethod
-    def from_skeleton(cls, skeleton: list[dict], save_path: str):
+    def from_skeleton(cls, skeleton: list[dict]):
         data_map = []
 
         for col_data in sorted(skeleton, key=lambda x: int(x["column_position"])):
@@ -128,7 +123,7 @@ class Table(Dataset):
             }
             data_map.append(new_column)
 
-        return cls.from_json(data_map, save_path)
+        return cls.from_json(data_map)
 
     def clone(self, data: np.ndarray) -> "Table":
         if self.get_computing_shape()[1] != data.shape[1]:
@@ -158,7 +153,7 @@ class Table(Dataset):
                 )
             )
 
-        return Table(new_columns, self.processor, self.pk_col_indexes)
+        return Table(new_columns, self.pk_col_indexes)
 
     def to_json(self) -> list[dict]:
         return [
@@ -208,15 +203,15 @@ class Table(Dataset):
         pks_values = np.hstack([col.get_data() for col in self.get_primary_keys()])
         return pks_values.shape[0] == np.unique(pks_values, axis=0).shape[0]
 
-    def preprocess(self) -> "Table":
-        new_cols = self.processor.process(self.columns)
-        return Table(new_cols, self.processor, self.pk_col_indexes)
+    def preprocess(self, processor: TableProcessor) -> "Table":
+        new_cols = processor.process(self.columns)
+        return Table(new_cols, self.pk_col_indexes)
 
-    def postprocess(self) -> "Table":
-        new_cols = self.processor.inverse_process(self.columns)
+    def postprocess(self, processor: TableProcessor) -> "Table":
+        new_cols = processor.inverse_process(self.columns)
         for col in new_cols:
             col.values = col.values.astype(col.value_type)
-        return Table(new_cols, self.processor, self.pk_col_indexes)
+        return Table(new_cols, self.pk_col_indexes)
 
     def all_to_numeric(self) -> "Table":
         new_cols = []
@@ -225,7 +220,7 @@ class Table(Dataset):
                 new_cols.append(col.to_numeric())
             else:
                 new_cols.append(col)
-        return Table(new_cols, self.processor, self.pk_col_indexes)
+        return Table(new_cols, self.pk_col_indexes)
 
     def all_to_categorical(self) -> "Table":
         new_cols = []
@@ -234,19 +229,17 @@ class Table(Dataset):
                 new_cols.append(col.to_categorical())
             else:
                 new_cols.append(col)
-        return Table(new_cols, self.processor, self.pk_col_indexes)
+        return Table(new_cols, self.pk_col_indexes)
 
 
 class TimeSeries(Table):
     def __init__(self, inner_table: Table, group_index: int = None):
         self.group_index = group_index
-        super().__init__(
-            inner_table.columns, inner_table.processor, inner_table.pk_col_indexes
-        )
+        super().__init__(inner_table.columns, inner_table.pk_col_indexes)
 
     @classmethod
-    def from_json(cls, json_data: list[dict], save_path: str) -> "TimeSeries":
-        inner_table = super().from_json(json_data, save_path)
+    def from_json(cls, json_data: list[dict]) -> "TimeSeries":
+        inner_table = super().from_json(json_data)
 
         group_index = None
         for col in inner_table.columns:
@@ -317,12 +310,10 @@ class TimeSeries(Table):
         data = np.hstack([col.get_data() for col in self._get_computing_columns()])
         return data.reshape(-1, time_steps, data.shape[1]).transpose(0, 2, 1)
 
-    def preprocess(self) -> "TimeSeries":
-        # new_cols = self.processor.process(self.columns)
-        preprocessed_table = super().preprocess()
+    def preprocess(self, processor: TableProcessor) -> "TimeSeries":
+        preprocessed_table = super().preprocess(processor)
         return TimeSeries(preprocessed_table, self.group_index)
 
-    def postprocess(self) -> "TimeSeries":
-        # new_cols = self.processor.inverse_process(self.columns)
-        postprocessed_table = super().postprocess()
+    def postprocess(self, processor: TableProcessor) -> "TimeSeries":
+        postprocessed_table = super().postprocess(processor)
         return TimeSeries(postprocessed_table, self.group_index)

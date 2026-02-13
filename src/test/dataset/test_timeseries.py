@@ -4,6 +4,10 @@ import shutil
 import numpy as np
 
 from sdg_core_lib.dataset.datasets import TimeSeries
+from sdg_core_lib.preprocess.strategies.vae_strategy import (
+    TabularVAEPreprocessingStrategy,
+)
+from sdg_core_lib.preprocess.table_processor import TableProcessor
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
 
@@ -47,12 +51,12 @@ def temp_folder():
 @pytest.fixture()
 def sample_timeseries(temp_folder):
     file_path = os.path.join(temp_folder, "timeseries.json")
-    return TimeSeries.from_json(time_series_data, file_path)
+    return TimeSeries.from_json(time_series_data)
 
 
 def test_timeseries_creation(temp_folder):
     file_path = os.path.join(temp_folder, "timeseries.json")
-    ts = TimeSeries.from_json(time_series_data, file_path)
+    ts = TimeSeries.from_json(time_series_data)
 
     # Verify basic properties
     assert len(ts.columns) == 4
@@ -66,7 +70,7 @@ def test_timeseries_invalid_creation(temp_folder):
     invalid_data = [d for d in time_series_data if d["column_name"] != "experiment_id"]
 
     with pytest.raises(ValueError, match="Time series must have a group index"):
-        TimeSeries.from_json(invalid_data, file_path)
+        TimeSeries.from_json(invalid_data)
 
 
 def test_timeseries_clone(sample_timeseries):
@@ -108,9 +112,12 @@ def test_timeseries_invalid_computing_data(sample_timeseries):
         sample_timeseries.clone(invalid_data)
 
 
-def test_timeseries_preprocess(sample_timeseries):
+def test_timeseries_preprocess(sample_timeseries, temp_folder):
     # Test preprocessing (should normalize continuous columns)
-    preprocessed = sample_timeseries.preprocess()
+    processor = TableProcessor(temp_folder).set_strategy(
+        TabularVAEPreprocessingStrategy()
+    )
+    preprocessed = sample_timeseries.preprocess(processor)
     computing_data = preprocessed.get_computing_data()
 
     # Check if one-hot encoding is applied to categorical columns and changed shape
@@ -129,10 +136,13 @@ def test_timeseries_preprocess(sample_timeseries):
         )  # Categorical data should be one-hot encoded
 
 
-def test_timeseries_postprocess(sample_timeseries):
+def test_timeseries_postprocess(sample_timeseries, temp_folder):
     # Test round-trip preprocessing and postprocessing
-    preprocessed = sample_timeseries.preprocess()
-    postprocessed = preprocessed.postprocess()
+    processor = TableProcessor(temp_folder).set_strategy(
+        TabularVAEPreprocessingStrategy()
+    )
+    preprocessed = sample_timeseries.preprocess(processor)
+    postprocessed = preprocessed.postprocess(processor)
 
     # Verify the data is restored (approximately due to floating point)
     original_data = sample_timeseries.get_computing_data()
@@ -169,7 +179,7 @@ def test_timeseries_invalid_experiment_lengths(temp_folder):
     ]
 
     file_path = os.path.join(temp_folder, "invalid_lengths.json")
-    ts = TimeSeries.from_json(invalid_data, file_path)
+    ts = TimeSeries.from_json(invalid_data)
 
     # Should raise when trying to get computing data due to inconsistent lengths
     with pytest.raises(ValueError, match="Experiments have different lengths"):

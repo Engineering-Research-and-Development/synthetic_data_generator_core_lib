@@ -1,7 +1,11 @@
 import numpy as np
 import pytest
 
-from sdg_core_lib.dataset.datasets import Table, TableProcessor
+from sdg_core_lib.dataset.datasets import Table
+from sdg_core_lib.preprocess.strategies.vae_strategy import (
+    TabularVAEPreprocessingStrategy,
+)
+from sdg_core_lib.preprocess.table_processor import TableProcessor
 from sdg_core_lib.dataset.columns import Numeric, Categorical, Column
 
 
@@ -34,7 +38,9 @@ def categorical_column():
 @pytest.fixture
 def table_processor(test_data_dir):
     """Create a TableProcessor instance with a temporary output directory."""
-    return TableProcessor(str(test_data_dir))
+    return TableProcessor(str(test_data_dir)).set_strategy(
+        TabularVAEPreprocessingStrategy()
+    )
 
 
 class TestTableProcessor:
@@ -92,12 +98,18 @@ class TestTableIntegration:
     @pytest.fixture
     def sample_table(self, test_data_dir, numeric_column, categorical_column):
         """Create a sample table for testing."""
-        processor = TableProcessor(str(test_data_dir))
-        return Table([numeric_column, categorical_column], processor)
+        return Table([numeric_column, categorical_column])
 
-    def test_table_preprocess(self, sample_table):
+    @pytest.fixture
+    def sample_processor(self, test_data_dir):
+        processor = TableProcessor(str(test_data_dir)).set_strategy(
+            TabularVAEPreprocessingStrategy()
+        )
+        return processor
+
+    def test_table_preprocess(self, sample_table, sample_processor):
         """Test table preprocessing."""
-        processed = sample_table.preprocess()
+        processed = sample_table.preprocess(sample_processor)
         assert len(processed.columns) == 2
         # Numeric column should be scaled
         assert not np.array_equal(
@@ -106,10 +118,10 @@ class TestTableIntegration:
         # Categorical column should be one-hot encoded
         assert processed.columns[1].values.shape[1] > 1
 
-    def test_table_postprocess(self, sample_table):
+    def test_table_postprocess(self, sample_table, sample_processor):
         """Test table postprocessing."""
-        processed = sample_table.preprocess()
-        restored = processed.postprocess()
+        processed = sample_table.preprocess(sample_processor)
+        restored = processed.postprocess(sample_processor)
 
         # Check numeric values are approximately equal
         np.testing.assert_allclose(
@@ -118,11 +130,11 @@ class TestTableIntegration:
             rtol=1e-6,
         )
 
-    def test_empty_table_initialization(self, test_data_dir):
+    def test_empty_table_initialization(self, test_data_dir, sample_processor):
         """Test creating a table with no columns."""
         with pytest.raises(ValueError, match="No columns provided for processing"):
-            table = Table([], TableProcessor(str(test_data_dir)))
-            table.preprocess()
+            table = Table([])
+            table.preprocess(sample_processor)
 
 
 class TestEdgeCases:
@@ -142,12 +154,15 @@ class TestEdgeCases:
     def test_save_and_load_processor(self, test_data_dir, numeric_column):
         """Test saving and loading a processor."""
         # Create and save processor state
-        processor = TableProcessor(str(test_data_dir))
+        processor = TableProcessor(str(test_data_dir)).set_strategy(
+            TabularVAEPreprocessingStrategy()
+        )
         cols = processor.process([numeric_column])
-        processor._save_all()
 
         # Create new processor and load state
-        new_processor = TableProcessor(str(test_data_dir))
+        new_processor = TableProcessor(str(test_data_dir)).set_strategy(
+            TabularVAEPreprocessingStrategy()
+        )
         new_processor.inverse_process(cols)
 
         # Verify loaded state

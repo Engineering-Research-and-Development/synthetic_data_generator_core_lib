@@ -5,6 +5,10 @@ import shutil
 import numpy as np
 
 from sdg_core_lib.dataset.datasets import Table
+from sdg_core_lib.preprocess.table_processor import TableProcessor
+from sdg_core_lib.preprocess.strategies.vae_strategy import (
+    TabularVAEPreprocessingStrategy,
+)
 
 current_folder = os.path.dirname(os.path.abspath(__file__))
 correct_dataset = json.load(open(os.path.join(current_folder, "correct_dataset.json")))
@@ -22,22 +26,19 @@ def temp_folder():
 
 
 def test_table_from_json(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     assert len(table.pk_col_indexes) == 2
     assert len(table.columns) == 4
 
 
 def test_table_from_skeleton(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_skeleton(correct_skeleton, file_path)
+    table = Table.from_skeleton(correct_skeleton)
     assert len(table.pk_col_indexes) == 2
     assert len(table.columns) == 4
 
 
 def test_table_get_primary_keys(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     assert table.get_primary_keys() == [
         table.columns[0],
         table.columns[1],
@@ -45,20 +46,17 @@ def test_table_get_primary_keys(temp_folder):
 
 
 def test_table_get_numeric_columns(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     assert table.get_numeric_columns() == [table.columns[2]]
 
 
 def test_table_get_categorical_columns(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     assert table.get_categorical_columns() == [table.columns[3]]
 
 
 def test_table_get_computing_data(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     data = table.get_computing_data()
     assert isinstance(data, np.ndarray)
     assert np.all(
@@ -67,14 +65,12 @@ def test_table_get_computing_data(temp_folder):
 
 
 def test_table_get_computing_shape(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     assert table.get_computing_shape() == (6, 2)
 
 
 def test_table_clone(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     data = np.random.randint(0, 100, size=(4, 2))
     new_table = table.clone(data)
     assert len(new_table.columns) == 4
@@ -83,8 +79,7 @@ def test_table_clone(temp_folder):
 
 
 def test_table_to_json(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     table_json = table.to_json()
     assert isinstance(table_json, list)
     assert len(table_json) == 4
@@ -92,8 +87,7 @@ def test_table_to_json(temp_folder):
 
 
 def test_table_to_skeleton(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     skeleton = table.to_skeleton()
     assert isinstance(skeleton, list)
     assert len(skeleton) == 4
@@ -101,23 +95,21 @@ def test_table_to_skeleton(temp_folder):
 
 
 def test_from_json_invalid_data(temp_folder):
-    file_path = os.path.join(temp_folder, "invalid.json")
     # Test with missing required fields
     invalid_data = [{"column_name": "test"}]  # Missing column_type and column_data
     with pytest.raises(TypeError):
-        Table.from_json(invalid_data, file_path)
+        Table.from_json(invalid_data)
 
     # Test with invalid column type
     invalid_type_data = [
         {"column_name": "test", "column_type": "invalid_type", "column_data": [1, 2, 3]}
     ]
     with pytest.raises(TypeError):
-        Table.from_json(invalid_type_data, file_path)
+        Table.from_json(invalid_type_data)
 
 
 def test_clone_invalid_shape(temp_folder):
-    file_path = os.path.join(temp_folder, "table.json")
-    table = Table.from_json(correct_dataset, file_path)
+    table = Table.from_json(correct_dataset)
     # Test with incorrect number of columns
     invalid_data = np.random.randint(0, 100, size=(6, 3))  # Expected 2 columns
     with pytest.raises(ValueError):
@@ -125,7 +117,6 @@ def test_clone_invalid_shape(temp_folder):
 
 
 def test_self_pk_integrity(temp_folder):
-    file_path = os.path.join(temp_folder, "pk_test.json")
     # Create a table with duplicate PKs
     invalid_data = [
         {
@@ -147,18 +138,17 @@ def test_self_pk_integrity(temp_folder):
             "column_datatype": "float",
         },
     ]
-    table = Table.from_json(invalid_data, file_path)
+    table = Table.from_json(invalid_data)
     assert table._self_pk_integrity() is False
 
 
 def test_empty_table(temp_folder):
     empty_data = []
     with pytest.raises(ValueError):
-        Table.from_json(empty_data, temp_folder)
+        Table.from_json(empty_data)
 
 
 def test_mixed_data_types(temp_folder):
-    file_path = os.path.join(temp_folder, "mixed.json")
     mixed_data = [
         {
             "column_name": "id",
@@ -179,14 +169,13 @@ def test_mixed_data_types(temp_folder):
             "column_datatype": "str",
         },
     ]
-    table = Table.from_json(mixed_data, file_path)
+    table = Table.from_json(mixed_data)
     assert len(table.get_numeric_columns()) == 1
     assert len(table.get_categorical_columns()) == 1
     assert len(table.get_primary_keys()) == 1
 
 
 def test_duplicate_group_index(temp_folder):
-    file_path = os.path.join(temp_folder, "duplicate_group.json")
     duplicate_group_data = [
         {
             "column_name": "group1",
@@ -202,11 +191,10 @@ def test_duplicate_group_index(temp_folder):
         },
     ]
     with pytest.raises(ValueError, match="Group index already set"):
-        Table.from_json(duplicate_group_data, file_path)
+        Table.from_json(duplicate_group_data)
 
 
 def test_table_with_missing_values(temp_folder):
-    file_path = os.path.join(temp_folder, "missing_values.json")
     data_with_missing = [
         {
             "column_name": "id",
@@ -222,12 +210,11 @@ def test_table_with_missing_values(temp_folder):
         },
     ]
     # TODO: Improve NoneValue Management in future
-    table = Table.from_json(data_with_missing, file_path)
+    table = Table.from_json(data_with_missing)
     assert len(table.columns) == 2
 
 
 def test_data_aggregation(temp_folder):
-    file_path = os.path.join(temp_folder, "aggregate.json")
     data = [
         {
             "column_name": "category",
@@ -242,7 +229,7 @@ def test_data_aggregation(temp_folder):
             "column_datatype": "int",
         },
     ]
-    table = Table.from_json(data, file_path)
+    table = Table.from_json(data)
     # Test computing data
     computing_data = table.get_computing_data()
     assert len(computing_data) == 5  # 5 rows
@@ -250,7 +237,6 @@ def test_data_aggregation(temp_folder):
 
 
 def test_preprocess_continuous_column(temp_folder):
-    file_path = os.path.join(temp_folder, "preprocess.json")
     data = [
         {
             "column_name": "value",
@@ -259,15 +245,17 @@ def test_preprocess_continuous_column(temp_folder):
             "column_datatype": "int",
         }
     ]
-    table = Table.from_json(data, file_path)
-    preprocessed_table = table.preprocess()
+    processor = TableProcessor(temp_folder).set_strategy(
+        TabularVAEPreprocessingStrategy()
+    )
+    table = Table.from_json(data)
+    preprocessed_table = table.preprocess(processor)
     compared_array = np.array(data[0]["column_data"]).reshape(-1, 1)
     scaled_array = (compared_array - np.mean(compared_array)) / np.std(compared_array)
     assert np.all(preprocessed_table.get_computing_data() == scaled_array)
 
 
 def test_postprocess_continuous_column(temp_folder):
-    file_path = os.path.join(temp_folder, "postprocess.json")
     data = [
         {
             "column_name": "value",
@@ -276,16 +264,18 @@ def test_postprocess_continuous_column(temp_folder):
             "column_datatype": "int",
         }
     ]
-    table = Table.from_json(data, file_path)
-    preprocessed_table = table.preprocess()
-    postprocessed_table = preprocessed_table.postprocess()
+    table = Table.from_json(data)
+    processor = TableProcessor(temp_folder).set_strategy(
+        TabularVAEPreprocessingStrategy()
+    )
+    preprocessed_table = table.preprocess(processor)
+    postprocessed_table = preprocessed_table.postprocess(processor)
     assert np.all(
         postprocessed_table.get_computing_data() == np.array([1, 2, 3]).reshape(-1, 1)
     )
 
 
 def test_preprocess_categorical_column(temp_folder):
-    file_path = os.path.join(temp_folder, "preprocess.json")
     data = [
         {
             "column_name": "value",
@@ -294,8 +284,11 @@ def test_preprocess_categorical_column(temp_folder):
             "column_datatype": "str",
         }
     ]
-    table = Table.from_json(data, file_path)
-    processed_table = table.preprocess()
+    table = Table.from_json(data)
+    processor = TableProcessor(temp_folder).set_strategy(
+        TabularVAEPreprocessingStrategy()
+    )
+    processed_table = table.preprocess(processor)
     assert np.all(
         processed_table.get_computing_data()
         == np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
@@ -303,7 +296,6 @@ def test_preprocess_categorical_column(temp_folder):
 
 
 def test_postprocess_categorical_column(temp_folder):
-    file_path = os.path.join(temp_folder, "postprocess.json")
     data = [
         {
             "column_name": "value",
@@ -312,9 +304,12 @@ def test_postprocess_categorical_column(temp_folder):
             "column_datatype": "str",
         }
     ]
-    table = Table.from_json(data, file_path)
-    processed_table = table.preprocess()
-    postprocessed_table = processed_table.postprocess()
+    table = Table.from_json(data)
+    processor = TableProcessor(temp_folder).set_strategy(
+        TabularVAEPreprocessingStrategy()
+    )
+    processed_table = table.preprocess(processor)
+    postprocessed_table = processed_table.postprocess(processor)
     assert np.all(
         postprocessed_table.get_computing_data()
         == np.array(["a", "b", "c"]).reshape(-1, 1)

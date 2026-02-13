@@ -2,7 +2,7 @@ from tslearn.metrics import dtw
 import numpy as np
 
 from sdg_core_lib.evaluate.tables import TabularComparisonEvaluator
-from sdg_core_lib.evaluate.metrics import MetricReport, TimeSeriesSpecificMetric
+from sdg_core_lib.evaluate.metrics import TimeSeriesSpecificMetric
 from sdg_core_lib.dataset.datasets import TimeSeries
 
 
@@ -23,13 +23,11 @@ class TimeSeriesComparisonEvaluator(TabularComparisonEvaluator):
         real_data: TimeSeries,
         synthetic_data: TimeSeries,
     ):
-        if type(real_data) is not TimeSeries:
+        if not isinstance(real_data, TimeSeries):
             raise ValueError("real_data must be a TimeSeries")
-        if type(synthetic_data) is not TimeSeries:
+        if not isinstance(synthetic_data, TimeSeries):
             raise ValueError("synthetic_data must be a TimeSeries")
-        self._real_data = real_data
-        self._synth_data = synthetic_data
-        self.report = MetricReport()
+        super().__init__(real_data, synthetic_data)
 
     def compute(self):
         numerical_columns = self._real_data.get_numeric_columns()
