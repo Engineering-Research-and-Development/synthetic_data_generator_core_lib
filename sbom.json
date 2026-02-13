@@ -1,7 +1,7 @@
 {
   "components": [
     {
-      "bom-ref": "Markdown==3.10.1",
+      "bom-ref": "Markdown==3.10.2",
       "description": "Python implementation of John Gruber's Markdown.",
       "externalReferences": [
         {
@@ -39,9 +39,9 @@
         }
       ],
       "name": "Markdown",
-      "purl": "pkg:pypi/markdown@3.10.1",
+      "purl": "pkg:pypi/markdown@3.10.2",
       "type": "library",
-      "version": "3.10.1"
+      "version": "3.10.2"
     },
     {
       "bom-ref": "MarkupSafe==3.0.3",
@@ -782,7 +782,7 @@
       "version": "0.2.0"
     },
     {
-      "bom-ref": "grpcio==1.76.0",
+      "bom-ref": "grpcio==1.78.0",
       "description": "HTTP/2-based RPC framework",
       "externalReferences": [
         {
@@ -801,7 +801,7 @@
           "url": "https://github.com/grpc/grpc"
         },
         {
-          "comment": "from packaging metadata: Home-page",
+          "comment": "from packaging metadata Project-URL: Homepage",
           "type": "website",
           "url": "https://grpc.io"
         }
@@ -810,14 +810,14 @@
         {
           "license": {
             "acknowledgement": "declared",
-            "name": "License :: OSI Approved :: Apache Software License"
+            "id": "Apache-2.0"
           }
         }
       ],
       "name": "grpcio",
-      "purl": "pkg:pypi/grpcio@1.76.0",
+      "purl": "pkg:pypi/grpcio@1.78.0",
       "type": "library",
-      "version": "1.76.0"
+      "version": "1.78.0"
     },
     {
       "bom-ref": "h5py==3.15.1",
@@ -1571,6 +1571,39 @@
       "version": "2.0.2"
     },
     {
+      "bom-ref": "numpy-typing-compat==20251206.2.0",
+      "description": "Static typing compatibility layer for older versions of NumPy",
+      "externalReferences": [
+        {
+          "comment": "from packaging metadata Project-URL: Issues",
+          "type": "issue-tracker",
+          "url": "https://github.com/jorenham/numpy-typing-compat/issues"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Changelog",
+          "type": "release-notes",
+          "url": "https://github.com/jorenham/numpy-typing-compat/releases"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Repository",
+          "type": "vcs",
+          "url": "https://github.com/jorenham/numpy-typing-compat"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "numpy-typing-compat",
+      "purl": "pkg:pypi/numpy-typing-compat@20251206.2.0",
+      "type": "library",
+      "version": "20251206.2.0"
+    },
+    {
       "bom-ref": "opt_einsum==3.4.0",
       "description": "Path optimization of einsum functions.",
       "licenses": [
@@ -1623,6 +1656,55 @@
       "purl": "pkg:pypi/optree@0.18.0",
       "type": "library",
       "version": "0.18.0"
+    },
+    {
+      "bom-ref": "optype==0.15.0",
+      "description": "Building Blocks for Precise & Flexible Type Hints",
+      "externalReferences": [
+        {
+          "comment": "from packaging metadata Project-URL: Documentation",
+          "type": "documentation",
+          "url": "https://github.com/jorenham/optype/blob/master/README.md"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Issues",
+          "type": "issue-tracker",
+          "url": "https://github.com/jorenham/optype/issues"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Funding",
+          "type": "other",
+          "url": "https://github.com/sponsors/jorenham"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Changelog",
+          "type": "release-notes",
+          "url": "https://github.com/jorenham/optype/releases"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Repository",
+          "type": "vcs",
+          "url": "https://github.com/jorenham/optype/"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "optype",
+      "properties": [
+        {
+          "name": "cdx:python:package:required-extra",
+          "value": "numpy"
+        }
+      ],
+      "purl": "pkg:pypi/optype@0.15.0",
+      "type": "library",
+      "version": "0.15.0"
     },
     {
       "bom-ref": "packageurl-python==0.17.6",
@@ -1712,6 +1794,50 @@
       "version": "2.2.3"
     },
     {
+      "bom-ref": "pandas-stubs==2.2.3.250527",
+      "description": "Type annotations for pandas",
+      "externalReferences": [
+        {
+          "comment": "from packaging metadata Project-URL: Documentation",
+          "type": "documentation",
+          "url": "https://pandas.pydata.org/pandas-docs/stable"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Bug Tracker",
+          "type": "issue-tracker",
+          "url": "https://github.com/pandas-dev/pandas-stubs/issues"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Repository",
+          "type": "vcs",
+          "url": "https://github.com/pandas-dev/pandas-stubs"
+        },
+        {
+          "comment": "from packaging metadata: Home-page",
+          "type": "website",
+          "url": "https://pandas.pydata.org"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "BSD-3-Clause"
+          }
+        },
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "name": "License :: OSI Approved :: BSD License"
+          }
+        }
+      ],
+      "name": "pandas-stubs",
+      "purl": "pkg:pypi/pandas-stubs@2.2.3.250527",
+      "type": "library",
+      "version": "2.2.3.250527"
+    },
+    {
       "bom-ref": "patsy==1.0.2",
       "description": "A Python package for describing statistical models and for building design matrices.",
       "externalReferences": [
@@ -1735,7 +1861,7 @@
       "version": "1.0.2"
     },
     {
-      "bom-ref": "pillow==12.1.0",
+      "bom-ref": "pillow==12.1.1",
       "description": "Python Imaging Library (fork)",
       "externalReferences": [
         {
@@ -1783,9 +1909,9 @@
         }
       ],
       "name": "pillow",
-      "purl": "pkg:pypi/pillow@12.1.0",
+      "purl": "pkg:pypi/pillow@12.1.1",
       "type": "library",
-      "version": "12.1.0"
+      "version": "12.1.1"
     },
     {
       "bom-ref": "pip-requirements-parser==32.0.1",
@@ -1849,7 +1975,7 @@
       "version": "3.17.0"
     },
     {
-      "bom-ref": "protobuf==5.29.5",
+      "bom-ref": "protobuf==5.29.6",
       "externalReferences": [
         {
           "comment": "from packaging metadata: Home-page",
@@ -1858,9 +1984,9 @@
         }
       ],
       "name": "protobuf",
-      "purl": "pkg:pypi/protobuf@5.29.5",
+      "purl": "pkg:pypi/protobuf@5.29.6",
       "type": "library",
-      "version": "5.29.5"
+      "version": "5.29.6"
     },
     {
       "bom-ref": "py-serializable==2.1.0",
@@ -2183,7 +2309,7 @@
       "version": "1.1.0"
     },
     {
-      "bom-ref": "rich==14.3.1",
+      "bom-ref": "rich==14.3.2",
       "description": "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal",
       "externalReferences": [
         {
@@ -2206,9 +2332,9 @@
         }
       ],
       "name": "rich",
-      "purl": "pkg:pypi/rich@14.3.1",
+      "purl": "pkg:pypi/rich@14.3.2",
       "type": "library",
-      "version": "14.3.1"
+      "version": "14.3.2"
     },
     {
       "bom-ref": "rpds-py==0.30.0",
@@ -2355,7 +2481,45 @@
       "version": "1.17.0"
     },
     {
-      "bom-ref": "sdg-core-lib==0.1.6",
+      "bom-ref": "scipy-stubs==1.16.3.3",
+      "description": "Type annotations for SciPy",
+      "externalReferences": [
+        {
+          "comment": "from packaging metadata Project-URL: Issues",
+          "type": "issue-tracker",
+          "url": "https://github.com/scipy/scipy-stubs/issues"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Changelog",
+          "type": "release-notes",
+          "url": "https://github.com/scipy/scipy-stubs/releases"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Repository",
+          "type": "vcs",
+          "url": "https://github.com/scipy/scipy-stubs"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Homepage",
+          "type": "website",
+          "url": "https://scipy.org/"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "BSD-3-Clause"
+          }
+        }
+      ],
+      "name": "scipy-stubs",
+      "purl": "pkg:pypi/scipy-stubs@1.16.3.3",
+      "type": "library",
+      "version": "1.16.3.3"
+    },
+    {
+      "bom-ref": "sdg-core-lib==0.1.7",
       "description": "Add your description here",
       "externalReferences": [
         {
@@ -2366,7 +2530,7 @@
       ],
       "name": "sdg-core-lib",
       "type": "library",
-      "version": "0.1.6"
+      "version": "0.1.7"
     },
     {
       "bom-ref": "seaborn==0.13.2",
@@ -2397,7 +2561,7 @@
       "version": "0.13.2"
     },
     {
-      "bom-ref": "setuptools==80.10.2",
+      "bom-ref": "setuptools==82.0.0",
       "description": "Easily download, build, install, upgrade, and uninstall Python packages",
       "externalReferences": [
         {
@@ -2425,9 +2589,9 @@
         }
       ],
       "name": "setuptools",
-      "purl": "pkg:pypi/setuptools@80.10.2",
+      "purl": "pkg:pypi/setuptools@82.0.0",
       "type": "library",
-      "version": "80.10.2"
+      "version": "82.0.0"
     },
     {
       "bom-ref": "six==1.17.0",
@@ -2736,6 +2900,49 @@
       "version": "0.7.0"
     },
     {
+      "bom-ref": "types-pytz==2025.2.0.20251108",
+      "description": "Typing stubs for pytz",
+      "externalReferences": [
+        {
+          "comment": "from packaging metadata Project-URL: Chat",
+          "type": "chat",
+          "url": "https://gitter.im/python/typing"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Issue tracker",
+          "type": "issue-tracker",
+          "url": "https://github.com/python/typeshed/issues"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Changes",
+          "type": "release-notes",
+          "url": "https://github.com/typeshed-internal/stub_uploader/blob/main/data/changelogs/pytz.md"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: GitHub",
+          "type": "vcs",
+          "url": "https://github.com/python/typeshed"
+        },
+        {
+          "comment": "from packaging metadata Project-URL: Homepage",
+          "type": "website",
+          "url": "https://github.com/python/typeshed"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "types-pytz",
+      "purl": "pkg:pypi/types-pytz@2025.2.0.20251108",
+      "type": "library",
+      "version": "2025.2.0.20251108"
+    },
+    {
       "bom-ref": "typing_extensions==4.15.0",
       "description": "Backported and Experimental Type Hints for Python 3.9+",
       "externalReferences": [
@@ -2883,7 +3090,7 @@
       "version": "2.6.3"
     },
     {
-      "bom-ref": "wcwidth==0.5.2",
+      "bom-ref": "wcwidth==0.6.0",
       "description": "Measures the displayed width of unicode strings in a terminal",
       "externalReferences": [
         {
@@ -2901,9 +3108,9 @@
         }
       ],
       "name": "wcwidth",
-      "purl": "pkg:pypi/wcwidth@0.5.2",
+      "purl": "pkg:pypi/wcwidth@0.6.0",
       "type": "library",
-      "version": "0.5.2"
+      "version": "0.6.0"
     },
     {
       "bom-ref": "webcolors==25.10.0",
@@ -2978,7 +3185,7 @@
       "version": "0.46.3"
     },
     {
-      "bom-ref": "wrapt==2.0.1",
+      "bom-ref": "wrapt==2.1.1",
       "description": "Module for decorators, wrappers and monkey patching.",
       "externalReferences": [
         {
@@ -3000,22 +3207,25 @@
           "comment": "from packaging metadata Project-URL: Homepage",
           "type": "website",
           "url": "https://github.com/GrahamDumpleton/wrapt"
-        },
+        }
+      ],
+      "licenses": [
         {
-          "comment": "from packaging metadata: Home-page",
-          "type": "website",
-          "url": "https://github.com/GrahamDumpleton/wrapt"
+          "license": {
+            "acknowledgement": "declared",
+            "id": "BSD-2-Clause"
+          }
         }
       ],
       "name": "wrapt",
-      "purl": "pkg:pypi/wrapt@2.0.1",
+      "purl": "pkg:pypi/wrapt@2.1.1",
       "type": "library",
-      "version": "2.0.1"
+      "version": "2.1.1"
     }
   ],
   "dependencies": [
     {
-      "ref": "Markdown==3.10.1"
+      "ref": "Markdown==3.10.2"
     },
     {
       "ref": "MarkupSafe==3.0.3"
@@ -3066,7 +3276,7 @@
       "dependsOn": [
         "matplotlib==3.10.8",
         "numpy==2.0.2",
-        "pillow==12.1.0"
+        "pillow==12.1.1"
       ],
       "ref": "contourpy==1.3.3"
     },
@@ -3129,7 +3339,7 @@
       "dependsOn": [
         "typing_extensions==4.15.0"
       ],
-      "ref": "grpcio==1.76.0"
+      "ref": "grpcio==1.78.0"
     },
     {
       "dependsOn": [
@@ -3178,13 +3388,13 @@
     },
     {
       "dependsOn": [
-        "grpcio==1.76.0",
+        "grpcio==1.78.0",
         "keras==3.6.0",
         "kt-legacy==1.0.5",
         "namex==0.1.0",
         "packaging==26.0",
         "pandas==2.2.3",
-        "protobuf==5.29.5",
+        "protobuf==5.29.6",
         "requests==2.32.5",
         "scikit-learn==1.5.2",
         "scipy==1.17.0",
@@ -3201,7 +3411,7 @@
         "numpy==2.0.2",
         "optree==0.18.0",
         "packaging==26.0",
-        "rich==14.3.1"
+        "rich==14.3.2"
       ],
       "ref": "keras==3.6.0"
     },
@@ -3234,7 +3444,7 @@
     },
     {
       "dependsOn": [
-        "Markdown==3.10.1",
+        "Markdown==3.10.2",
         "mdurl==0.1.2",
         "requests==2.32.5"
       ],
@@ -3248,10 +3458,10 @@
         "kiwisolver==1.4.9",
         "numpy==2.0.2",
         "packaging==26.0",
-        "pillow==12.1.0",
+        "pillow==12.1.1",
         "pyparsing==3.3.2",
         "python-dateutil==2.9.0.post0",
-        "setuptools==80.10.2"
+        "setuptools==82.0.0"
       ],
       "ref": "matplotlib==3.10.8"
     },
@@ -3276,6 +3486,13 @@
       "ref": "numba==0.63.1"
     },
     {
+      "dependsOn": [
+        "numpy==2.0.2",
+        "typing_extensions==4.15.0"
+      ],
+      "ref": "numpy-typing-compat==20251206.2.0"
+    },
+    {
       "ref": "numpy==2.0.2"
     },
     {
@@ -3284,20 +3501,35 @@
     {
       "dependsOn": [
         "numpy==2.0.2",
-        "rich==14.3.1",
+        "rich==14.3.2",
         "typing_extensions==4.15.0"
       ],
       "ref": "optree==0.18.0"
     },
     {
       "dependsOn": [
-        "setuptools==80.10.2",
+        "numpy-typing-compat==20251206.2.0",
+        "numpy==2.0.2",
+        "typing_extensions==4.15.0"
+      ],
+      "ref": "optype==0.15.0"
+    },
+    {
+      "dependsOn": [
+        "setuptools==82.0.0",
         "wheel==0.46.3"
       ],
       "ref": "packageurl-python==0.17.6"
     },
     {
       "ref": "packaging==26.0"
+    },
+    {
+      "dependsOn": [
+        "numpy==2.0.2",
+        "types-pytz==2025.2.0.20251108"
+      ],
+      "ref": "pandas-stubs==2.2.3.250527"
     },
     {
       "dependsOn": [
@@ -3324,7 +3556,7 @@
         "defusedxml==0.7.1",
         "packaging==26.0"
       ],
-      "ref": "pillow==12.1.0"
+      "ref": "pillow==12.1.1"
     },
     {
       "dependsOn": [
@@ -3335,12 +3567,12 @@
     },
     {
       "dependsOn": [
-        "wcwidth==0.5.2"
+        "wcwidth==0.6.0"
       ],
       "ref": "prettytable==3.17.0"
     },
     {
-      "ref": "protobuf==5.29.5"
+      "ref": "protobuf==5.29.6"
     },
     {
       "dependsOn": [
@@ -3398,7 +3630,7 @@
         "Pygments==2.19.2",
         "markdown-it-py==4.0.0"
       ],
-      "ref": "rich==14.3.1"
+      "ref": "rich==14.3.2"
     },
     {
       "ref": "rpds-py==0.30.0"
@@ -3409,12 +3641,19 @@
         "matplotlib==3.10.8",
         "numpy==2.0.2",
         "pandas==2.2.3",
-        "pillow==12.1.0",
+        "pillow==12.1.1",
         "scipy==1.17.0",
         "seaborn==0.13.2",
         "threadpoolctl==3.6.0"
       ],
       "ref": "scikit-learn==1.5.2"
+    },
+    {
+      "dependsOn": [
+        "optype==0.15.0",
+        "scipy==1.17.0"
+      ],
+      "ref": "scipy-stubs==1.16.3.3"
     },
     {
       "dependsOn": [
@@ -3431,20 +3670,23 @@
         "keras==3.6.0",
         "loguru==0.7.3",
         "numpy==2.0.2",
+        "pandas-stubs==2.2.3.250527",
         "pandas==2.2.3",
         "scikit-learn==1.5.2",
+        "scipy-stubs==1.16.3.3",
         "seaborn==0.13.2",
         "skops==0.13.0",
         "statsmodels==0.14.5",
         "tensorflow==2.18.0",
         "tslearn==0.7.0"
       ],
-      "ref": "sdg-core-lib==0.1.6"
+      "ref": "sdg-core-lib==0.1.7"
     },
     {
       "dependsOn": [
         "matplotlib==3.10.8",
         "numpy==2.0.2",
+        "pandas-stubs==2.2.3.250527",
         "pandas==2.2.3",
         "scipy==1.17.0",
         "statsmodels==0.14.5"
@@ -3456,7 +3698,7 @@
         "packaging==26.0",
         "wheel==0.46.3"
       ],
-      "ref": "setuptools==80.10.2"
+      "ref": "setuptools==82.0.0"
     },
     {
       "ref": "six==1.17.0"
@@ -3466,7 +3708,7 @@
         "numpy==2.0.2",
         "packaging==26.0",
         "prettytable==3.17.0",
-        "rich==14.3.1",
+        "rich==14.3.2",
         "scikit-learn==1.5.2",
         "scipy==1.17.0"
       ],
@@ -3492,14 +3734,14 @@
     },
     {
       "dependsOn": [
-        "Markdown==3.10.1",
+        "Markdown==3.10.2",
         "Werkzeug==3.1.5",
         "absl-py==2.4.0",
-        "grpcio==1.76.0",
+        "grpcio==1.78.0",
         "numpy==2.0.2",
         "packaging==26.0",
-        "protobuf==5.29.5",
-        "setuptools==80.10.2",
+        "protobuf==5.29.6",
+        "setuptools==82.0.0",
         "six==1.17.0",
         "tensorboard-data-server==0.7.2"
       ],
@@ -3512,7 +3754,7 @@
         "flatbuffers==25.12.19",
         "gast==0.7.0",
         "google-pasta==0.2.0",
-        "grpcio==1.76.0",
+        "grpcio==1.78.0",
         "h5py==3.15.1",
         "keras==3.6.0",
         "libclang==18.1.1",
@@ -3520,14 +3762,14 @@
         "numpy==2.0.2",
         "opt_einsum==3.4.0",
         "packaging==26.0",
-        "protobuf==5.29.5",
+        "protobuf==5.29.6",
         "requests==2.32.5",
-        "setuptools==80.10.2",
+        "setuptools==82.0.0",
         "six==1.17.0",
         "tensorboard==2.18.0",
         "termcolor==3.3.0",
         "typing_extensions==4.15.0",
-        "wrapt==2.0.1"
+        "wrapt==2.1.1"
       ],
       "ref": "tensorflow==2.18.0"
     },
@@ -3552,6 +3794,9 @@
       "ref": "tslearn==0.7.0"
     },
     {
+      "ref": "types-pytz==2025.2.0.20251108"
+    },
+    {
       "ref": "typing_extensions==4.15.0"
     },
     {
@@ -3564,7 +3809,7 @@
       "ref": "urllib3==2.6.3"
     },
     {
-      "ref": "wcwidth==0.5.2"
+      "ref": "wcwidth==0.6.0"
     },
     {
       "ref": "webcolors==25.10.0"
@@ -3572,19 +3817,19 @@
     {
       "dependsOn": [
         "packaging==26.0",
-        "setuptools==80.10.2"
+        "setuptools==82.0.0"
       ],
       "ref": "wheel==0.46.3"
     },
     {
       "dependsOn": [
-        "setuptools==80.10.2"
+        "setuptools==82.0.0"
       ],
-      "ref": "wrapt==2.0.1"
+      "ref": "wrapt==2.1.1"
     }
   ],
   "metadata": {
-    "timestamp": "2026-01-30T10:30:48.942862+00:00",
+    "timestamp": "2026-02-13T11:25:11.026016+00:00",
     "tools": {
       "components": [
         {
@@ -3688,7 +3933,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:6dbabbed-526c-469c-b273-bb9affbf7bd1",
+  "serialNumber": "urn:uuid:8ea2046f-e047-419d-beec-512990628ce7",
   "version": 1,
   "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
   "bomFormat": "CycloneDX",
