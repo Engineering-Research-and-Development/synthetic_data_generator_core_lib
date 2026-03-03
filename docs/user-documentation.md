@@ -104,12 +104,9 @@ dataset_config = {
 }
 ```
 
-#### Supported Column Types
+#### Supported Feature Types
 - **Numeric**: Integers and floats
 - **Categorical**: Discrete categories
-- **Text**: String values
-- **Boolean**: True/False values
-- **DateTime**: Timestamps and dates
 
 #### Best Practices
 - Ensure consistent data types across columns
@@ -163,7 +160,6 @@ dataset_config = {
 
 #### Required Columns
 - **group_index**: Identifies different experiments/time series groups
-- **primary_key**: Time index within each experiment
 - **continuous**: Numeric measurement values
 - **categorical**: Discrete category values
 
@@ -176,29 +172,6 @@ dataset_config = {
 - Consider seasonality and trends
 - Use appropriate frequency settings
 
-### Custom Data Types
-
-GENESIS Core Lib supports custom data types through its extensible architecture.
-
-#### Creating Custom Data Types
-
-```python
-from sdg_core_lib.dataset.datasets import Dataset
-
-class CustomDataset(Dataset):
-    @classmethod
-    def from_json(cls, json_data):
-        # Implementation for loading custom data
-        pass
-    
-    def preprocess(self, processor):
-        # Custom preprocessing logic
-        pass
-    
-    def postprocess(self, processor):
-        # Custom postprocessing logic
-        pass
-```
 
 ## Model Types
 
@@ -288,146 +261,6 @@ model_config = {
 | Any size | Time series | TimeSeriesVAE | Specialized for temporal data |
 | Any size | Very high dimensional | TabularVAE | More stable training |
 
-## Configuration
-
-### Dataset Configuration
-
-#### Basic Structure
-```python
-dataset_config = {
-    "dataset_type": "table|time_series|custom",
-    "data": [list_of_columns],
-    "metadata": {
-        # Optional metadata
-    }
-}
-```
-
-#### Advanced Options
-```python
-dataset_config = {
-    "dataset_type": "table",
-    "data": data_payload,
-    "preprocessing": {
-        "normalize_numeric": True,
-        "encode_categorical": True,
-        "handle_missing": "mean|median|mode"
-    },
-    "validation": {
-        "check_schema": True,
-        "validate_types": True
-    }
-}
-```
-
-### Model Configuration
-
-#### Basic Structure
-```python
-model_config = {
-    "algorithm_name": "path.to.model.Class",
-    "model_name": "unique_identifier",
-    "input_shape": "auto|specific_shape",
-    "image": "path/to/saved_model"  # For loading pre-trained models
-}
-```
-
-#### Advanced Options
-```python
-model_config = {
-    "algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE",
-    "model_name": "advanced_vae",
-    "hyperparameters": {
-        "epochs": 1000,
-        "learning_rate": 0.0002,
-        "batch_size": 32,
-        "latent_dim": 100
-    },
-    "architecture": {
-        "hidden_layers": [256, 128, 64],
-        "activation": "relu",
-        "dropout": 0.2
-    }
-}
-```
-
-### Function Configuration
-
-#### Generation Functions
-```python
-functions = [
-    {
-        "feature": "target_column",
-        "function_name": "LinearFunction",
-        "parameters": {
-            "m": 1.0,
-            "q": 0.0,
-            "min_value": 0.0,
-            "max_value": 1.0
-        }
-    }
-]
-```
-
-#### Available Functions
-
-##### LinearFunction
-Generates linear data following y = mx + q
-```python
-{
-    "function_name": "LinearFunction",
-    "parameters": {
-        "m": 1.0,          # slope
-        "q": 0.0,          # y-intercept
-        "min_value": 0.0,  # minimum x value
-        "max_value": 1.0   # maximum x value
-    }
-}
-```
-
-##### QuadraticFunction
-Generates quadratic data following y = ax² + bx + c
-```python
-{
-    "function_name": "QuadraticFunction",
-    "parameters": {
-        "a": 1.0,          # quadratic coefficient
-        "b": 0.0,          # linear coefficient
-        "c": 0.0,          # constant term
-        "min_value": 0.0,  # minimum x value
-        "max_value": 1.0   # maximum x value
-    }
-}
-```
-
-##### SinusoidalFunction
-Generates sinusoidal data
-```python
-{
-    "function_name": "SinusoidalFunction",
-    "parameters": {
-        "amplitude": 1.0,  # wave amplitude
-        "frequency": 1.0,  # wave frequency
-        "phase": 0.0,      # phase shift
-        "min_value": 0.0,  # minimum x value
-        "max_value": 6.28  # maximum x value (2π)
-    }
-}
-```
-
-##### NormalDistributionSample
-Generates data from normal distribution
-```python
-{
-    "function_name": "NormalDistributionSample",
-    "parameters": {
-        "mean": 0.0,       # distribution mean
-        "std_dev": 1.0,    # standard deviation
-        "min_value": -3.0, # minimum sample value
-        "max_value": 3.0   # maximum sample value
-    }
-}
-```
 
 ## API Reference
 
@@ -559,67 +392,9 @@ with open("synthetic_customers.json", "w") as f:
     json.dump(synthetic_customers, f)
 ```
 
-### Use Case 2: Financial Time Series
 
-Generate synthetic financial time series for backtesting trading strategies.
 
-```python
-from sdg_core_lib import Job
-import json
-
-# Financial time series data with proper structure
-time_series_config = {
-    "dataset_type": "time_series",
-    "data": [
-        {
-            "column_name": "experiment_id",
-            "column_type": "group_index",
-            "column_data": [1, 1, 2, 2, 3, 4, 5],  # 5 experiments
-            "column_datatype": "int"
-        },
-        {
-            "column_name": "time",
-            "column_type": "primary_key",
-            "column_data": [0, 1, 2, 0, 1, 2],  # 3 time steps per experiment
-            "column_datatype": "int"
-        },
-        {
-            "column_name": "price",
-            "column_type": "continuous",
-            "column_data": [100.0, 101.0, 102.0, 103.0, 104.0, 105.0, 106.0, 107.0, 108.0],
-            "column_datatype": "float64"
-        },
-        {
-            "column_name": "volume",
-            "column_type": "continuous",
-            "column_data": [1000000, 1100000, 1200000, 1300000, 1400000, 1500000, 1600000, 1700000, 1800000],
-            "column_datatype": "int64"
-        }
-    ]
-}
-
-# Configure time series generation
-model_config = {
-    "algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TimeSeriesVAE.TimeSeriesVAE",
-    "model_name": "financial_ts_generator"
-}
-
-# Generate synthetic time series
-job = Job(
-    n_rows=500,  # 500 trading days
-    model_info=model_config,
-    dataset=time_series_config,
-    save_filepath="./financial_models"
-)
-
-synthetic_ts, metrics, model, schema = job.train()
-
-# Analyze results
-print(f"Generated {len(synthetic_ts)} trading days")
-print(f"First few entries: {synthetic_ts[:3]}")
-```
-
-### Use Case 3: Healthcare Data
+### Use Case 2: Healthcare Data
 
 Generate synthetic patient data for research while maintaining HIPAA compliance.
 
@@ -666,7 +441,7 @@ print(f"Privacy metrics: {metrics}")
 print(f"Generated {len(synthetic_patients)} synthetic patient records")
 ```
 
-### Use Case 4: Function-Based Data Generation
+### Use Case 3: Function-Based Data Generation
 
 Generate controlled datasets for specific testing scenarios.
 
@@ -719,7 +494,7 @@ print("Generated dataset:")
 print(f"First few rows: {synthetic_data[:5]}")
 ```
 
-### Use Case 5: Model Comparison
+### Use Case 4: Model Comparison
 
 Compare different models to find the best for your data.
 
@@ -911,11 +686,6 @@ if gpus:
 # Adjust learning rate
 os.environ["LEARNING_RATE"] = "0.0001"
 
-# Use gradient clipping
-os.environ["GRADIENT_CLIP_NORM"] = "1.0"
-
-# Try different optimizer
-model_config["optimizer"] = "adam"
 ```
 
 #### 5. Slow Performance
@@ -969,141 +739,6 @@ def analyze_quality(real_data, synthetic_data, metrics):
     # Add visualization code here
 ```
 
-### Performance Monitoring
 
-#### 1. Resource Usage
-```python
-import psutil
-import time
-
-def monitor_resources():
-    process = psutil.Process()
-    memory_info = process.memory_info()
-    return {
-        "rss": memory_info.rss,  # Physical memory
-        "vms": memory_info.vms,  # Virtual memory
-        "percent": process.memory_percent()
-    }
-
-def cleanup_memory():
-    import gc
-    gc.collect()
-    # Clear TensorFlow session if needed
-    tf.keras.backend.clear_session()
-```
-
-#### 2. Training Progress
-```python
-# Monitor training progress
-os.environ["VERBOSE"] = "1"
-os.environ["SHOW_PROGRESS"] = "true"
-```
-
-#### 3. Quality Tracking
-```python
-# Track quality over time
-quality_history = []
-for epoch in range(100):
-    # Train for one epoch
-    # Evaluate quality
-    quality_history.append(current_quality)
-    
-    # Plot quality progression
-    if epoch % 10 == 0:
-        print(f"Epoch {epoch}: Quality = {current_quality:.3f}")
-```
-
-## Advanced Topics
-
-### Custom Model Development
-
-#### Creating Custom Models
-```python
-from sdg_core_lib.data_generator.models.UnspecializedModel import UnspecializedModel
-
-class CustomModel(UnspecializedModel):
-    def _build(self, input_shape):
-        # Implement model architecture
-        pass
-    
-    def train(self, data):
-        # Implement training logic
-        pass
-    
-    def infer(self, n_rows):
-        # Implement inference logic
-        pass
-    
-    def save(self, folder_path):
-        # Implement model saving
-        pass
-    
-    def load(self, model_filepath):
-        # Implement model loading
-        pass
-```
-
-### Custom Function Development
-
-#### Creating Custom Functions
-```python
-from sdg_core_lib.post_process.functions.UnspecializedFunction import UnspecializedFunction
-from sdg_core_lib.post_process.functions.Parameter import Parameter
-
-class CustomFunction(UnspecializedFunction):
-    parameters = [
-        Parameter("param1", "default_value", "float"),
-        Parameter("param2", "default_value", "int")
-    ]
-    description = "Custom function description"
-    priority = Priority.MEDIUM
-    is_generative = True
-    
-    def apply(self, n_rows, data):
-        # Implement function logic
-        return processed_data
-```
-
-### Integration with ML Pipelines
-
-#### Scikit-learn Integration
-```python
-from sklearn.base import BaseEstimator
-from sdg_core_lib import Job
-
-class SyntheticDataGenerator(BaseEstimator):
-    def __init__(self, n_rows=1000, model_type="VAE"):
-        self.n_rows = n_rows
-        self.model_type = model_type
-    
-    def fit(self, X, y=None):
-        # Train synthetic data generator
-        pass
-    
-    def transform(self, X):
-        # Generate synthetic data
-        pass
-    
-    def fit_transform(self, X, y=None):
-        return self.fit(X, y).transform(X)
-```
-
-#### TensorFlow Integration
-```python
-import tensorflow as tf
-from sdg_core_lib import Job
-
-# Create TensorFlow dataset
-tf_dataset = tf.data.Dataset.from_tensor_slices(real_data)
-
-# Integrate with GENESIS
-class TensorFlowSyntheticGenerator:
-    def __init__(self, job_config):
-        self.job = Job(**job_config)
-    
-    def generate_dataset(self, n_samples):
-        synthetic_data, _, _, _ = self.job.train()
-        return tf.data.Dataset.from_tensor_slices(synthetic_data)
-```
 
 This comprehensive user documentation provides everything you need to effectively use GENESIS Core Lib for synthetic data generation across various use cases and scenarios.
