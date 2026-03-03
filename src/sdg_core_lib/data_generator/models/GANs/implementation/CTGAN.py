@@ -11,6 +11,7 @@ from sdg_core_lib.data_generator.models.GANs.CTGANComponents import (
     CTGANModel,
 )
 import keras
+import tensorflow as tf
 from sdg_core_lib.data_generator.models.TrainingInfo import TrainingInfo
 import numpy as np
 
@@ -18,7 +19,7 @@ import numpy as np
 class CTGAN(UnspecializedModel):
     def __init__(
         self,
-        metadata: dict,
+        metadata: list[dict],
         model_name: str,
         input_shape: str = None,
         load_path: str = None,
@@ -31,7 +32,7 @@ class CTGAN(UnspecializedModel):
         gen_steps=4,
         critic_dropout=0.2,
     ):
-        super().__init__(metadata, model_name, input_shape, load_path)
+        super().__init__(self._clean_skeleton(metadata), model_name, input_shape, load_path)
         self._batch_size = batch_size
         self._epochs = epochs
         self._gen_steps = gen_steps
@@ -43,10 +44,19 @@ class CTGAN(UnspecializedModel):
         self._instantiate()
 
     @staticmethod
-    def infer_data_structure(skeleton):
+    def _clean_skeleton(skeleton):
+        if skeleton != [{}]:
+            return [
+                item
+                for item in skeleton
+                if item["feature_type"] in ["continuous", "categorical"]
+            ]
+        return skeleton
+
+    def infer_data_structure(self):
         cats, modes, idxs = [], [], []
         true_index = 0
-        for col in skeleton:
+        for col in self._metadata:
             try:
                 f_size = int(col["feature_size"])
                 if col["feature_type"] == "categorical":
@@ -90,7 +100,7 @@ class CTGAN(UnspecializedModel):
             categories_per_discrete_column,
             modes_per_continuous_column,
             onehot_discrete_indexes,
-        ) = CTGAN.infer_data_structure(self._metadata)
+        ) = self.infer_data_structure()
         self.generator = CTGANGenerator(
             self._metadata,
             modes_per_continuous_column,
@@ -106,7 +116,7 @@ class CTGAN(UnspecializedModel):
         # Should set the _model variable CTGAN Model complete with Generator and Critic
         # Does NOT return the model
         # self._metadata is available
-        _, _, onehot_discrete_indexes = CTGAN.infer_data_structure(self._metadata)
+        _, _, onehot_discrete_indexes = self.infer_data_structure()
         critic = keras.saving.load_model(os.path.join(folder_path, "critic.keras"))
         generator = keras.saving.load_model(
             os.path.join(folder_path, "generator.keras")
@@ -114,11 +124,24 @@ class CTGAN(UnspecializedModel):
         self._model = CTGANModel(generator, critic, onehot_discrete_indexes)
 
         # Load probability_mass_function_list if it exists
-        pmf_path = os.path.join(folder_path, "probability_mass_function_list.npy")
+        pmf_path = os.path.join(folder_path, "probability_mass_function_list.npz")
         if os.path.exists(pmf_path):
-            self._model.probability_mass_function_list = np.load(
-                pmf_path, allow_pickle=True
+            pmf_data = np.load(pmf_path)
+            # Convert back to list of TensorFlow tensors
+            pmf_list = []
+            for key in sorted(pmf_data.keys()):
+                pmf_list.append(tf.convert_to_tensor(pmf_data[key], dtype=tf.float32))
+            self._model.probability_mass_function_list = pmf_list
+        # Also check for old .npy format for backward compatibility
+        elif os.path.exists(os.path.join(folder_path, "probability_mass_function_list.npy")):
+            pmf_list = np.load(
+                os.path.join(folder_path, "probability_mass_function_list.npy"), allow_pickle=True
             )
+            # Convert to TensorFlow tensors if needed
+            if isinstance(pmf_list, list) and len(pmf_list) > 0 and isinstance(pmf_list[0], np.ndarray):
+                self._model.probability_mass_function_list = [tf.convert_to_tensor(pmf, dtype=tf.float32) for pmf in pmf_list]
+            else:
+                self._model.probability_mass_function_list = pmf_list
 
     def save(self, folder_path: str):
         keras.saving.save_model(
@@ -132,9 +155,11 @@ class CTGAN(UnspecializedModel):
             hasattr(self._model, "probability_mass_function_list")
             and self._model.probability_mass_function_list is not None
         ):
-            np.save(
-                os.path.join(folder_path, "probability_mass_function_list.npy"),
-                self._model.probability_mass_function_list,
+            # Convert TensorFlow tensors to numpy arrays before saving
+            pmf_list = [tensor.numpy() for tensor in self._model.probability_mass_function_list]
+            np.savez(
+                os.path.join(folder_path, "probability_mass_function_list.npz"),
+                *pmf_list,
             )
 
     def train(self, data: np.ndarray):
@@ -157,9 +182,7 @@ class CTGAN(UnspecializedModel):
         )
         self._model._train_data = data
         probability_mass_function_list = self._model.get_pmfs(data)
-        self._model.probability_mass_function_list = keras.ops.convert_to_numpy(
-            probability_mass_function_list
-        )
+        self._model.probability_mass_function_list = probability_mass_function_list
         history = self._model.fit(
             data, batch_size=self._batch_size, epochs=self._epochs, verbose=1
         )

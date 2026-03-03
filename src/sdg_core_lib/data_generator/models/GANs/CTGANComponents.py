@@ -185,8 +185,8 @@ class CTGANModel(keras.Model):
     def metrics(self):
         return [self.gen_loss_tracker, self.critic_loss_tracker]
 
-    @tf.function
     def generate_batch_cond(self, batch_size):
+        batch_size = int(batch_size)  # Convert symbolic tensor to int
         num_cats = len(self.generator.cats_disc)
         total_cond_dim = sum(self.generator.cats_disc)
         cats_disc = tf.convert_to_tensor(self.generator.cats_disc, dtype=tf.int32)
@@ -195,25 +195,22 @@ class CTGANModel(keras.Model):
             shape=[batch_size], minval=0, maxval=num_cats, dtype=tf.int32
         )
 
-        relevant_pmfs = tf.gather(self.probability_mass_function_list, col_indices)
-
-        cat_indices = tf.random.categorical(tf.math.log(relevant_pmfs), num_samples=1)
-        cat_indices = tf.cast(tf.squeeze(cat_indices, axis=1), tf.int32)
-
-        offsets_table = tf.concat([[0], tf.cumsum(cats_disc)[:-1]], axis=0)
-        batch_offsets = tf.gather(offsets_table, col_indices)
-
-        global_hot_indices = batch_offsets + cat_indices
-        row_indices = tf.range(batch_size)
-        scatter_indices = tf.stack([row_indices, global_hot_indices], axis=1)
-
-        cond_batch = tf.scatter_nd(
-            indices=scatter_indices,
-            updates=tf.ones([batch_size], dtype=tf.float32),
-            shape=[batch_size, total_cond_dim],
-        )
-
-        return cond_batch
+        # Create condition vector by sampling from PMFs and creating one-hot encoding
+        condition_list = []
+        for i in range(batch_size):
+            idx = col_indices[i].numpy()
+            pmf = self.probability_mass_function_list[idx].numpy().flatten()
+            # Sample from PMF
+            cat_idx = np.random.choice(len(pmf), p=pmf)
+            # Create one-hot vector for total_cond_dim
+            one_hot = np.zeros(total_cond_dim)
+            # Calculate offset for this categorical variable
+            offset = sum(self.generator.cats_disc[:idx])
+            one_hot[offset + cat_idx] = 1.0
+            condition_list.append(one_hot)
+        
+        cond = tf.convert_to_tensor(condition_list, dtype=tf.float32)
+        return cond
 
     @staticmethod
     @tf.function
@@ -291,9 +288,10 @@ class CTGANModel(keras.Model):
         pmfs = []
         curr = 0
         for sz in self.generator.cats_disc:
-            chunk = onehot_all[:, curr : curr + sz]
-            log_freqs = tf.math.log(tf.reduce_sum(chunk, axis=0) + 1.0)
-            pmfs.append(log_freqs / tf.reduce_sum(log_freqs))
+            chunk = onehot_all[:, curr : curr + sz] # (N_row, cats)
+            chunk_np = chunk.numpy()
+            log_freqs = np.log(np.sum(chunk_np, axis=0) + 1.0).reshape(1, -1)
+            pmfs.append(tf.convert_to_tensor(log_freqs / np.sum(log_freqs), dtype=tf.float32))
             curr += sz
         return pmfs
 
@@ -301,7 +299,16 @@ class CTGANModel(keras.Model):
         batch = ops.shape(data)[0]
         self.row_dim = ops.shape(data)[1]
         z = tf.random.normal([batch, self.row_dim - sum(self.generator.cats_disc)])
-        cond = self.generate_batch_cond(batch)
+        
+        # Use tf.py_function to call generate_batch_cond in eager mode
+        def generate_cond_eager(batch_size):
+            return self.generate_batch_cond(batch_size)
+        
+        cond = tf.py_function(generate_cond_eager, [batch], tf.float32)
+        # Set the shape explicitly - it should be [batch_size, total_cond_dim]
+        total_cond_dim = sum(self.generator.cats_disc)
+        cond.set_shape([None, total_cond_dim])
+        
         real_batch = CTGANModel.sample_real_data(
             self._train_data, cond, self.onehot_discrete_indexes
         )
