@@ -133,13 +133,13 @@ dataset_config = {
         {
             "column_name": "experiment_id",
             "column_type": "group_index",
-            "column_data": [1, 1, 1, 2, 2, 2, 3, 3],
+            "column_data": [1, 1, 1, 1, 2, 2, 2, 2],
             "column_datatype": "int"
         },
         {
             "column_name": "time",
             "column_type": "primary_key",
-            "column_data": [0, 1, 2, 0, 1, 2, 0, 1, 2],
+            "column_data": [0, 1, 2, 3, 4, 5, 6, 7, 8],
             "column_datatype": "int"
         },
         {
@@ -165,11 +165,11 @@ dataset_config = {
 
 #### Best Practices
 - Ensure consistent experiment lengths
+- Ensure at least **12** samples for experiment
 - Provide proper group_index for experiment identification
 - Use primary_key for temporal ordering
 - Handle missing time points appropriately
 - Ensure regular time intervals
-- Consider seasonality and trends
 - Use appropriate frequency settings
 
 
