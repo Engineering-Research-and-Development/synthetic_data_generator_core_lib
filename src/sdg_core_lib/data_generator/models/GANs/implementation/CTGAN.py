@@ -32,7 +32,9 @@ class CTGAN(UnspecializedModel):
         gen_steps=4,
         critic_dropout=0.2,
     ):
-        super().__init__(self._clean_skeleton(metadata), model_name, input_shape, load_path)
+        super().__init__(
+            self._clean_skeleton(metadata), model_name, input_shape, load_path
+        )
         self._batch_size = batch_size
         self._epochs = epochs
         self._gen_steps = gen_steps
@@ -133,13 +135,22 @@ class CTGAN(UnspecializedModel):
                 pmf_list.append(tf.convert_to_tensor(pmf_data[key], dtype=tf.float32))
             self._model.probability_mass_function_list = pmf_list
         # Also check for old .npy format for backward compatibility
-        elif os.path.exists(os.path.join(folder_path, "probability_mass_function_list.npy")):
+        elif os.path.exists(
+            os.path.join(folder_path, "probability_mass_function_list.npy")
+        ):
             pmf_list = np.load(
-                os.path.join(folder_path, "probability_mass_function_list.npy"), allow_pickle=True
+                os.path.join(folder_path, "probability_mass_function_list.npy"),
+                allow_pickle=True,
             )
             # Convert to TensorFlow tensors if needed
-            if isinstance(pmf_list, list) and len(pmf_list) > 0 and isinstance(pmf_list[0], np.ndarray):
-                self._model.probability_mass_function_list = [tf.convert_to_tensor(pmf, dtype=tf.float32) for pmf in pmf_list]
+            if (
+                isinstance(pmf_list, list)
+                and len(pmf_list) > 0
+                and isinstance(pmf_list[0], np.ndarray)
+            ):
+                self._model.probability_mass_function_list = [
+                    tf.convert_to_tensor(pmf, dtype=tf.float32) for pmf in pmf_list
+                ]
             else:
                 self._model.probability_mass_function_list = pmf_list
 
@@ -156,7 +167,9 @@ class CTGAN(UnspecializedModel):
             and self._model.probability_mass_function_list is not None
         ):
             # Convert TensorFlow tensors to numpy arrays before saving
-            pmf_list = [tensor.numpy() for tensor in self._model.probability_mass_function_list]
+            pmf_list = [
+                tensor.numpy() for tensor in self._model.probability_mass_function_list
+            ]
             np.savez(
                 os.path.join(folder_path, "probability_mass_function_list.npz"),
                 *pmf_list,

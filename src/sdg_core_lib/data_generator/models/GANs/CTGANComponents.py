@@ -208,7 +208,7 @@ class CTGANModel(keras.Model):
             offset = sum(self.generator.cats_disc[:idx])
             one_hot[offset + cat_idx] = 1.0
             condition_list.append(one_hot)
-        
+
         cond = tf.convert_to_tensor(condition_list, dtype=tf.float32)
         return cond
 
@@ -288,10 +288,12 @@ class CTGANModel(keras.Model):
         pmfs = []
         curr = 0
         for sz in self.generator.cats_disc:
-            chunk = onehot_all[:, curr : curr + sz] # (N_row, cats)
+            chunk = onehot_all[:, curr : curr + sz]  # (N_row, cats)
             chunk_np = chunk.numpy()
             log_freqs = np.log(np.sum(chunk_np, axis=0) + 1.0).reshape(1, -1)
-            pmfs.append(tf.convert_to_tensor(log_freqs / np.sum(log_freqs), dtype=tf.float32))
+            pmfs.append(
+                tf.convert_to_tensor(log_freqs / np.sum(log_freqs), dtype=tf.float32)
+            )
             curr += sz
         return pmfs
 
@@ -299,16 +301,16 @@ class CTGANModel(keras.Model):
         batch = ops.shape(data)[0]
         self.row_dim = ops.shape(data)[1]
         z = tf.random.normal([batch, self.row_dim - sum(self.generator.cats_disc)])
-        
+
         # Use tf.py_function to call generate_batch_cond in eager mode
         def generate_cond_eager(batch_size):
             return self.generate_batch_cond(batch_size)
-        
+
         cond = tf.py_function(generate_cond_eager, [batch], tf.float32)
         # Set the shape explicitly - it should be [batch_size, total_cond_dim]
         total_cond_dim = sum(self.generator.cats_disc)
         cond.set_shape([None, total_cond_dim])
-        
+
         real_batch = CTGANModel.sample_real_data(
             self._train_data, cond, self.onehot_discrete_indexes
         )
