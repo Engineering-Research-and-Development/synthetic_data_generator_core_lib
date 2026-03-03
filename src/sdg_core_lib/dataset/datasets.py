@@ -163,26 +163,27 @@ class Table(Dataset):
         return Table(new_columns, self.pk_col_indexes)
 
     def to_json(self) -> list[dict]:
-        return [FeatureData(
-            column_data=col.values.reshape(
+        return [
+            FeatureData(
+                column_data=col.values.reshape(
                     -1,
                 ).tolist(),
-            column_name=col.name,
-            column_type=col.column_type,
-            column_datatype=col.value_type
-        ).model_dump()
+                column_name=col.name,
+                column_type=col.column_type,
+                column_datatype=col.value_type,
+            ).model_dump()
             for col in self.columns
         ]
 
     def to_skeleton(self) -> list[dict]:
         return [
             SkeletonOut(
-                feature_name= col.name,
+                feature_name=col.name,
                 feature_position=col.position,
                 feature_type=col.column_type,
-                type= col.value_type,
-                is_categorical= True if isinstance(col, Categorical) else False,
-                feature_size= str(col.get_internal_shape()[1])
+                type=col.value_type,
+                is_categorical=True if isinstance(col, Categorical) else False,
+                feature_size=str(col.get_internal_shape()[1]),
             ).model_dump()
             for col in self.columns
         ]

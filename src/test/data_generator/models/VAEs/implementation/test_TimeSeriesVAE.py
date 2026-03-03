@@ -29,7 +29,7 @@ def data():
             {
                 "column_name": "A",
                 "column_type": "group_index",
-                "column_datatype": "int",
+                "column_datatype": "int32",
                 "column_data": np.repeat(
                     np.arange(20, dtype="int"), repeats=51
                 ).reshape(-1, 1),

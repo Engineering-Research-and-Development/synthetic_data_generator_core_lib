@@ -3,6 +3,7 @@ from sdg_core_lib.commons import DataType
 from enum import Enum
 from typing import List
 
+
 class SupportedFeatureTypes(str, Enum):
     continuous = "continuous"
     categorical = "categorical"
@@ -20,9 +21,11 @@ class BaseFeature(BaseModel):
 class FeatureData(BaseFeature):
     column_data: List[float | int | str] | List
 
+
 class DataSkeleton(BaseFeature):
     column_position: int
     column_size: PositiveInt
+
 
 class SkeletonOut(BaseModel):
     model_config = ConfigDict(use_enum_values=True)

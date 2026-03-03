@@ -3,6 +3,7 @@ import os
 import json
 import shutil
 import numpy as np
+from pydantic import ValidationError
 
 from sdg_core_lib.dataset.datasets import Table
 from sdg_core_lib.preprocess.table_processor import TableProcessor
@@ -97,14 +98,14 @@ def test_table_to_skeleton(temp_folder):
 def test_from_json_invalid_data(temp_folder):
     # Test with missing required fields
     invalid_data = [{"column_name": "test"}]  # Missing column_type and column_data
-    with pytest.raises(TypeError):
+    with pytest.raises(ValidationError):
         Table.from_json(invalid_data)
 
     # Test with invalid column type
     invalid_type_data = [
         {"column_name": "test", "column_type": "invalid_type", "column_data": [1, 2, 3]}
     ]
-    with pytest.raises(TypeError):
+    with pytest.raises(ValidationError):
         Table.from_json(invalid_type_data)
 
 
@@ -123,19 +124,19 @@ def test_self_pk_integrity(temp_folder):
             "column_name": "id1",
             "column_type": "primary_key",
             "column_data": [1, 1, 2, 2],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
         {
             "column_name": "id2",
             "column_type": "primary_key",
             "column_data": [1, 1, 1, 2],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
         {
             "column_name": "value",
             "column_type": "continuous",
             "column_data": [1.1, 2.2, 3.3, 4.4],
-            "column_datatype": "float",
+            "column_datatype": "float32",
         },
     ]
     table = Table.from_json(invalid_data)
@@ -154,13 +155,13 @@ def test_mixed_data_types(temp_folder):
             "column_name": "id",
             "column_type": "primary_key",
             "column_data": [1, 2, 3],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
         {
             "column_name": "score",
             "column_type": "continuous",
             "column_data": [1.1, 2.2, 3.3],
-            "column_datatype": "float",
+            "column_datatype": "float32",
         },
         {
             "column_name": "category",
@@ -181,13 +182,13 @@ def test_duplicate_group_index(temp_folder):
             "column_name": "group1",
             "column_type": "group_index",
             "column_data": [1, 2, 3],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
         {
             "column_name": "group2",
             "column_type": "group_index",
             "column_data": [1, 2, 3],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
     ]
     with pytest.raises(ValueError, match="Group index already set"):
@@ -200,13 +201,13 @@ def test_table_with_missing_values(temp_folder):
             "column_name": "id",
             "column_type": "primary_key",
             "column_data": [1, 2, 3],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
         {
             "column_name": "value",
             "column_type": "continuous",
             "column_data": [1.1, None, 3.3],
-            "column_datatype": "float",
+            "column_datatype": "float32",
         },
     ]
     # TODO: Improve NoneValue Management in future
@@ -226,7 +227,7 @@ def test_data_aggregation(temp_folder):
             "column_name": "value",
             "column_type": "continuous",
             "column_data": [10, 20, 30, 40, 50],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
     ]
     table = Table.from_json(data)
@@ -242,7 +243,7 @@ def test_preprocess_continuous_column(temp_folder):
             "column_name": "value",
             "column_type": "continuous",
             "column_data": [1, 2, 3],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         }
     ]
     processor = TableProcessor(temp_folder).set_strategy(
@@ -261,7 +262,7 @@ def test_postprocess_continuous_column(temp_folder):
             "column_name": "value",
             "column_type": "continuous",
             "column_data": [1, 2, 3],
-            "column_datatype": "int",
+            "column_datatype": "int32",
         }
     ]
     table = Table.from_json(data)
