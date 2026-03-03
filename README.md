@@ -36,10 +36,38 @@ pip install -e ".[dev]"
 ```python
 from sdg_core_lib import Job
 
-# Load your dataset configuration
-import json
-with open('config.json', 'r') as f:
-    config = json.load(f)
+# Text-based JSON configuration (no file needed)
+config = {
+    "n_rows": 1000,
+    "model": {
+        "algorithm_name": "sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE.TabularVAE",
+        "model_name": "customer_synthetic_model"
+    },
+    "dataset": {
+        "dataset_type": "table",
+        "data": [
+            {
+                "column_data": [13.71, 13.4, 13.27, 13.17, 14.13, 13.88, 13.24, 13.73],
+                "column_name": "alcohol",
+                "column_type": "continuous",
+                "column_datatype": "float64"
+            },
+            {
+                "column_data": [5.65, 3.91, 4.28, 2.59, 4.1, 3.9, 3.8, 4.2],
+                "column_name": "malic_acid",
+                "column_type": "continuous",
+                "column_datatype": "float64"
+            },
+            {
+                "column_data": [1.28, 1.05, 1.02, 1.03, 1.71, 1.23, 1.07, 1.5],
+                "column_name": "ash",
+                "column_type": "continuous",
+                "column_datatype": "float64"
+            }
+        ]
+    },
+    "save_filepath": "./models"
+}
 
 # Create and run a synthetic data generation job
 job = Job(
@@ -61,6 +89,8 @@ print(f"Quality metrics: {metrics}")
 
 ```python
 # Generate data using mathematical functions
+from sdg_core_lib import Job
+
 functions = [
     {
         "feature": "linear_data",
