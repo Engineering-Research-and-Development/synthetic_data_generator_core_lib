@@ -28,7 +28,7 @@ class CTGAN(UnspecializedModel):
         pac_size=10,
         learning_rate=1e-3,
         batch_size=100,
-        epochs=10,
+        epochs=50,
         gen_steps=4,
         critic_dropout=0.2,
     ):

@@ -189,7 +189,6 @@ class CTGANModel(keras.Model):
         batch_size = int(batch_size)  # Convert symbolic tensor to int
         num_cats = len(self.generator.cats_disc)
         total_cond_dim = sum(self.generator.cats_disc)
-        cats_disc = tf.convert_to_tensor(self.generator.cats_disc, dtype=tf.int32)
 
         col_indices = tf.random.uniform(
             shape=[batch_size], minval=0, maxval=num_cats, dtype=tf.int32
