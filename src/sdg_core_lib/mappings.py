@@ -2,7 +2,9 @@ from typing import Type
 from abc import ABC
 
 from sdg_core_lib.data_generator.models.GANs.implementation.CTGAN import CTGAN
-from sdg_core_lib.data_generator.models.VAEs.implementation.AutoTabularVAE import AutoTabularVAE
+from sdg_core_lib.data_generator.models.VAEs.implementation.AutoTabularVAE import (
+    AutoTabularVAE,
+)
 from sdg_core_lib.data_generator.models.VAEs.implementation.TabularVAE import (
     TabularVAE,
 )
