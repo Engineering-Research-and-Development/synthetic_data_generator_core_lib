@@ -20,7 +20,7 @@ class SinusoidalFunction(UnspecializedFunction):
     ]
     description = "Generates sinusoidal data in domain comprised between min_value and max_value following the y = a*sin(2*pi*f*x + 2*pi*phi) + v equation"
     priority = Priority.MAX
-    is_generative = False
+    is_generative = True
     allowed_data = [
         AllowedData(DataType.float32, False),
     ]

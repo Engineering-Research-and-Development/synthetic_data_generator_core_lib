@@ -17,19 +17,19 @@ time_series_data = [
         "column_name": "experiment_id",
         "column_type": "group_index",
         "column_data": [1, 1, 1, 2, 2, 2, 3, 3, 3],
-        "column_datatype": "int",
+        "column_datatype": "int32",
     },
     {
         "column_name": "time",
         "column_type": "primary_key",
         "column_data": [0, 1, 2, 0, 1, 2, 0, 1, 2],
-        "column_datatype": "int",
+        "column_datatype": "int32",
     },
     {
         "column_name": "value1",
         "column_type": "continuous",
         "column_data": [1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3],
-        "column_datatype": "float",
+        "column_datatype": "float32",
     },
     {
         "column_name": "category",
@@ -162,19 +162,19 @@ def test_timeseries_invalid_experiment_lengths(temp_folder):
             "column_name": "experiment_id",
             "column_type": "group_index",
             "column_data": [1, 1, 2, 2, 2],  # Different lengths
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
         {
             "column_name": "time",
             "column_type": "primary_key",
             "column_data": [0, 1, 0, 1, 2],  # Different lengths
-            "column_datatype": "int",
+            "column_datatype": "int32",
         },
         {
             "column_name": "value",
             "column_type": "continuous",
             "column_data": [1.1, 1.2, 2.1, 2.2, 2.3],
-            "column_datatype": "float",
+            "column_datatype": "float32",
         },
     ]
 

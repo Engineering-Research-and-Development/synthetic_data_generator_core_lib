@@ -180,33 +180,32 @@ class PerModeNormalization(Step):
         if self.operator is None:
             raise ValueError("Operator not initialized")
         column = data.reshape(-1, 1)
-        active_weights_indx = np.where(self.operator.weights_ > 0.01)
-        weights = self.operator.weights_[active_weights_indx]
-        means = self.operator.means_[active_weights_indx].flatten()
-        stds = np.sqrt(self.operator.covariances_[active_weights_indx].flatten())
+        active_weights_indexes = np.where(self.operator.weights_ > 0.01)
+        weights = self.operator.weights_[active_weights_indexes]
+        means = self.operator.means_[active_weights_indexes].flatten()
+        stds = np.sqrt(self.operator.covariances_[active_weights_indexes].flatten())
         mixture_probability_density = []
-        for w, m, s in zip(weights, means, stds):
+        for weight, mean, std in zip(weights, means, stds):
             mixture_probability_density.append(
-                w
-                * PerModeNormalization._gaussian_probability_density_function(
-                    column, m, s
-                )
+                weight * self._gaussian_probability_density_function(column, mean, std)
             )
         marginal_mixture_probability_density = np.hstack(mixture_probability_density)
-        responsibilities = PerModeNormalization._compute_responsibilities(
+        responsibilities = self._compute_responsibilities(
             marginal_mixture_probability_density
         )
         rng = np.random.default_rng(self.random_state)
-        n, K = responsibilities.shape
+        n, k = responsibilities.shape
         sampled_mode = np.array(
-            [rng.choice(K, p=responsibilities[i]) for i in range(n)]
+            [rng.choice(k, p=responsibilities[i]) for i in range(n)]
         )
-        f = np.zeros((n, K), dtype=int)
-        f[np.arange(n), sampled_mode] = 1
+        mode_assignment = np.zeros((n, k), dtype=int)
+        mode_assignment[np.arange(n), sampled_mode] = 1
         mu_sel = means[sampled_mode]
         std_sel = stds[sampled_mode]
         normalized_value = (column.reshape(-1) - mu_sel) / (4.0 * std_sel)
-        to_return = np.concatenate([normalized_value.reshape(-1, 1), f], axis=1)
+        to_return = np.concatenate(
+            [normalized_value.reshape(-1, 1), mode_assignment], axis=1
+        )
         return to_return
 
     def inverse_transform(self, data: np.ndarray) -> np.ndarray:
@@ -221,18 +220,10 @@ class PerModeNormalization(Step):
             data = data.reshape(1, -1)
 
         active_modes = np.argmax(data[:, 1:], axis=1)
-
-        # Get the means and stds for the active modes
         selected_mus = means[active_modes]
         selected_devs = stds[active_modes]
-
-        # Get the normalized values (first column)
         normalized_values = data[:, 0]
-
-        # Denormalize the values
         values = (normalized_values * 4 * selected_devs) + selected_mus
-
-        # Always return 2D array with shape (n_samples, 1) for consistency
         return values.reshape(-1, 1)
 
     @staticmethod

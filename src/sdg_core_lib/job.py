@@ -33,7 +33,7 @@ class Job:
         functions: Optional[list[dict]] = None,
     ):
         self.__model_info = model_info
-        self.__dataset = dataset
+        self.__dataset = dataset if dataset is not None else {}
         self.__n_rows = n_rows
         self.__save_filepath = save_filepath
         self.__functions = functions
@@ -63,9 +63,9 @@ class Job:
         return getattr(module, class_name)
 
     def _model_factory(
-        self, preprocess_data: Dataset | None = None
+        self, preprocess_data: Dataset | None = None, is_new_model=True
     ) -> UnspecializedModel:
-        model_file = self.__model_info.get("image", None)
+        model_file = self.__save_filepath if not is_new_model else None
         model_name = self.__model_info.get("model_name")
         input_shape = self.__model_info.get("input_shape", None)
         metadata = None
@@ -142,7 +142,7 @@ class Job:
             data = self.__dataset_class.from_json(data_payload)
             preprocessed_data = data.preprocess(processor)
 
-        model = self._model_factory(preprocessed_data)
+        model = self._model_factory(preprocessed_data, is_new_model=False)
         predicted_data = model.infer(self.__n_rows)
         synthetic_data = preprocessed_data.clone(predicted_data)
         synthetic_data = synthetic_data.postprocess(processor)

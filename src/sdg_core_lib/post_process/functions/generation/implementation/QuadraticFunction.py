@@ -19,7 +19,7 @@ class QuadraticFunction(UnspecializedFunction):
     ]
     description = "Generates parabolic data in domain comprised between min_value and max_value following the y=a^2+bx+c equation"
     priority = Priority.MAX
-    is_generative = False
+    is_generative = True
     allowed_data = [
         AllowedData(DataType.float32, False),
     ]

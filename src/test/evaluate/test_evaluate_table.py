@@ -16,13 +16,13 @@ dummy_json = [
         "column_name": "a",
         "column_type": "continuous",
         "column_data": [1, 2, 3, 1, 2, 3],
-        "column_datatype": "int",
+        "column_datatype": "int32",
     },
     {
         "column_name": "b",
         "column_type": "categorical",
         "column_data": [1, 1, 1, 2, 2, 2],
-        "column_datatype": "int",
+        "column_datatype": "int32",
     },
     {
         "column_name": "c",
@@ -45,7 +45,7 @@ single_numeric_json = [
         "column_name": "single",
         "column_type": "continuous",
         "column_data": [1],
-        "column_datatype": "int",
+        "column_datatype": "int32",
     }
 ]
 single_categorical_json = [

@@ -200,7 +200,7 @@ def test_ctgan_model_get_pmfs(ctgan_model):
     pmfs = ctgan_model.get_pmfs(train_data)
 
     assert len(pmfs) == 1  # One categorical column
-    assert pmfs[0].shape == (3,)  # 3 categories
+    assert pmfs[0].shape == (1, 3)  # 3 categories
 
 
 def test_ctgan_model_compile(ctgan_model):

@@ -2,6 +2,11 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from sdg_core_lib.dataset.columns import Numeric, Categorical, Column
+from sdg_core_lib.dataset.validation_schema import (
+    FeatureData,
+    DataSkeleton,
+    SkeletonOut,
+)
 from sdg_core_lib.preprocess.base_processor import Processor
 from sdg_core_lib.preprocess.table_processor import TableProcessor
 
@@ -75,6 +80,7 @@ class Table(Dataset):
             raise ValueError("Empty dataset")
 
         for idx, col_data in enumerate(json_data):
+            FeatureData.model_validate(col_data)
             col_type = col_data.get("column_type", "")
             col_name = col_data.get("column_name", "")
             col_values = np.array(
@@ -110,6 +116,7 @@ class Table(Dataset):
         data_map = []
 
         for col_data in sorted(skeleton, key=lambda x: int(x["column_position"])):
+            DataSkeleton.model_validate(col_data)
             col_type = col_data.get("column_type", "")
             col_name = col_data.get("column_name", "")
             col_value_type = col_data.get("column_datatype", "")
@@ -157,27 +164,27 @@ class Table(Dataset):
 
     def to_json(self) -> list[dict]:
         return [
-            {
-                "column_data": col.values.reshape(
+            FeatureData(
+                column_data=col.values.reshape(
                     -1,
                 ).tolist(),
-                "column_name": col.name,
-                "column_type": col.column_type,
-                "column_datatype": col.value_type,
-            }
+                column_name=col.name,
+                column_type=col.column_type,
+                column_datatype=col.value_type,
+            ).model_dump()
             for col in self.columns
         ]
 
     def to_skeleton(self) -> list[dict]:
         return [
-            {
-                "feature_name": col.name,
-                "feature_position": col.position,
-                "is_categorical": True if isinstance(col, Categorical) else False,
-                "type": col.value_type,
-                "feature_type": col.column_type,
-                "feature_size": str(col.get_internal_shape()[1]),
-            }
+            SkeletonOut(
+                feature_name=col.name,
+                feature_position=col.position,
+                feature_type=col.column_type,
+                type=col.value_type,
+                is_categorical=True if isinstance(col, Categorical) else False,
+                feature_size=str(col.get_internal_shape()[1]),
+            ).model_dump()
             for col in self.columns
         ]
 
