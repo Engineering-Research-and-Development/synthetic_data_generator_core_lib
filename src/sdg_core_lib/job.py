@@ -65,7 +65,7 @@ class Job:
     def _model_factory(
         self, preprocess_data: Dataset | None = None
     ) -> UnspecializedModel:
-        model_file = self.__model_info.get("image", None)
+        model_file = self.__save_filepath
         model_name = self.__model_info.get("model_name")
         input_shape = self.__model_info.get("input_shape", None)
         metadata = None
